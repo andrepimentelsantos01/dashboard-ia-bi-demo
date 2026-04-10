@@ -1,0 +1,71 @@
+.dashboard-container {
+    padding: 1rem;
+}
+
+.dashboard-btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-tab-btn {
+    margin: 0 5px;
+    border-radius: 8px !important;
+    transition: all 0.2s ease-in-out;
+}
+
+.dashboard-tab-btn:hover {
+    transform: translateY(-1px);
+}
+
+.skeleton-wrapper {
+    padding: 1rem;
+}
+
+.skeleton-block {
+    background: linear-gradient(90deg, #e6e6e6 25%, #f2f2f2 37%, #e6e6e6 63%);
+    background-size: 400% 100%;
+    animation: skeleton-loading 1.4s ease infinite;
+    border-radius: 6px;
+}
+
+.skeleton-title {
+    height: 28px;
+    width: 40%;
+    margin-bottom: 20px;
+}
+
+.skeleton-row {
+    height: 18px;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-btn-group {
+        gap: 8px;
+    }
+
+    .dashboard-tab-btn {
+        flex: 1 1 calc(50% - 10px);
+        margin: 5px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-tab-btn {
+        flex: 1 1 100%;
+        margin: 5px 0;
+    }
+}

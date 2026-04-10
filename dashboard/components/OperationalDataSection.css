@@ -1,0 +1,74 @@
+.operational-section-wrapper {
+    padding: 0;
+    position: relative;
+    overflow: visible !important;
+    margin-bottom: 0;
+}
+
+.operational-title-container {
+    position: relative;
+}
+
+.operational-title {
+    color: #233044;
+    opacity: 0.75;
+    font-size: 1rem;
+    margin-bottom: 12px;
+    margin-top: 0;
+    text-align: center;
+}
+
+.operational-zoom-controls {
+    position: absolute;
+    top: 1px;
+    right: 0px;
+    display: flex;
+    gap: 6px;
+    z-index: 20;
+}
+
+.operational-zoom-button {
+    width: 25px;
+    height: 25px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fff;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.operational-table-container {
+    max-height: 520px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 8px 24px rgba(16, 42, 67, 0.08);
+    background: #ffffff;
+    position: relative;
+}
+
+.operational-zoom-wrapper {
+    transform-origin: top left;
+}
+
+.operational-view-more-button {
+    border-radius: 100px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    margin-bottom: 0;
+}
+
+.operational-expand-wrapper {
+    position: absolute;
+    top: -28px;
+    right: -5px;
+    z-index: 9999;
+    pointer-events: auto;
+}
+
+@media (max-width: 767px) {
+    .operational-table-container {
+        max-height: 460px;
+    }
+}

@@ -1,0 +1,117 @@
+.kpi-card {
+    width: 100%;
+    min-height: 108px;
+    min-width: 140px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 18px;
+    background: #1c476e;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25), inset 0 0 12px rgba(255,255,255,0.03);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    transform: translateZ(0);
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35), inset 0 0 14px rgba(255,255,255,0.04);
+}
+
+.kpi-card-overlay {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2%;
+    border-radius: 18px 18px 0 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.kpi-card-body {
+    padding: 14px 16px;
+    position: relative;
+    z-index: 2;
+    min-height: 108px;
+}
+
+.kpi-card-label {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: 0.4px;
+    line-height: 1.35;
+}
+
+.kpi-card-value {
+    font-size: 1.55rem;
+    margin-top: auto;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+    letter-spacing: -0.4px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.35);
+}
+
+.kpi-card.card {
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    min-height: 108px !important;
+}
+
+@media (max-width: 767px) {
+    .kpi-card,
+    .kpi-card.card,
+    .kpi-card-body {
+        min-height: 96px !important;
+    }
+
+    .kpi-card-value {
+        font-size: 1.3rem;
+    }
+}
+
+.kpi-card-variation {
+    margin-top: 6px;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    width: fit-content;
+    align-items: center;
+    gap: 4px;
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    margin-left: 0;
+    margin-right: 0;
+    font-weight: 600;
+}
+
+.variation-up::before {
+    content: url("data:image/svg+xml;utf8,<svg width='10' height='10' xmlns='http://www.w3.org/2000/svg'><polygon points='5,0 10,10 0,10' fill='%2334d058'/></svg>");
+}
+
+.variation-down::before {
+    content: url("data:image/svg+xml;utf8,<svg width='10' height='10' xmlns='http://www.w3.org/2000/svg'><polygon points='0,0 10,0 5,10' fill='%23ff4d4f'/></svg>");
+}
+
+.variation-zero::before {
+    content: "–";
+    font-size: 0.9rem;
+}
+
+.variation-up {
+    color: #34d058;
+}
+
+.variation-down {
+    color: #ff4d4f;
+}
+
+.variation-zero {
+    color: rgba(255,255,255,0.85);
+}
