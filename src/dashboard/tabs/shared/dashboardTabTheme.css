@@ -1,18 +1,18 @@
 :root {
     --bi-surface: rgba(255, 255, 255, 0.9);
     --bi-surface-strong: rgba(255, 255, 255, 0.98);
-    --bi-surface-soft: linear-gradient(180deg, rgba(248, 251, 255, 0.94) 0%, rgba(255, 255, 255, 0.98) 100%);
-    --bi-border: rgba(18, 50, 77, 0.1);
-    --bi-border-strong: rgba(28, 70, 109, 0.18);
-    --bi-shadow-soft: 0 16px 36px rgba(15, 40, 65, 0.08);
-    --bi-shadow-card: 0 14px 32px rgba(15, 40, 65, 0.1);
-    --bi-shadow-float: 0 20px 40px rgba(21, 60, 96, 0.2);
-    --bi-text: #18344e;
-    --bi-text-soft: #5b7083;
-    --bi-brand: #1c466d;
-    --bi-brand-strong: #143652;
-    --bi-accent: #00aeef;
-    --bi-accent-soft: rgba(0, 174, 239, 0.14);
+    --bi-surface-soft: linear-gradient(180deg, rgba(248, 252, 251, 0.96) 0%, rgba(255, 255, 255, 0.99) 100%);
+    --bi-border: rgba(20, 79, 75, 0.1);
+    --bi-border-strong: rgba(22, 101, 96, 0.18);
+    --bi-shadow-soft: 0 16px 36px rgba(12, 56, 53, 0.08);
+    --bi-shadow-card: 0 14px 32px rgba(12, 56, 53, 0.1);
+    --bi-shadow-float: 0 20px 40px rgba(14, 79, 74, 0.2);
+    --bi-text: #143f3d;
+    --bi-text-soft: #617a78;
+    --bi-brand: #166762;
+    --bi-brand-strong: #0e4946;
+    --bi-accent: #19b59f;
+    --bi-accent-soft: rgba(25, 181, 159, 0.14);
 }
 
 .bi-scope {
@@ -32,8 +32,8 @@
 
 .bi-scope .section-wrapper-header {
     padding: 8px 18px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(247, 250, 253, 0.92) 100%);
-    border-bottom: 1px solid rgba(24, 52, 78, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(245, 250, 249, 0.92) 100%);
+    border-bottom: 1px solid rgba(20, 79, 75, 0.08);
 }
 
 .bi-scope .section-wrapper-title {
@@ -71,7 +71,7 @@
 }
 
 .bi-scope .filter-section-wrapper .section-wrapper-header {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(243, 248, 252, 0.96) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(241, 249, 247, 0.96) 100%);
 }
 
 .bi-scope .filter-section-wrapper .section-wrapper-body {
@@ -111,15 +111,15 @@
 }
 
 .bi-scope .filter-section-card {
-    background: linear-gradient(180deg, rgba(244, 248, 252, 0.96) 0%, rgba(255, 255, 255, 0.98) 100%);
-    border: 1px solid rgba(22, 58, 90, 0.12);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 8px 18px rgba(17, 43, 67, 0.06);
+    background: linear-gradient(180deg, rgba(244, 250, 249, 0.96) 0%, rgba(255, 255, 255, 0.98) 100%);
+    border: 1px solid rgba(20, 79, 75, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 8px 18px rgba(12, 56, 53, 0.06);
     border-radius: 18px;
     padding: 10px 12px;
 }
 
 .bi-scope .filter-section-card:hover {
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 12px 22px rgba(17, 43, 67, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78), 0 12px 22px rgba(12, 56, 53, 0.08);
 }
 
 .bi-scope .dropdownMenu {
@@ -128,9 +128,9 @@
     left: 0 !important;
     width: 100% !important;
     background: rgba(255, 255, 255, 0.98) !important;
-    border: 1px solid rgba(21, 60, 96, 0.1) !important;
+    border: 1px solid rgba(20, 79, 75, 0.1) !important;
     border-radius: 14px !important;
-    box-shadow: 0 18px 30px rgba(16, 42, 67, 0.12) !important;
+    box-shadow: 0 18px 30px rgba(12, 56, 53, 0.12) !important;
     max-height: 320px !important;
     overflow-y: auto !important;
     z-index: 2000 !important;
@@ -145,14 +145,14 @@
 
 .bi-scope .dropdownMenu::-webkit-scrollbar-thumb,
 .bi-scope .operational-table-container::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(28, 70, 109, 0.45), rgba(0, 174, 239, 0.4));
+    background: linear-gradient(180deg, rgba(14, 73, 70, 0.42), rgba(25, 181, 159, 0.4));
     border-radius: 999px;
     border: 2px solid rgba(255, 255, 255, 0.75);
 }
 
 .bi-scope .dropdownMenu::-webkit-scrollbar-track,
 .bi-scope .operational-table-container::-webkit-scrollbar-track {
-    background: rgba(232, 240, 247, 0.8);
+    background: rgba(232, 242, 240, 0.85);
     border-radius: 999px;
 }
 
@@ -174,9 +174,9 @@
 }
 
 .bi-scope .overview-card {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 252, 255, 0.96) 100%);
-    border: 1px solid rgba(19, 59, 92, 0.08);
-    box-shadow: 0 12px 28px rgba(16, 42, 67, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(249, 252, 251, 0.97) 100%);
+    border: 1px solid rgba(20, 79, 75, 0.08);
+    box-shadow: 0 12px 28px rgba(12, 56, 53, 0.08);
 }
 
 .bi-scope .overview-card-title {
@@ -189,22 +189,22 @@
 }
 
 .bi-scope .operational-table-container {
-    border: 1px solid rgba(19, 59, 92, 0.08);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 253, 0.98) 100%);
-    box-shadow: 0 14px 28px rgba(16, 42, 67, 0.1);
+    border: 1px solid rgba(20, 79, 75, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(246, 251, 250, 0.98) 100%);
+    box-shadow: 0 14px 28px rgba(12, 56, 53, 0.1);
 }
 
 .bi-scope .operational-zoom-button {
-    border: 1px solid rgba(20, 54, 82, 0.14);
+    border: 1px solid rgba(14, 73, 70, 0.14);
     border-radius: 10px;
-    box-shadow: 0 8px 18px rgba(16, 42, 67, 0.08);
+    box-shadow: 0 8px 18px rgba(12, 56, 53, 0.08);
     color: var(--bi-brand);
 }
 
 .bi-scope .operational-view-more-button {
     border-radius: 999px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(233, 246, 253, 0.96) 100%);
-    border: 1px solid rgba(0, 174, 239, 0.3);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(231, 248, 245, 0.96) 100%);
+    border: 1px solid rgba(25, 181, 159, 0.3);
     color: var(--bi-brand);
 }
 
@@ -213,8 +213,8 @@
     right: 18px !important;
     bottom: 18px !important;
     z-index: 6000 !important;
-    border: 1px solid rgba(0, 174, 239, 0.28) !important;
-    background: linear-gradient(135deg, rgba(17, 60, 94, 0.98) 0%, rgba(28, 89, 136, 0.98) 100%) !important;
+    border: 1px solid rgba(25, 181, 159, 0.28) !important;
+    background: linear-gradient(135deg, rgba(14, 73, 70, 0.98) 0%, rgba(24, 122, 113, 0.98) 100%) !important;
     color: #ffffff !important;
     padding: 10px 14px !important;
     font-size: 0.76rem !important;
@@ -225,7 +225,7 @@
 
 .bi-scope .floating-clear-button:hover {
     opacity: 1 !important;
-    background: linear-gradient(135deg, rgba(14, 50, 79, 1) 0%, rgba(22, 74, 114, 1) 100%) !important;
+    background: linear-gradient(135deg, rgba(10, 59, 56, 1) 0%, rgba(18, 102, 94, 1) 100%) !important;
 }
 
 .bi-scope .section-mt,
@@ -253,9 +253,9 @@
     min-height: 250px !important;
     padding: 30px !important;
     border-radius: 24px !important;
-    background: linear-gradient(180deg, rgba(248, 251, 255, 0.98) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
-    box-shadow: 0 30px 80px rgba(15, 40, 65, 0.24) !important;
-    border: 1px solid rgba(19, 59, 92, 0.08);
+    background: linear-gradient(180deg, rgba(248, 252, 251, 0.98) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    box-shadow: 0 30px 80px rgba(12, 56, 53, 0.24) !important;
+    border: 1px solid rgba(20, 79, 75, 0.08);
 }
 
 .bi-scope .overview-date-modal .headerModal,

@@ -306,7 +306,7 @@ export const useChartBarVerticalState = ({
                                              labels,
                                              values,
                                              backendData,
-                                             color = "#15334d",
+                                             color = "#17877e",
                                              valueFormat = "currency",
                                              filterType = "mes",
                                              onCrossFilter,

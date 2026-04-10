@@ -9,7 +9,7 @@ const ChartBarVertical = ({
                               labels,
                               values,
                               backendData,
-                              color = "#1c476e",
+                              color = "#17877e",
                               onCrossFilter,
                               valueFormat = "currency",
                               filterType = "mes",

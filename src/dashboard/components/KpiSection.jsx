@@ -17,7 +17,7 @@ const KpiSection = ({ kpis }) => {
                         value: kpis.valorTotalMovimentado,
                         variation: kpis.variationValorTotalMovimentado
                     },
-                    color: "#2d9cdb"
+                    color: "#19b59f"
                 },
                 {
                     label: "Valor Entregue",
@@ -56,7 +56,7 @@ const KpiSection = ({ kpis }) => {
                     value: v?.value ?? v,
                     variation: v?.variation
                 },
-                color: "#2d9cdb"
+                color: "#19b59f"
             }));
     }, [kpis, isDefault]);
 

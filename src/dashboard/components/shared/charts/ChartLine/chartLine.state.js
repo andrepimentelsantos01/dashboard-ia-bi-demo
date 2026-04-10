@@ -1,6 +1,10 @@
 import { useState, useMemo, useCallback } from "react";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 
+const LINE_COLOR = "#17877e";
+const LINE_FILL = "rgba(23, 135, 126, 0.24)";
+const SLIDER_FILL = "rgba(25, 181, 159, 0.18)";
+
 const toNumber = (value) => {
     if (typeof value === "number") return value;
     if (!value) return 0;
@@ -192,10 +196,10 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                     height: 10,
                     bottom: 10,
                     borderColor: "transparent",
-                    fillerColor: "rgba(0, 136, 212, 0.15)",
+                    fillerColor: SLIDER_FILL,
                     handleIcon: "path://M512 64L576 128 512 192 448 128z",
                     handleSize: "80%",
-                    handleColor: "#1c476e",
+                    handleColor: LINE_COLOR,
                     start: startSlider,
                     end: 100
                 },
@@ -214,16 +218,16 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                     type: "line",
                     data: averages,
                     smooth: true,
-                    lineStyle: { width: 3, color: "#1c476e" },
-                    itemStyle: { color: "#1c476e" },
+                    lineStyle: { width: 3, color: LINE_COLOR },
+                    itemStyle: { color: LINE_COLOR },
                     symbolSize: 6,
                     animationDuration: 600,
-                    areaStyle: { opacity: 0.25, color: "#1c476e" },
+                    areaStyle: { opacity: 1, color: LINE_FILL },
                     label: {
                         show: true,
                         position: "top",
                         fontSize: 10,
-                        color: "#1c476e",
+                        color: LINE_COLOR,
                         formatter: (point) => formatShort(point.value)
                     }
                 }

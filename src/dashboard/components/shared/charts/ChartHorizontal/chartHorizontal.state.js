@@ -18,7 +18,7 @@ const naturalAsc = new Intl.Collator(undefined, {
 export const useChartHorizontalState = ({
                                             data,
                                             backendData,
-                                            color = "#1c476e",
+                                            color = "#17877e",
                                             order = "ASC",
                                             onCrossFilter,
                                             valueFormat

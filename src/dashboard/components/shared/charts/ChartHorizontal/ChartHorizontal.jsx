@@ -18,7 +18,7 @@ const ChartInstanceStatic = React.memo(({ option }) => (
 const ChartHorizontal = ({
                              data,
                              backendData,
-                             color = "#1c476e",
+                             color = "#17877e",
                              order = "ASC",
                              onCrossFilter,
                              valueFormat

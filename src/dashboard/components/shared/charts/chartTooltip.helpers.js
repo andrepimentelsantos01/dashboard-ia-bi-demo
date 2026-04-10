@@ -58,10 +58,10 @@ export const buildResponsiveTooltip = (formatter, overrides = {}) => ({
     renderMode: "html",
     transitionDuration: 0,
     backgroundColor: "rgba(255,255,255,0.94)",
-    borderColor: "rgba(7, 26, 44, 0.85)",
+    borderColor: "rgba(14, 73, 70, 0.85)",
     borderWidth: 1,
     textStyle: {
-        color: "#062c5f",
+        color: "#143f3d",
         fontSize: 12,
         lineHeight: 18
     },
@@ -75,7 +75,7 @@ export const buildResponsiveTooltip = (formatter, overrides = {}) => ({
         "overflow-wrap:anywhere",
         "box-sizing:border-box",
         "border-radius:12px",
-        "box-shadow:0 16px 28px rgba(15, 40, 65, 0.18)"
+        "box-shadow:0 16px 28px rgba(12, 56, 53, 0.18)"
     ].join(";"),
     position: getResponsiveTooltipPosition,
     formatter,

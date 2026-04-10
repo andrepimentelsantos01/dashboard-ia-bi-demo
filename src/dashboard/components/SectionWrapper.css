@@ -23,9 +23,9 @@
 
 .section-wrapper-title {
     font-size: 1rem;
-    color: #233044;
+    color: #1a4b49;
     font-weight: normal;
-    border-left: 4px solid #00AEEF;
+    border-left: 4px solid #19b59f;
     padding-left: 10px;
     margin-bottom: 0;
 }
@@ -50,7 +50,7 @@
     border: none;
     cursor: pointer;
     font-size: 20px;
-    color: #233044;
+    color: #1a4b49;
     align-items: center;
 }
 

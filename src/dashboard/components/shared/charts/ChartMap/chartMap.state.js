@@ -5,6 +5,23 @@ import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 
 echarts.registerMap("brazil", brasilMap);
 
+const generateCorporateScale = (count) => {
+    const baseHue = 190;
+    const hueSpread = 22;
+    const saturation = 46;
+    const lightnessStart = 90;
+    const lightnessEnd = 34;
+
+    return Array.from({ length: Math.max(count, 2) }, (_, i) => {
+        const hue = (baseHue + (i * hueSpread) / Math.max(count - 1, 1)) % 360;
+        const lightness =
+            lightnessStart -
+            ((lightnessStart - lightnessEnd) * i) / Math.max(count - 1, 1);
+
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    });
+};
+
 const formatCurrencyFull = (value) =>
     (typeof value === "number" ? value : Number(value || 0)).toLocaleString("pt-BR", {
         style: "currency",
@@ -124,6 +141,11 @@ export const useChartMapState = ({ backendData, onCrossFilter }) => {
         [formattedData]
     );
 
+    const visualMapColors = useMemo(
+        () => generateCorporateScale(formattedData.length),
+        [formattedData.length]
+    );
+
     const handleClickUF = useCallback((params) => {
         const name = params?.name;
         if (!name || !onCrossFilter) return;
@@ -172,7 +194,7 @@ export const useChartMapState = ({ backendData, onCrossFilter }) => {
                 text: ["Alto", "Baixo"],
                 textStyle: { color: "#4b5563" },
                 inRange: {
-                    color: ["#dce6f4", "#8ba9c9", "#1c476e"]
+                    color: visualMapColors
                 },
                 formatter: (value) => formatCurrencyFull(value),
                 calculable: false
@@ -194,14 +216,14 @@ export const useChartMapState = ({ backendData, onCrossFilter }) => {
                         borderWidth: 0.8
                     },
                     emphasis: {
-                        label: { show: true, color: "#15334d" },
-                        itemStyle: { areaColor: "#b9c8d8" }
+                        label: { show: true, color: "#0e4946" },
+                        itemStyle: { areaColor: "#9ddfd6" }
                     },
                     data: formattedData
                 }
             ]
         };
-    }, [aggregated.byUF, formattedData, maxValue, nameToUF]);
+    }, [aggregated.byUF, formattedData, maxValue, nameToUF, visualMapColors]);
 
     return {
         open,
