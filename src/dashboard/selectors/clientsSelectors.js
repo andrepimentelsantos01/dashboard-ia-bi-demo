@@ -128,11 +128,11 @@ export const buildClientsDerivedData = (analytics = []) => {
                 value: totalMovimentado,
                 variation: variationValorTotal
             },
-            "Consumo MÃ©dio Mensal": {
+            "Consumo Médio Mensal": {
                 value: consumoMedioMensal,
                 variation: variationConsumo
             },
-            "Ticket MÃ©dio": {
+            "Ticket Médio": {
                 value: totalPedidos > 0 ? somaTickets / totalPedidos : 0,
                 variation: variationTicket
             },

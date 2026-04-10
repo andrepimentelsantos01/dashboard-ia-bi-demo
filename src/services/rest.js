@@ -20,7 +20,23 @@ const statusAliases = {
 
 const safeDate = (value) => {
   if (!value) return null;
-  const date = value instanceof Date ? value : new Date(value);
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+
+  if (typeof value === "string") {
+    const trimmedValue = value.trim();
+    const dateOnlyMatch = trimmedValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+    if (dateOnlyMatch) {
+      const [, year, month, day] = dateOnlyMatch;
+      const localDate = new Date(Number(year), Number(month) - 1, Number(day));
+      return Number.isNaN(localDate.getTime()) ? null : localDate;
+    }
+  }
+
+  const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
 };
 

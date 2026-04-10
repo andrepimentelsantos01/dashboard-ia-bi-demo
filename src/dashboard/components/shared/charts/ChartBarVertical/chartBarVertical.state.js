@@ -60,11 +60,21 @@ const resolveKey = (row, filterType) => {
     if (filterType === "fornecedor") return row.fornecedor;
     if (filterType === "cliente") return row.cliente;
     if (filterType === "status") return row.status;
+    if (filterType === "mes" && row.year_months) return row.year_months;
 
     const date = new Date(row.data || row.dataCriacao || row.dataEntregaReal || row.dataEnvio);
     if (Number.isNaN(date.getTime())) return null;
 
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+};
+
+const resolveFilterMetadata = (row, filterType) => {
+    if (filterType === "produto") return { type: "produto", id: row.product_id ?? null };
+    if (filterType === "fornecedor") return { type: "fornecedor", id: row.supplier_id ?? null };
+    if (filterType === "cliente") return { type: "cliente", id: row.client_id ?? null };
+    if (filterType === "categoria") return { type: "categoria", id: null };
+    if (filterType === "status") return { type: "status", id: null };
+    return { type: filterType, id: null };
 };
 
 export const useBarVerticalAggregation = (backendData, filterType) =>
@@ -80,7 +90,11 @@ export const useBarVerticalAggregation = (backendData, filterType) =>
             const quantity = Number(row.quantidade) || 0;
 
             if (!result[key]) {
+                const metadata = resolveFilterMetadata(row, filterType);
+
                 result[key] = {
+                    type: metadata.type,
+                    id: metadata.id,
                     volume: 0,
                     categoriaValor: {},
                     categoriaQtd: {},
@@ -345,8 +359,12 @@ export const useChartBarVerticalState = ({
         }
 
         setSelected(name);
-        onCrossFilter({ type: filterType, value: name });
-    }, [filterType, onCrossFilter, selected]);
+        onCrossFilter({
+            type: aggregated[name]?.type || filterType,
+            id: aggregated[name]?.id,
+            value: name
+        });
+    }, [aggregated, filterType, onCrossFilter, selected]);
 
     const option = useMemo(
         () => buildBarVerticalOptions({

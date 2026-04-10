@@ -138,7 +138,7 @@ const normalizeStatus = (v) => {
 const OperationalDataSection = ({ tabela }) => {
     const [state, setState] = useState({
         expanded: false,
-        zoom: 1,
+        zoom: 0.9,
         open: false
     });
 

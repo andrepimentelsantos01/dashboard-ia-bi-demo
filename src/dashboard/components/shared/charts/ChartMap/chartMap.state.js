@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import * as echarts from "echarts";
-import brasilMap from "/src/views/erp/dashboard/mocks/brasil.geo.json";
+import brasilMap from "/src/dashboard/mocks/brasil.geo.json";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 
 echarts.registerMap("brazil", brasilMap);
@@ -64,7 +64,8 @@ export const useChartMapState = ({ backendData, onCrossFilter }) => {
         const totals = {};
 
         for (const row of backendData || []) {
-            const uf = typeof row.uf === "string" ? row.uf.trim().toUpperCase() : null;
+            const sourceUf = row.client_state ?? row.uf;
+            const uf = typeof sourceUf === "string" ? sourceUf.trim().toUpperCase() : null;
             if (!uf) continue;
 
             if (!byUF[uf]) {
@@ -88,7 +89,7 @@ export const useChartMapState = ({ backendData, onCrossFilter }) => {
 
             const bucket = byUF[uf];
             const value = typeof row.valorTotal === "number" ? row.valorTotal : Number(row.valorTotal) || 0;
-            const quantity = typeof row.quantidade === "number" ? row.quantidade : 0;
+            const quantity = typeof row.quantidade === "number" ? row.quantidade : Number(row.quantidade) || 0;
             totals[uf] = (totals[uf] || 0) + value;
             bucket.volume += quantity;
 

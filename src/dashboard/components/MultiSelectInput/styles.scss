@@ -39,55 +39,52 @@
             }
         }
 
-        .dropdownMenu {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 1300;
-            max-height: 200px;
-            overflow-y: auto;
+    }
+}
 
+.multi-select-dropdown-menu {
+    position: fixed;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 10001;
+    max-height: 200px;
+    overflow-y: auto;
+    max-width: calc(100vw - 24px);
 
-            span {
-                // height: 18px;
-                // width: 18px;
-                border-radius: 10px;
-                font-size: 18px;
-                text-align: center;
-            }
+    span {
+        border-radius: 10px;
+        font-size: 18px;
+        text-align: center;
+    }
 
-            .dropdownItem {
-                padding: 10px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
+    .dropdownItem {
+        padding: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
 
-                &:hover {
-                    background-color: #f0f0f0;
-                }
+        &:hover {
+            background-color: #f0f0f0;
+        }
 
-                &.selected {
-                    font-weight: bold;
-                    color: #1acca0;
-                }
-            }
+        &.selected {
+            font-weight: bold;
+            color: #1acca0;
+        }
+    }
 
-            .addOption {
-                background: #d7d7d7;
-                color: #181818;
-                font-weight: 500;
-                display: flex;
-                align-items: center;
-                i {
-                    margin-right: 8px;
-                }
-            }
+    .addOption {
+        background: #d7d7d7;
+        color: #181818;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+
+        i {
+            margin-right: 8px;
         }
     }
 }

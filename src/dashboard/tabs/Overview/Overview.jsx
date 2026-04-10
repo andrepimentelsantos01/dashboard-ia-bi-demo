@@ -32,8 +32,7 @@ const Overview = () => {
         historicoValores,
         rankingClientes,
         produtosRanking,
-        categoriasPizza,
-        clientsByState
+        categoriasPizza
     } = data.overview;
 
     const { tabela } = data.operacionais;
@@ -91,7 +90,7 @@ const Overview = () => {
             height: 260,
             component: (
                 <ChartMap
-                    backendData={clientsByState}
+                    backendData={tabela}
                     onCrossFilter={handleCrossFilter}
                 />
             )
@@ -142,8 +141,7 @@ const Overview = () => {
         categoriasPizza,
         produtosRanking,
         rankingClientes,
-        fornecedoresEntrega,
-        clientsByState
+        fornecedoresEntrega
     ]);
 
     return (

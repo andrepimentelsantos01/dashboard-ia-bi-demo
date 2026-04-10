@@ -1,21 +1,27 @@
-import React, { useMemo, useCallback } from "react";
-import { Row, Col } from "react-bootstrap";
+import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import MultiSelectInput from "./MultiSelectInput";
 import DateRangePicker from "./DateRangePicker";
 import { useFilterSectionOptions } from "../hooks/useFilterSectionOptions";
 import "./FilterSection.css";
 
 const FilterSection = ({
-                           filters,
-                           onChange,
-                           fornecedores,
-                           clientes,
-                           categorias,
-                           produtos,
-                           orders,
-                           numeroCotacao,
-                           hiddenFilterNames = []
-                       }) => {
+    filters,
+    onChange,
+    fornecedores,
+    clientes,
+    categorias,
+    produtos,
+    orders,
+    numeroCotacao,
+    hiddenFilterNames = []
+}) => {
+    const scrollRef = useRef(null);
+    const [scrollState, setScrollState] = useState({
+        canScrollLeft: false,
+        canScrollRight: false
+    });
+
     const filterInputs = useFilterSectionOptions(
         fornecedores,
         clientes,
@@ -31,14 +37,60 @@ const FilterSection = ({
     );
 
     const handleSelectChange = useCallback(
-        name => ({ target }) => onChange(name, target.value),
+        (name) => ({ target }) => onChange(name, target.value),
         [onChange]
     );
+
+    const updateScrollState = useCallback(() => {
+        const element = scrollRef.current;
+        if (!element) return;
+
+        const maxScrollLeft = element.scrollWidth - element.clientWidth;
+
+        setScrollState({
+            canScrollLeft: element.scrollLeft > 4,
+            canScrollRight: element.scrollLeft < maxScrollLeft - 4
+        });
+    }, []);
+
+    const handleHorizontalScroll = useCallback((direction) => {
+        const element = scrollRef.current;
+        if (!element) return;
+
+        const firstCard = element.querySelector(".filter-col");
+        const cardWidth = firstCard?.getBoundingClientRect().width || 220;
+        const gap = 14;
+
+        element.scrollBy({
+            left: direction * (cardWidth + gap),
+            behavior: "smooth"
+        });
+    }, []);
+
+    useEffect(() => {
+        updateScrollState();
+
+        const element = scrollRef.current;
+        if (!element) return;
+
+        element.addEventListener("scroll", updateScrollState, { passive: true });
+
+        const resizeObserver = new ResizeObserver(() => {
+            updateScrollState();
+        });
+
+        resizeObserver.observe(element);
+
+        return () => {
+            element.removeEventListener("scroll", updateScrollState);
+            resizeObserver.disconnect();
+        };
+    }, [updateScrollState, visibleFilterInputs.length]);
 
     const renderedInputs = useMemo(
         () =>
             visibleFilterInputs.map(({ label, name, data }) => (
-                <Col xs={12} md={3} key={name} className="filter-col">
+                <div key={name} className="filter-col">
                     <div className="filter-section-card">
                         <MultiSelectInput
                             label={label}
@@ -50,29 +102,50 @@ const FilterSection = ({
                             menuPosition="fixed"
                         />
                     </div>
-                </Col>
+                </div>
             )),
         [visibleFilterInputs, filters, handleSelectChange]
     );
 
-    const dateFilter = (
-        <Col xs={12} md={3} className="filter-col">
-            <div className="filter-section-card">
-                <DateRangePicker
-                    label="Período"
-                    name="dateRange"
-                    value={filters.dateRange}
-                    onChange={({ target }) => onChange("dateRange", target.value)}
-                />
-            </div>
-        </Col>
-    );
-
     return (
-        <Row className="filter-section-row">
-            {renderedInputs}
-            {dateFilter}
-        </Row>
+        <div className="filter-section-carousel">
+            {scrollState.canScrollLeft ? (
+                <button
+                    type="button"
+                    className="filter-scroll-button filter-scroll-button--left"
+                    onClick={() => handleHorizontalScroll(-1)}
+                    aria-label="Scroll filters left"
+                >
+                    <FiChevronLeft />
+                </button>
+            ) : null}
+
+            <div className="filter-section-row" ref={scrollRef}>
+                {renderedInputs}
+
+                <div className="filter-col">
+                    <div className="filter-section-card">
+                        <DateRangePicker
+                            label="Período"
+                            name="dateRange"
+                            value={filters.dateRange}
+                            onChange={({ target }) => onChange("dateRange", target.value)}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {scrollState.canScrollRight ? (
+                <button
+                    type="button"
+                    className="filter-scroll-button filter-scroll-button--right"
+                    onClick={() => handleHorizontalScroll(1)}
+                    aria-label="Scroll filters right"
+                >
+                    <FiChevronRight />
+                </button>
+            ) : null}
+        </div>
     );
 };
 

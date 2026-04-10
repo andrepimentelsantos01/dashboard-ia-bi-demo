@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./styles.scss";
@@ -10,14 +11,16 @@ const DateRangePicker = ({
     name,
     onChange,
     value,
-    containerStyle = "Default",
-    btnStyle = "Default"
+    containerStyle = "Default"
 }) => {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
+    const [dropdownStyle, setDropdownStyle] = useState(null);
     const { t } = useTranslation();
-    const containerRef = React.useRef(null);
+    const containerRef = useRef(null);
+    const buttonRef = useRef(null);
+    const dropdownRef = useRef(null);
 
     const formatPeriod = (start, end) => {
         const options = { day: "2-digit", month: "short", year: "numeric" };
@@ -45,15 +48,38 @@ const DateRangePicker = ({
         if (value) {
             setStartDate(value.start);
             setEndDate(value.end);
-        } else {
-            setStartDate(null);
-            setEndDate(null);
+            return;
         }
+
+        setStartDate(null);
+        setEndDate(null);
     }, [value]);
+
+    const updateDropdownPosition = useCallback(() => {
+        const button = buttonRef.current;
+        if (!button) return;
+
+        const rect = button.getBoundingClientRect();
+        const width = Math.max(rect.width, 260);
+        const viewportWidth = window.innerWidth;
+        const left = Math.min(
+            Math.max(12, rect.left),
+            Math.max(12, viewportWidth - width - 12)
+        );
+
+        setDropdownStyle({
+            top: rect.bottom + 8,
+            left,
+            width
+        });
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (containerRef.current && !containerRef.current.contains(event.target)) {
+            const clickedTrigger = containerRef.current?.contains(event.target);
+            const clickedDropdown = dropdownRef.current?.contains(event.target);
+
+            if (!clickedTrigger && !clickedDropdown) {
                 setIsOpen(false);
             }
         };
@@ -64,6 +90,24 @@ const DateRangePicker = ({
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        updateDropdownPosition();
+
+        const handleWindowChange = () => {
+            updateDropdownPosition();
+        };
+
+        window.addEventListener("resize", handleWindowChange);
+        window.addEventListener("scroll", handleWindowChange, true);
+
+        return () => {
+            window.removeEventListener("resize", handleWindowChange);
+            window.removeEventListener("scroll", handleWindowChange, true);
+        };
+    }, [isOpen, updateDropdownPosition]);
 
     const handleDateRangePicker = useCallback((date, type) => {
         const nextStartDate = type === "start" ? date : startDate;
@@ -90,17 +134,25 @@ const DateRangePicker = ({
     return (
         <div className="filter-container-date-range" ref={containerRef}>
             <p className="label">{label}</p>
+
             <div className="dropdown">
                 <button
                     type="button"
                     className={`dropdown-button dropdown-button--${containerStyle}`}
-                    onClick={() => setIsOpen((prev) => !prev)}
+                    onClick={() => setIsOpen((previous) => !previous)}
+                    ref={buttonRef}
                 >
                     {formatPeriod(startDate, endDate)}
                 </button>
+            </div>
 
-                {isOpen && (
-                    <div className="dropdown-content">
+            {isOpen && typeof document !== "undefined"
+                ? createPortal(
+                    <div
+                        className="dropdown-content"
+                        style={dropdownStyle || undefined}
+                        ref={dropdownRef}
+                    >
                         <div className="date-picker-group">
                             <label className="date-label">{t("start_date")}:</label>
                             <DatePicker
@@ -124,9 +176,10 @@ const DateRangePicker = ({
                                 locale={ptBR}
                             />
                         </div>
-                    </div>
-                )}
-            </div>
+                    </div>,
+                    document.body
+                )
+                : null}
         </div>
     );
 };
