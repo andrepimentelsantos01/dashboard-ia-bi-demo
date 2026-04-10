@@ -7,7 +7,7 @@
 
 .chart-horizontal-expand-btn {
     position: absolute;
-    top: -28px;
+    top: -52px;
     right: -5px;
     z-index: 10;
     width: 24px;
@@ -37,7 +37,7 @@
 
 .chart-horizontal-sort-btn {
     position: absolute;
-    top: -28px;
+    top: -52px;
     right: 28px;
     z-index: 10;
     width: 24px;
@@ -62,7 +62,7 @@
 
 .chart-horizontal-refresh-btn {
     position: absolute;
-    top: -28px;
+    top: -52px;
     right: 61px;
     z-index: 10;
     width: 24px;

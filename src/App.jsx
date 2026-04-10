@@ -7,7 +7,7 @@ const App = () => {
       <section className="app-shell__hero">
         <div>
           <p className="app-shell__eyebrow">André Pimentel Santos /@andrepimentelsantos01</p>
-          <h1>Demonstração Dashboard</h1>
+          <h1>Demonstração Dashboard Corporativo</h1>
           <p>
             Esta versao roda com servicos mockados e
             dados locais no mesmo formato esperado por uma API REST.

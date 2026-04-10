@@ -1,6 +1,6 @@
 .kpi-card {
     width: 100%;
-    min-height: 108px;
+    min-height: 88px;
     min-width: 140px;
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 18px;
@@ -34,7 +34,6 @@
     padding: 14px 16px;
     position: relative;
     z-index: 2;
-    min-height: 108px;
 }
 
 .kpi-card-label {
@@ -44,11 +43,12 @@
     margin-bottom: 8px;
     letter-spacing: 0.4px;
     line-height: 1.35;
+    padding: 0px 16px 20px;
 }
 
 .kpi-card-value {
     font-size: 1.55rem;
-    margin-top: auto;
+    margin-top: -20px;
     font-weight: 700;
     color: #ffffff;
     line-height: 1.2;
@@ -59,14 +59,14 @@
 .kpi-card.card {
     margin-bottom: 0 !important;
     padding: 0 !important;
-    min-height: 108px !important;
+    min-height: 88px !important;
 }
 
 @media (max-width: 767px) {
     .kpi-card,
     .kpi-card.card,
     .kpi-card-body {
-        min-height: 96px !important;
+        min-height: 88px !important;
     }
 
     .kpi-card-value {
