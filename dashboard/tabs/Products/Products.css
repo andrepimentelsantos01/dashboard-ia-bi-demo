@@ -1,5 +1,0 @@
-@import "../shared/dashboardTabTheme.css";
-
-.bi-scope .filter-col:nth-child(4) {
-    display: none !important;
-}

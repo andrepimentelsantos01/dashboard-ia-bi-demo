@@ -1,9 +1,9 @@
-import overviewMock from "../../dashboard/mocks/dashboardOverview.mock.json";
-import ordersMock from "../../dashboard/mocks/dashboardOrders.mock.json";
-import productsMock from "../../dashboard/mocks/dashboardProducts.mock.json";
-import clientsMock from "../../dashboard/mocks/dashboardClients.mock.json";
-import suppliersMock from "../../dashboard/mocks/dashboardSuppliers.mock.json";
-import quotationsMock from "../../dashboard/mocks/dashboardQuotations.mock.json";
+import overviewMock from "../dashboard/mocks/dashboardOverview.mock.json";
+import ordersMock from "../dashboard/mocks/dashboardOrders.mock.json";
+import productsMock from "../dashboard/mocks/dashboardProducts.mock.json";
+import clientsMock from "../dashboard/mocks/dashboardClients.mock.json";
+import suppliersMock from "../dashboard/mocks/dashboardSuppliers.mock.json";
+import quotationsMock from "../dashboard/mocks/dashboardQuotations.mock.json";
 
 const statusAliases = {
   finalizado: "finalized",
@@ -133,33 +133,43 @@ const normalizeRows = (rows, config) => {
 };
 
 const applyCommonFilters = (rows, filters = {}) => {
+  const matchesFilter = (filterValue, rowValue, normalize = (value) => value) => {
+    if (filterValue === undefined || filterValue === null || filterValue === "") return true;
+
+    if (Array.isArray(filterValue)) {
+      return filterValue.some((value) => normalize(value) === normalize(rowValue));
+    }
+
+    return normalize(filterValue) === normalize(rowValue);
+  };
+
   return rows.filter((row) => {
-    if (filters.client_id && row.client_id !== filters.client_id) return false;
-    if (filters.supplier_id && row.supplier_id !== filters.supplier_id) return false;
-    if (filters.product_id && row.product_id !== filters.product_id) return false;
+    if (!matchesFilter(filters.client_id, row.client_id)) return false;
+    if (!matchesFilter(filters.supplier_id, row.supplier_id)) return false;
+    if (!matchesFilter(filters.product_id, row.product_id)) return false;
     if (
       filters.product_class_material_name?.length &&
       !filters.product_class_material_name.includes(row.product_class_material_name)
     ) {
       return false;
     }
-    if (filters.item_status && row.item_status !== filters.item_status) return false;
+    if (!matchesFilter(filters.item_status, row.item_status)) return false;
     if (
       filters.quotation_status &&
-      row.quotation_status !== slugifyStatus(filters.quotation_status)
+      !matchesFilter(filters.quotation_status, row.quotation_status, slugifyStatus)
     ) {
       return false;
     }
     if (filters.client_state && row.client_state !== filters.client_state) return false;
     if (
       filters.purchase_order_id &&
-      String(row.purchase_order_id) !== String(filters.purchase_order_id)
+      !matchesFilter(filters.purchase_order_id, row.purchase_order_id, (value) => String(value))
     ) {
       return false;
     }
     if (
       filters.quotation_code &&
-      String(row.quotation_code) !== String(filters.quotation_code)
+      !matchesFilter(filters.quotation_code, row.quotation_code, (value) => String(value))
     ) {
       return false;
     }

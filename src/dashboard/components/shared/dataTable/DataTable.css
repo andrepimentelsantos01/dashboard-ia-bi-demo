@@ -1,0 +1,199 @@
+:root {
+    --datatable-zoom: 1;
+}
+
+.datatable-wrapper {
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    background: #ffffff;
+    max-height: 500px;
+    overflow-y: auto;
+    position: relative;
+    will-change: scroll-position;
+}
+
+.datatable-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: calc(10px * var(--datatable-zoom)) calc(12px * var(--datatable-zoom)) 0;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.94) 100%);
+    backdrop-filter: blur(8px);
+}
+
+.datatable-search-input {
+    width: min(320px, calc(100% - 24px));
+    padding: calc(6px * var(--datatable-zoom)) calc(10px * var(--datatable-zoom));
+    margin: 0;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 8px;
+    font-size: calc(0.8rem * var(--datatable-zoom));
+    background: #ffffff;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.datatable-search-input:focus {
+    border-color: #375a7f;
+    box-shadow: 0 0 0 2px rgba(55,90,127,0.15);
+}
+
+.datatable-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.datatable-export-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(21, 60, 96, 0.12);
+    border-radius: 999px;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(242,247,252,0.98) 100%);
+    color: #1c466d;
+    font-size: calc(0.78rem * var(--datatable-zoom));
+    font-weight: 600;
+    box-shadow: 0 10px 18px rgba(16, 42, 67, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.datatable-export-button:hover {
+    transform: translateY(-1px);
+    border-color: rgba(0, 174, 239, 0.28);
+    box-shadow: 0 12px 22px rgba(16, 42, 67, 0.12);
+}
+
+.datatable-export-button svg {
+    font-size: 14px;
+}
+
+.datatable-export-button--sheet {
+    color: #146c43;
+}
+
+.datatable-export-button--pdf {
+    color: #b42318;
+}
+
+.datatable-table {
+    margin: 0;
+    width: 100%;
+    background: #ffffff;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: calc(0.86rem * var(--datatable-zoom));
+}
+
+.datatable-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: inherit;
+}
+
+.datatable-header-row {
+    background: linear-gradient(90deg, #375a7f, #4a6c92);
+    color: white;
+    font-size: calc(0.78rem * var(--datatable-zoom));
+    text-align: center;
+    height: calc(38px * var(--datatable-zoom));
+    cursor: pointer;
+}
+
+.datatable-header-cell {
+    padding: calc(6px * var(--datatable-zoom)) calc(10px * var(--datatable-zoom));
+    white-space: nowrap;
+    user-select: none;
+    border-right: 1px solid rgba(255,255,255,0.25);
+}
+
+.datatable-header-cell:last-child {
+    border-right: none;
+}
+
+.datatable-sort-indicator {
+    margin-left: 6px;
+}
+
+.datatable-row {
+    text-align: center;
+    vertical-align: middle;
+    transition: background 0.2s ease;
+    height: calc(34px * var(--datatable-zoom));
+}
+
+.datatable-row.even {
+    background-color: #f7f7f7;
+}
+
+.datatable-row.odd {
+    background-color: #ffffff;
+}
+
+.datatable-row:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.datatable-cell {
+    padding: calc(6px * var(--datatable-zoom)) calc(10px * var(--datatable-zoom));
+    white-space: nowrap;
+    border-right: 1px solid rgba(0,0,0,0.05);
+    line-height: 1.35;
+}
+
+.datatable-cell:last-child {
+    border-right: none;
+}
+
+.datatable-status {
+    padding: calc(4px * var(--datatable-zoom)) calc(8px * var(--datatable-zoom));
+    border-radius: 4px;
+    font-size: calc(0.7rem * var(--datatable-zoom));
+    font-weight: 600;
+    display: inline-block;
+    color: #ffffff;
+}
+
+.datatable-status.success {
+    background: #198754;
+}
+
+.datatable-status.danger {
+    background: #dc3545;
+}
+
+.datatable-status.neutral {
+    background: #6c757d;
+}
+
+.datatable-status.warning {
+    background: #fd7e14;
+}
+
+@media (max-width: 767px) {
+    .datatable-toolbar {
+        align-items: stretch;
+    }
+
+    .datatable-search-input {
+        width: 100%;
+    }
+
+    .datatable-toolbar-actions {
+        width: 100%;
+    }
+
+    .datatable-export-button {
+        flex: 1 1 calc(50% - 5px);
+        justify-content: center;
+    }
+}
