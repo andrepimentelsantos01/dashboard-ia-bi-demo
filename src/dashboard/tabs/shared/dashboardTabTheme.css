@@ -1,4 +1,5 @@
-:root {
+:root,
+html[data-theme="light"] {
     --bi-surface: rgba(255, 255, 255, 0.9);
     --bi-surface-strong: rgba(255, 255, 255, 0.98);
     --bi-surface-soft: linear-gradient(180deg, rgba(248, 252, 251, 0.96) 0%, rgba(255, 255, 255, 0.99) 100%);
@@ -13,6 +14,23 @@
     --bi-brand-strong: #0e4946;
     --bi-accent: #19b59f;
     --bi-accent-soft: rgba(25, 181, 159, 0.14);
+}
+
+html[data-theme="dark"] {
+    --bi-surface: rgba(10, 26, 25, 0.86);
+    --bi-surface-strong: rgba(12, 31, 29, 0.96);
+    --bi-surface-soft: linear-gradient(180deg, rgba(9, 24, 23, 0.96) 0%, rgba(14, 32, 31, 0.98) 100%);
+    --bi-border: rgba(119, 211, 198, 0.12);
+    --bi-border-strong: rgba(119, 211, 198, 0.2);
+    --bi-shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.34);
+    --bi-shadow-card: 0 16px 34px rgba(0, 0, 0, 0.38);
+    --bi-shadow-float: 0 24px 44px rgba(0, 0, 0, 0.42);
+    --bi-text: #dbf2ef;
+    --bi-text-soft: #8fb8b3;
+    --bi-brand: #5bd8c7;
+    --bi-brand-strong: #b7f8ef;
+    --bi-accent: #3fcfbb;
+    --bi-accent-soft: rgba(63, 207, 187, 0.18);
 }
 
 .bi-scope {
@@ -209,10 +227,6 @@
 }
 
 .bi-scope .floating-clear-button {
-    position: fixed !important;
-    right: 18px !important;
-    bottom: 18px !important;
-    z-index: 6000 !important;
     border: 1px solid rgba(25, 181, 159, 0.28) !important;
     background: linear-gradient(135deg, rgba(14, 73, 70, 0.98) 0%, rgba(24, 122, 113, 0.98) 100%) !important;
     color: #ffffff !important;
@@ -221,6 +235,39 @@
     font-weight: 600 !important;
     letter-spacing: 0.02em;
     box-shadow: var(--bi-shadow-float) !important;
+}
+
+.bi-scope .floating-action-stack {
+    position: fixed !important;
+    right: 18px !important;
+    bottom: 18px !important;
+    z-index: 6000 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.bi-scope .floating-theme-button {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(25, 181, 159, 0.28) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(231, 248, 245, 0.96) 100%) !important;
+    color: var(--bi-brand) !important;
+    box-shadow: var(--bi-shadow-float) !important;
+}
+
+.bi-scope .floating-theme-button svg {
+    font-size: 1rem;
+}
+
+.bi-scope .floating-theme-button:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(214, 245, 240, 1) 100%) !important;
 }
 
 .bi-scope .floating-clear-button:hover {
@@ -311,6 +358,56 @@
     box-shadow: 0 10px 20px rgba(16, 42, 67, 0.08);
 }
 
+html[data-theme="dark"] .bi-scope .section-wrapper-header,
+html[data-theme="dark"] .bi-scope .filter-section-wrapper .section-wrapper-header {
+    background: linear-gradient(180deg, rgba(14, 32, 31, 0.98) 0%, rgba(11, 27, 26, 0.96) 100%);
+}
+
+html[data-theme="dark"] .bi-scope .filter-section-card {
+    background: linear-gradient(180deg, rgba(17, 38, 37, 0.96) 0%, rgba(11, 26, 25, 0.98) 100%);
+    box-shadow: inset 0 1px 0 rgba(214, 247, 241, 0.05), 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+html[data-theme="dark"] .bi-scope .dropdownMenu {
+    background: rgba(13, 30, 29, 0.98) !important;
+    box-shadow: 0 20px 36px rgba(0, 0, 0, 0.28) !important;
+}
+
+html[data-theme="dark"] .bi-scope .dropdownMenu::-webkit-scrollbar-track,
+html[data-theme="dark"] .bi-scope .operational-table-container::-webkit-scrollbar-track {
+    background: rgba(22, 48, 46, 0.88);
+}
+
+html[data-theme="dark"] .bi-scope .overview-card,
+html[data-theme="dark"] .bi-scope .operational-table-container {
+    background: linear-gradient(180deg, rgba(12, 31, 29, 0.98) 0%, rgba(9, 24, 23, 0.96) 100%);
+}
+
+html[data-theme="dark"] .bi-scope .operational-view-more-button {
+    background: linear-gradient(135deg, rgba(11, 28, 27, 0.97) 0%, rgba(18, 50, 47, 0.96) 100%);
+}
+
+html[data-theme="dark"] .bi-scope .overview-date-modal .MuiBox-root,
+html[data-theme="dark"] .bi-scope .products-date-modal .MuiBox-root,
+html[data-theme="dark"] .bi-scope .clients-date-modal .MuiBox-root,
+html[data-theme="dark"] .bi-scope .suppliers-date-modal .MuiBox-root,
+html[data-theme="dark"] .bi-scope .orders-date-modal .MuiBox-root,
+html[data-theme="dark"] .bi-scope .quotations-date-modal .MuiBox-root {
+    background: linear-gradient(180deg, rgba(12, 31, 29, 0.98) 0%, rgba(10, 25, 24, 0.98) 100%) !important;
+}
+
+html[data-theme="dark"] .bi-scope .section-wrapper-actions .btn,
+html[data-theme="dark"] .bi-scope .operational-zoom-button,
+html[data-theme="dark"] .bi-scope .operational-view-more-button {
+    color: var(--bi-brand-strong);
+}
+
+html[data-theme="dark"] .bi-scope .floating-theme-button {
+    background: linear-gradient(135deg, rgba(11, 28, 27, 0.98) 0%, rgba(18, 50, 47, 0.96) 100%) !important;
+    color: var(--bi-brand-strong) !important;
+    border-color: rgba(111, 213, 200, 0.18) !important;
+}
+
 .bi-scope .react-datepicker-popper,
 .bi-scope .MuiPickersPopper-root {
     z-index: 4000 !important;
@@ -340,9 +437,13 @@
     }
 
     .bi-scope .floating-clear-button {
+        padding: 9px 12px !important;
+    }
+
+    .bi-scope .floating-action-stack {
         right: 12px !important;
         bottom: 12px !important;
-        padding: 9px 12px !important;
+        gap: 8px !important;
     }
 
     .bi-scope .date-filter-buttons {

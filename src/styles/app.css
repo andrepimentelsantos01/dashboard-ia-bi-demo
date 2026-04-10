@@ -1,9 +1,56 @@
+:root,
+html[data-theme="light"] {
+  --app-text: #143f3d;
+  --app-bg-radial: rgba(42, 161, 146, 0.14);
+  --app-bg-base-start: #f7fbfa;
+  --app-bg-base-end: #eef5f4;
+  --app-hero-start: #0d4745;
+  --app-hero-end: #14635e;
+  --app-hero-shadow: rgba(13, 71, 69, 0.18);
+  --app-hero-text-soft: rgba(241, 252, 250, 0.86);
+  --app-hero-accent: #8ce2d6;
+  --app-theme-btn-bg: rgba(255, 255, 255, 0.16);
+  --app-theme-btn-bg-hover: rgba(255, 255, 255, 0.24);
+  --app-theme-btn-border: rgba(181, 244, 234, 0.24);
+  --app-theme-btn-text: #f5fffd;
+  --action-btn-bg: rgba(255, 255, 255, 0.9);
+  --action-btn-bg-hover: rgba(255, 255, 255, 0.98);
+  --action-btn-border: rgba(20, 79, 75, 0.14);
+  --action-btn-border-hover: rgba(25, 181, 159, 0.34);
+  --action-btn-shadow: 0 10px 20px rgba(12, 56, 53, 0.1);
+  --action-btn-shadow-hover: 0 14px 24px rgba(12, 56, 53, 0.14);
+  --action-btn-icon: #166762;
+}
+
+html[data-theme="dark"] {
+  --app-text: #d8eeeb;
+  --app-bg-radial: rgba(38, 150, 136, 0.18);
+  --app-bg-base-start: #081615;
+  --app-bg-base-end: #102322;
+  --app-hero-start: #0f5956;
+  --app-hero-end: #16756f;
+  --app-hero-shadow: rgba(4, 16, 15, 0.42);
+  --app-hero-text-soft: rgba(223, 248, 244, 0.82);
+  --app-hero-accent: #92f0e0;
+  --app-theme-btn-bg: rgba(4, 24, 23, 0.32);
+  --app-theme-btn-bg-hover: rgba(4, 24, 23, 0.46);
+  --app-theme-btn-border: rgba(146, 240, 224, 0.2);
+  --app-theme-btn-text: #ecfffc;
+  --action-btn-bg: rgba(9, 28, 27, 0.88);
+  --action-btn-bg-hover: rgba(12, 38, 36, 0.96);
+  --action-btn-border: rgba(110, 209, 195, 0.18);
+  --action-btn-border-hover: rgba(123, 229, 213, 0.34);
+  --action-btn-shadow: 0 12px 22px rgba(0, 0, 0, 0.28);
+  --action-btn-shadow-hover: 0 16px 28px rgba(0, 0, 0, 0.34);
+  --action-btn-icon: #9ce8dc;
+}
+
 :root {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #143f3d;
+  color: var(--app-text);
   background:
-    radial-gradient(circle at top left, rgba(42, 161, 146, 0.14), transparent 30%),
-    linear-gradient(180deg, #f7fbfa 0%, #eef5f4 100%);
+    radial-gradient(circle at top left, var(--app-bg-radial), transparent 30%),
+    linear-gradient(180deg, var(--app-bg-base-start) 0%, var(--app-bg-base-end) 100%);
 }
 
 * {
@@ -14,6 +61,8 @@ body {
   margin: 0;
   min-height: 100vh;
   background: transparent;
+  color: var(--app-text);
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 button {
@@ -35,9 +84,17 @@ button {
   margin-bottom: 20px;
   padding: 28px 32px;
   border-radius: 24px;
-  background: linear-gradient(135deg, #0d4745 0%, #14635e 100%);
+  background: linear-gradient(135deg, var(--app-hero-start) 0%, var(--app-hero-end) 100%);
   color: #f7fbff;
-  box-shadow: 0 24px 60px rgba(13, 71, 69, 0.18);
+  box-shadow: 0 24px 60px var(--app-hero-shadow);
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.app-shell__hero-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
 }
 
 .app-shell__hero h1 {
@@ -49,7 +106,7 @@ button {
 .app-shell__hero p {
   margin: 0;
   max-width: 70ch;
-  color: rgba(241, 252, 250, 0.86);
+  color: var(--app-hero-text-soft);
 }
 
 .app-shell__eyebrow {
@@ -58,11 +115,113 @@ button {
   letter-spacing: 0.14em;
   font-size: 12px;
   font-weight: 700;
-  color: #8ce2d6 !important;
+  color: var(--app-hero-accent) !important;
+}
+
+.app-shell__theme-toggle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--app-theme-btn-border);
+  background: var(--app-theme-btn-bg);
+  color: var(--app-theme-btn-text);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.app-shell__theme-toggle:hover {
+  transform: translateY(-1px);
+  background: var(--app-theme-btn-bg-hover);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+}
+
+.app-shell__theme-toggle svg {
+  font-size: 16px;
+}
+
+.app-shell__theme-toggle span {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .app-shell__content {
   overflow: hidden;
+}
+
+.section-wrapper-collapse-button,
+.chart-bar-vertical-sort-btn,
+.chart-bar-vertical-expand-btn,
+.chart-bar-vertical-refresh-btn,
+.chart-horizontal-expand-btn,
+.chart-horizontal-sort-btn,
+.chart-horizontal-refresh-btn,
+.chart-line-expand-btn,
+.chart-line-refresh-btn,
+.chart-map-expand-btn,
+.chart-map-refresh-btn,
+.chart-pie-expand-btn,
+.chart-pie-refresh-btn,
+.treemap-expand-btn {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--action-btn-border) !important;
+  background: var(--action-btn-bg) !important;
+  color: var(--action-btn-icon) !important;
+  backdrop-filter: blur(14px);
+  box-shadow: var(--action-btn-shadow) !important;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease !important;
+}
+
+.section-wrapper-collapse-button:hover,
+.chart-bar-vertical-sort-btn:hover,
+.chart-bar-vertical-expand-btn:hover,
+.chart-bar-vertical-refresh-btn:hover,
+.chart-horizontal-expand-btn:hover,
+.chart-horizontal-sort-btn:hover,
+.chart-horizontal-refresh-btn:hover,
+.chart-line-expand-btn:hover,
+.chart-line-refresh-btn:hover,
+.chart-map-expand-btn:hover,
+.chart-map-refresh-btn:hover,
+.chart-pie-expand-btn:hover,
+.chart-pie-refresh-btn:hover,
+.treemap-expand-btn:hover {
+  transform: translateY(-1px) scale(1.02);
+  background: var(--action-btn-bg-hover) !important;
+  border-color: var(--action-btn-border-hover) !important;
+  color: var(--action-btn-icon) !important;
+  box-shadow: var(--action-btn-shadow-hover) !important;
+}
+
+.chart-bar-vertical-sort-icon,
+.chart-bar-vertical-expand-icon,
+.chart-bar-vertical-refresh-icon,
+.chart-horizontal-icon,
+.chart-line-expand-icon,
+.chart-line-refresh-icon,
+.chart-map-expand-icon,
+.chart-map-refresh-icon,
+.chart-pie-expand-icon,
+.chart-pie-refresh-icon,
+.treemap-expand-icon {
+  color: inherit !important;
+  font-size: 14px !important;
 }
 
 @media (max-width: 768px) {
@@ -73,5 +232,15 @@ button {
   .app-shell__hero {
     padding: 22px 18px;
     border-radius: 18px;
+  }
+
+  .app-shell__hero-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-shell__theme-toggle {
+    justify-content: center;
+    width: 100%;
   }
 }

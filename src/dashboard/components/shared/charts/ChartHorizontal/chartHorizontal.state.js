@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
+import { useChartThemeTokens } from "../chartTheme";
 
 const formatCurrencyFull = (value) =>
     (typeof value === "number" ? value : Number(value || 0)).toLocaleString("pt-BR", {
@@ -26,6 +27,7 @@ export const useChartHorizontalState = ({
     const [open, setOpen] = useState(false);
     const [selectedName, setSelectedName] = useState(null);
     const [orderState, setOrder] = useState(order);
+    const themeTokens = useChartThemeTokens();
 
     const handleRefresh = useCallback(() => {
         setOrder(order);
@@ -205,10 +207,10 @@ export const useChartHorizontalState = ({
             xAxis: {
                 type: "value",
                 splitLine: {
-                    lineStyle: { color: "rgba(0,0,0,0.08)", type: "dashed" }
+                    lineStyle: { color: themeTokens.splitLine, type: "dashed" }
                 },
                 axisLabel: {
-                    color: "#4b5864",
+                    color: themeTokens.textSecondary,
                     fontSize: 10,
                     interval: "auto",
                     hideOverlap: true,
@@ -224,7 +226,7 @@ export const useChartHorizontalState = ({
                 type: "category",
                 data: labels,
                 axisLabel: {
-                    color: "#4b5864",
+                    color: themeTokens.textSecondary,
                     fontSize: 10,
                     margin: 10,
                     width: 120,
@@ -239,7 +241,7 @@ export const useChartHorizontalState = ({
                     label: {
                         show: true,
                         position: "right",
-                        color: "#171515",
+                        color: themeTokens.chartLabelStrong,
                         fontSize: 10,
                         formatter: ({ value }) => formatValue(value)
                     },
@@ -277,7 +279,7 @@ export const useChartHorizontalState = ({
                 }
             ]
         };
-    }, [aggregated, color, formatValue, labels, values]);
+    }, [aggregated, color, formatValue, labels, themeTokens, values]);
 
     return {
         open,

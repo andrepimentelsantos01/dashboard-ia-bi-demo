@@ -8,12 +8,14 @@ export const normalizeOverviewAnalytics = (rows = []) =>
     rows.map(row => {
         const quantity = Number(row.quantity_requested) || 0;
         const total = Number(row.total_amount) || 0;
+        const status = row.logistics_status || row.item_status;
 
         return {
             ...row,
             quantidade: quantity,
             valorTotal: total,
             valorUnitario: quantity ? total / quantity : 0,
+            status,
             quantity,
             total
         };
@@ -23,6 +25,7 @@ export const normalizeOverviewTable = (rows = []) =>
     rows.map(row => {
         const quantidade = Number(row.quantity_requested) || 0;
         const valorTotal = Number(row.total_amount) || 0;
+        const status = row.logistics_status || row.item_status;
 
         return {
             ...row,
@@ -34,7 +37,8 @@ export const normalizeOverviewTable = (rows = []) =>
             fornecedor: row.supplier_name,
             produto: row.product_name,
             cliente: row.client_name,
-            status: row.item_status
+            item_status: status,
+            status
         };
     });
 
@@ -85,7 +89,7 @@ export const buildOverviewDerivedData = (analytics = []) => {
         }
         acc.fornecedores[fornecedor].valor += value;
 
-        const status = row.item_status || "Sem status";
+        const status = row.logistics_status || row.item_status || "Sem status";
         if (!acc.status[status]) acc.status[status] = { name: status, value: 0 };
         acc.status[status].value += 1;
 

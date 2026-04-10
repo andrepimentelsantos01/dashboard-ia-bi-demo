@@ -1,201 +1,139 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { Row, Col, Button } from "react-bootstrap";
+import { FiMaximize2, FiMinus, FiPlus } from "react-icons/fi";
 import DataTable from "./shared/dataTable";
 import ModalComponent from "/src/components/ModalV2";
+import { normalizeStatusLabel } from "../selectors/shared/dashboardStatus";
 import "./OperationalDataSection.css";
 
 const ROW_LIMIT = 10;
 
 const COLUMN_LABELS = {
-
     order_code: "Código Pedido",
     order_date: "Data do Pedido",
     year_months: "Ano/Mês",
-
     client_name: "Cliente",
     client_city: "Cidade",
     client_state: "UF",
-
     supplier_name: "Fornecedor",
-
     product_name: "Produto",
     product_class_material_name: "Categoria",
-
     quantity_requested: "Quantidade",
     unit_price: "Valor Unitário",
-
     total_amount: "Valor Total",
     total_amount_received: "Valor Recebido",
     total_amount_rejection: "Valor Rejeitado",
-
     item_status: "Status Pedido",
-
     expected_delivery_date: "Entrega Prevista",
     actual_delivery_date: "Entrega Real",
-
     delay_days: "Dias de Atraso",
-
     partial_delivery_flag: "Entrega Parcial",
-
     sum_total_amount: "Valor Total",
     sum_quantity: "Quantidade",
-    count_items: "Itens",
+    count_items: "Itens"
 };
 
-const STATUS_MAP = {
-    active: "Ativo",
-    amended: "Alterado",
-    approved: "Aprovado",
-    archived: "Arquivado",
-    available: "Disponível",
-    awaiting_approval: "Aguardando Aprovação",
-    awaiting_judgement: "Aguardando Julgamento",
-    awaiting_partial_shipment_response: "Aguardando Resposta de Envio Parcial",
-    awaiting_qualification: "Aguardando Qualificação",
-    awaiting_shipment: "Aguardando Envio",
-    awaiting_supplement: "Aguardando Complemento",
-    being_received: "Em Recebimento",
-    blocked: "Bloqueado",
-    busy: "Ocupado",
-    canceled: "Cancelado",
-    cancelled: "Cancelado",
-    closed: "Fechado",
-    completed: "Concluído",
-    delivered: "Entregue",
-    disqualified: "Desclassificado",
-    draft: "Rascunho",
-    eligible: "Habilitado",
-    expired: "Expirado",
-    failed: "Falhou",
-    fully_shipped: "Totalmente Enviado",
-    fully_used: "Totalmente Utilizado",
-    in_progess: "Em Progresso",
-    in_progress: "Em Progresso",
-    in_review: "Em Revisão",
-    in_sorting: "Em Distribuição",
-    in_training: "Em Treinamento",
-    in_transit: "Em Trânsito",
-    inactive: "Inativo",
-    ineligible: "Inabilitado",
-    integrated: "Integrado",
-    invited: "Convidado",
-    invoiced: "Faturado",
-    item_implemented: "Item Implantado",
-    judgement: "Em Julgamento",
-    maintenance: "Em Manutenção",
-    mundimed_review: "Em Revisão Mundimed",
-    no_bids_received: "Sem Propostas",
-    not_approved: "Não Aprovado",
-    offline: "Offline",
-    on_break: "Em Pausa",
-    on_leave: "Afastado",
-    open: "Aberto",
-    partial_received: "Recebido Parcial",
-    partial_shipment_approved: "Envio Parcial Aprovado",
-    partial_shipment_rejected: "Envio Parcial Rejeitado",
-    partially_delivered: "Parcialmente Entregue",
-    partially_in_force: "Parcialmente Vigente",
-    partially_invoiced: "Parcialmente Faturado",
-    partially_returned: "Parcialmente Devolvido",
-    partially_shipped: "Parcialmente Enviado",
-    partially_used: "Parcialmente Utilizado",
-    passwordexpired: "Senha Expirada",
-    pending: "Pendente",
-    pendingactivation: "Aguardando Ativação",
-    pendingdeletion: "Aguardando Exclusão",
-    picking_in_progress: "Separação em Andamento",
-    qualified: "Qualificado",
-    qualified_awaiting_commitment: "Aguardando Empenho",
-    qualified_purchase_order_issued: "Ordem de Compra Gerada",
-    quoted: "Cotado",
-    rejected: "Rejeitado",
-    released: "Liberado",
-    returned: "Devolvido",
-    returned_for_correction: "Devolvido para Correção",
-    sample_received: "Amostra Recebida",
-    sample_requested: "Amostra Solicitada",
-    sample_sent: "Amostra Enviada",
-    sorting: "Em Distribuição",
-    standardized: "Padronizado",
-    suspended: "Suspenso",
-    terminated: "Encerrado",
-    total_received: "Recebido Total",
-    trialperiod: "Período de Teste",
-    under_bidding: "Em Disputa",
-    under_evaluation: "Em Avaliação",
-    under_qualification: "Em Habilitação",
-    under_quotation: "Em Cotação",
-    under_review: "Em Revisão",
-    underreview: "Em Revisão"
+const normalizeOperationalStatus = (row) =>
+    normalizeStatusLabel(
+        row?.logistics_status || row?.item_status || row?.order_status || row?.status,
+        { fallback: "Desconhecido" }
+    );
+
+const mapOperationalRow = (row) => {
+    const normalizedStatus = normalizeOperationalStatus(row);
+
+    return {
+        ...row,
+        logistics_status: normalizedStatus,
+        item_status: normalizedStatus,
+        order_status: normalizedStatus,
+        status: normalizedStatus
+    };
 };
 
-const normalizeStatus = (v) => {
-    if (!v) return "Desconhecido";
-    const s = String(v).toLowerCase().trim().replace(/\s+/g, "_");
-    return STATUS_MAP[s] || "Desconhecido";
+const COLUMN_PRIORITY = {
+    total_amount: 1,
+    sum_total_amount: 2,
+    unit_price: 1,
+    avg_unit_price: 2,
+    quantity_requested: 1,
+    sum_quantity: 2,
+    order_date: 1,
+    year_months: 1,
+    item_status: 1,
+    order_status: 2,
+    status: 3
 };
 
 const OperationalDataSection = ({ tabela }) => {
     const [state, setState] = useState({
         expanded: false,
-        zoom: 0.9,
+        zoom: 0.96,
         open: false
     });
 
     const { expanded, zoom, open } = state;
 
     const setExpanded = useCallback(
-        (v) => setState((s) => ({ ...s, expanded: v })),
+        (value) => setState((current) => ({ ...current, expanded: value })),
         []
     );
 
     const setZoom = useCallback(
         (updater) =>
-            setState((s) => ({
-                ...s,
-                zoom: typeof updater === "function" ? updater(s.zoom) : updater
+            setState((current) => ({
+                ...current,
+                zoom: typeof updater === "function" ? updater(current.zoom) : updater
             })),
         []
     );
 
     const setOpen = useCallback(
-        (v) => setState((s) => ({ ...s, open: v })),
+        (value) => setState((current) => ({ ...current, open: value })),
         []
     );
 
-    const visibleRows = useMemo(() => {
-        return expanded ? tabela : tabela.slice(0, ROW_LIMIT);
-    }, [expanded, tabela]);
+    const normalizedTable = useMemo(
+        () => tabela.map(mapOperationalRow),
+        [tabela]
+    );
+
+    const visibleRows = useMemo(
+        () => (expanded ? normalizedTable : normalizedTable.slice(0, ROW_LIMIT)),
+        [expanded, normalizedTable]
+    );
 
     const columns = useMemo(() => {
-        const row = visibleRows[0];
+        const row = normalizedTable[0];
         if (!row) return [];
 
-        return Object.keys(row)
-            .filter(k => COLUMN_LABELS[k])
-            .map((key) => ({
-                key,
-                label: COLUMN_LABELS[key] ?? key
-            }));
-    }, [visibleRows]);
+        const byLabel = new Map();
 
-    const rowsFormatted = useMemo(() => {
-        return visibleRows.map((row) => ({
-            ...row,
-            item_status: normalizeStatus(row.item_status)
-        }));
-    }, [visibleRows]);
+        Object.keys(row)
+            .filter((key) => COLUMN_LABELS[key])
+            .forEach((key) => {
+                const label = COLUMN_LABELS[key] ?? key;
+                const current = byLabel.get(label);
+                const nextPriority = COLUMN_PRIORITY[key] ?? 99;
 
-    const modalRows = useMemo(() => {
-        return tabela.map((row) => ({
-            ...row,
-            item_status: normalizeStatus(row.item_status)
+                if (!current || nextPriority < current.priority) {
+                    byLabel.set(label, {
+                        key,
+                        label,
+                        priority: nextPriority
+                    });
+                }
+            });
+
+        return Array.from(byLabel.values()).map(({ key, label }) => ({
+            key,
+            label
         }));
-    }, [tabela]);
+    }, [normalizedTable]);
 
     const applyZoom = useCallback(
-        (d) => {
-            setZoom((z) => Math.min(1.5, Math.max(0.7, z + d)));
+        (delta) => {
+            setZoom((value) => Math.min(1.16, Math.max(0.82, Number((value + delta).toFixed(2)))));
         },
         [setZoom]
     );
@@ -206,30 +144,48 @@ const OperationalDataSection = ({ tabela }) => {
 
     return (
         <div className="operational-section-wrapper">
-            <div className="operational-expand-wrapper" onClick={() => setOpen(true)}>
-                <div className="chart-pie-expand-btn">
-                    <span className="chart-pie-expand-icon">⤢</span>
-                </div>
-            </div>
-
             <Row className="mb-0">
                 <Col xs={12}>
                     <div className="operational-title-container">
-                        <h6 className="operational-title">Tabela Consolidada</h6>
+                        <div className="operational-title-copy">
+                            <h6 className="operational-title">Tabela Consolidada</h6>
+                            <p className="operational-subtitle">
+                                Consulte, pesquise e exporte os dados operacionais já sincronizados com os gráficos.
+                            </p>
+                        </div>
 
-                        <div className="operational-zoom-controls">
-                            <button
-                                onClick={() => applyZoom(-0.1)}
-                                className="operational-zoom-button"
-                            >
-                                –
-                            </button>
+                        <div className="operational-actions">
+                            <div className="operational-zoom-controls">
+                                <button
+                                    type="button"
+                                    onClick={() => applyZoom(-0.04)}
+                                    className="operational-zoom-button"
+                                    aria-label="Reduzir zoom da tabela"
+                                >
+                                    <FiMinus />
+                                </button>
+
+                                <span className="operational-zoom-indicator">
+                                    {Math.round(zoom * 100)}%
+                                </span>
+
+                                <button
+                                    type="button"
+                                    onClick={() => applyZoom(0.04)}
+                                    className="operational-zoom-button"
+                                    aria-label="Aumentar zoom da tabela"
+                                >
+                                    <FiPlus />
+                                </button>
+                            </div>
 
                             <button
-                                onClick={() => applyZoom(+0.1)}
-                                className="operational-zoom-button"
+                                type="button"
+                                className="operational-expand-button"
+                                onClick={() => setOpen(true)}
+                                aria-label="Expandir tabela operacional"
                             >
-                                +
+                                <FiMaximize2 />
                             </button>
                         </div>
                     </div>
@@ -241,24 +197,23 @@ const OperationalDataSection = ({ tabela }) => {
                         >
                             <DataTable
                                 columns={columns}
-                                rows={rowsFormatted}
-                                exportRows={modalRows}
+                                rows={visibleRows}
+                                exportRows={normalizedTable}
                                 exportFileName="tabela-operacional"
                                 exportTitle="Tabela Consolidada"
-                                premium={true}
                             />
                         </div>
                     </div>
 
-                    {tabela.length > ROW_LIMIT && (
-                        <div className="text-center mt-2">
+                    {normalizedTable.length > ROW_LIMIT && (
+                        <div className="text-center mt-3">
                             <Button
                                 variant="outline-info"
                                 size="sm"
                                 onClick={toggleExpanded}
                                 className="operational-view-more-button"
                             >
-                                {expanded ? "Ver menos" : `Ver todos (${tabela.length})`}
+                                {expanded ? "Ver menos" : `Ver todos (${normalizedTable.length})`}
                             </Button>
                         </div>
                     )}
@@ -272,11 +227,10 @@ const OperationalDataSection = ({ tabela }) => {
                 content={
                     <DataTable
                         columns={columns}
-                        rows={modalRows}
-                        exportRows={modalRows}
+                        rows={normalizedTable}
+                        exportRows={normalizedTable}
                         exportFileName="tabela-operacional"
                         exportTitle="Tabela Consolidada"
-                        premium={true}
                     />
                 }
             />

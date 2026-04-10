@@ -24,12 +24,12 @@ const OverviewSection = ({ charts }) => {
     if (!renderedCharts) return null;
 
     return (
-        <Row className="g-3">
+        <Row className="overview-grid-row">
             {renderedCharts.map(({ key, title, height, component, isCurva }) => (
-                <Col key={key} xs={12} md={6}>
+                <Col key={key} xs={12} md={6} className="overview-grid-col">
                     {isCurva ? (
                         <div className="overview-curva-wrapper">
-                            <h6 className="overview-card-title text-center text-black-50">
+                            <h6 className="overview-card-title overview-card-title--center">
                                 {title}
                             </h6>
 
@@ -40,7 +40,7 @@ const OverviewSection = ({ charts }) => {
                     ) : (
                         <Card className="overview-card">
                             <Card.Body className="overview-card-body overview-card-body-fix">
-                                <h6 className="overview-card-title text-center text-black-50">
+                                <h6 className="overview-card-title overview-card-title--center">
                                     {title}
                                 </h6>
 

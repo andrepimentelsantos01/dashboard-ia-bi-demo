@@ -1,22 +1,10 @@
-import overviewMock from "../dashboard/mocks/dashboardOverview.mock.json";
-import ordersMock from "../dashboard/mocks/dashboardOrders.mock.json";
-import productsMock from "../dashboard/mocks/dashboardProducts.mock.json";
-import clientsMock from "../dashboard/mocks/dashboardClients.mock.json";
-import suppliersMock from "../dashboard/mocks/dashboardSuppliers.mock.json";
-import quotationsMock from "../dashboard/mocks/dashboardQuotations.mock.json";
-
-const statusAliases = {
-  finalizado: "finalized",
-  "expedicao / envio": "invoiced",
-  "expedição / envio": "invoiced",
-  "em cotacao": "under_quotation",
-  "em cotação": "under_quotation",
-  rejeitado: "rejected",
-  entregue: "delivered",
-  atrasado: "pending",
-  cancelado: "cancelled",
-  "em transporte": "in_transit"
-};
+import overviewMock from "../mocks/dashboard/dashboardOverview.mock.json";
+import ordersMock from "../mocks/dashboard/dashboardOrders.mock.json";
+import productsMock from "../mocks/dashboard/dashboardProducts.mock.json";
+import clientsMock from "../mocks/dashboard/dashboardClients.mock.json";
+import suppliersMock from "../mocks/dashboard/dashboardSuppliers.mock.json";
+import quotationsMock from "../mocks/dashboard/dashboardQuotations.mock.json";
+import { normalizeStatusLabel, slugifyStatus } from "../dashboard/selectors/shared/dashboardStatus";
 
 const safeDate = (value) => {
   if (!value) return null;
@@ -44,16 +32,6 @@ const toYearMonth = (value) => {
   const date = safeDate(value);
   if (!date) return null;
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-};
-
-const slugifyStatus = (status) => {
-  const base = String(status || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-
-  return statusAliases[base] || base.replace(/\s+/g, "_");
 };
 
 const compareDateRange = (dateValue, range) => {
@@ -112,7 +90,9 @@ const normalizeRows = (rows, config) => {
     const purchaseOrderId =
       row[orderKey] ?? row.numeroPedido ?? row.ordemCompra ?? null;
     const quotationCode = row[quotationKey] ?? row.numeroCotacao ?? null;
-    const itemStatus = row[statusKey] || null;
+    const rawItemStatus = row[statusKey] || null;
+    const logisticsStatus = normalizeStatusLabel(rawItemStatus, { fallback: null });
+    const itemStatus = logisticsStatus || rawItemStatus;
 
     return {
       row_id: index + 1,
@@ -137,7 +117,8 @@ const normalizeRows = (rows, config) => {
       unit_price: unitPrice || (quantity ? total / quantity : 0),
       item_status: itemStatus,
       order_status: itemStatus,
-      quotation_status: slugifyStatus(itemStatus),
+      logistics_status: logisticsStatus,
+      quotation_status: slugifyStatus(rawItemStatus || itemStatus),
       glosa: Number(row[glosaKey] || 0),
       sum_glosa_amount: Number(row[glosaKey] || 0),
       abc_classification: classAbcKey ? row[classAbcKey] || null : null,
@@ -250,7 +231,7 @@ const quotationsRows = normalizeRows(quotationsMock.tabelaCotas, {
 const buildOverviewResponse = (rows) => {
   const totalAmount = rows.reduce((sum, row) => sum + row.sum_total_amount, 0);
   const delivered = rows
-    .filter((row) => row.item_status === "Entregue")
+    .filter((row) => (row.logistics_status || row.item_status) === "Entregue")
     .reduce((sum, row) => sum + row.sum_total_amount, 0);
 
   return {
@@ -260,14 +241,16 @@ const buildOverviewResponse = (rows) => {
       total_volume_products: rows.reduce((sum, row) => sum + row.sum_quantity, 0),
       total_clients: countDistinct(rows, "client_id"),
       clients_with_delay: countDistinct(
-        rows.filter((row) => row.item_status === "Atrasado"),
+        rows.filter((row) => (row.logistics_status || row.item_status) === "Atrasado"),
         "client_id"
       ),
       suppliers_with_delay: countDistinct(
-        rows.filter((row) => row.item_status === "Atrasado"),
+        rows.filter((row) => (row.logistics_status || row.item_status) === "Atrasado"),
         "supplier_id"
       ),
-      orders_with_delay: rows.filter((row) => row.item_status === "Atrasado").length
+      orders_with_delay: rows.filter(
+        (row) => (row.logistics_status || row.item_status) === "Atrasado"
+      ).length
     },
     fact: rows,
     table: rows

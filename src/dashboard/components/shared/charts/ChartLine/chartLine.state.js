@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
+import { useChartThemeTokens } from "../chartTheme";
 
 const LINE_COLOR = "#17877e";
 const LINE_FILL = "rgba(23, 135, 126, 0.24)";
@@ -17,6 +18,7 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
     const [open, setOpen] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState(null);
     const [chartKey, setChartKey] = useState(0);
+    const themeTokens = useChartThemeTokens();
 
     const handleRefresh = useCallback(() => {
         setSelectedMonth(null);
@@ -173,7 +175,7 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                 type: "category",
                 data: months,
                 axisLabel: {
-                    color: "#4b5864",
+                    color: themeTokens.textSecondary,
                     fontSize: 10,
                     rotate: 40
                 }
@@ -181,12 +183,12 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
             yAxis: {
                 type: "value",
                 axisLabel: {
-                    color: "#4b5864",
+                    color: themeTokens.textSecondary,
                     fontSize: 10,
                     formatter: (value) => formatShort(value)
                 },
                 splitLine: {
-                    lineStyle: { color: "rgba(0,0,0,0.08)", type: "dashed" }
+                    lineStyle: { color: themeTokens.splitLine, type: "dashed" }
                 }
             },
             dataZoom: [
@@ -196,7 +198,7 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                     height: 10,
                     bottom: 10,
                     borderColor: "transparent",
-                    fillerColor: SLIDER_FILL,
+                    fillerColor: themeTokens.sliderFill,
                     handleIcon: "path://M512 64L576 128 512 192 448 128z",
                     handleSize: "80%",
                     handleColor: LINE_COLOR,
@@ -227,13 +229,13 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                         show: true,
                         position: "top",
                         fontSize: 10,
-                        color: LINE_COLOR,
+                        color: themeTokens.isDark ? "#6de1d0" : LINE_COLOR,
                         formatter: (point) => formatShort(point.value)
                     }
                 }
             ]
         };
-    }, [aggregated, averages, months]);
+    }, [aggregated, averages, months, themeTokens]);
 
     return {
         open,

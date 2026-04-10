@@ -5,6 +5,7 @@ import { FiRefreshCcw, FiMaximize2 } from "react-icons/fi";
 import "./ChartPie.css";
 import { useChartPieState } from "./chartPie.state";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
+import { useChartThemeTokens } from "../chartTheme";
 
 const stringToHue = (str) => {
     let hash = 0;
@@ -29,6 +30,7 @@ const toNumber = (value) => {
 };
 
 const ChartPie = ({ data, backendData, onVisualFilter, onCrossFilter, filterType }) => {
+    const themeTokens = useChartThemeTokens();
     const {
         open,
         setOpen,
@@ -99,7 +101,7 @@ const ChartPie = ({ data, backendData, onVisualFilter, onCrossFilter, filterType
             itemWidth: 12,
             itemGap: 12,
             padding: [25, 0, 0, 0],
-            textStyle: { color: "#4b5864", fontSize: 11, lineHeight: 14 }
+            textStyle: { color: themeTokens.pieLegend, fontSize: 11, lineHeight: 14 }
         },
         series: [
             {
@@ -117,7 +119,7 @@ const ChartPie = ({ data, backendData, onVisualFilter, onCrossFilter, filterType
                     position: "outside",
                     formatter: "{b}: {d}%",
                     fontSize: 12,
-                    color: "#2e3642"
+                    color: themeTokens.pieLabel
                 },
                 labelLine: {
                     show: true,
@@ -125,7 +127,7 @@ const ChartPie = ({ data, backendData, onVisualFilter, onCrossFilter, filterType
                     length: 16,
                     length2: 12,
                     lineStyle: {
-                        color: "rgba(0,0,0,0.25)",
+                        color: themeTokens.pieLabelLine,
                         width: 1.2
                     }
                 },
@@ -141,7 +143,7 @@ const ChartPie = ({ data, backendData, onVisualFilter, onCrossFilter, filterType
                 animationEasing: "cubicOut"
             }
         ]
-    }), [filteredData, tooltipFormatter]);
+    }), [filteredData, themeTokens, tooltipFormatter]);
 
     const refreshChart = useCallback(() => {
         handleRefresh();

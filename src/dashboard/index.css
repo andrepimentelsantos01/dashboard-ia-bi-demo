@@ -82,6 +82,42 @@
     margin-bottom: 12px;
 }
 
+html[data-theme="dark"] .dashboard-tab-btn {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="dark"] .dashboard-tab-btn.btn-outline-primary {
+    color: #8fe4d7;
+    border-color: rgba(111, 213, 200, 0.34);
+    background: rgba(10, 28, 27, 0.88);
+}
+
+html[data-theme="dark"] .dashboard-tab-btn.btn-outline-primary:hover,
+html[data-theme="dark"] .dashboard-tab-btn.btn-outline-primary:focus {
+    color: #d8fffa;
+    border-color: rgba(123, 229, 213, 0.5);
+    background: rgba(21, 62, 58, 0.92);
+}
+
+html[data-theme="dark"] .dashboard-tab-btn.btn-primary {
+    color: #031312;
+    border-color: #6adccc;
+    background: linear-gradient(135deg, #6de1d0 0%, #3fcfbb 100%);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .dashboard-tab-btn.btn-primary:hover,
+html[data-theme="dark"] .dashboard-tab-btn.btn-primary:focus,
+html[data-theme="dark"] .dashboard-tab-btn.btn-primary:active {
+    color: #031312;
+    border-color: #9af0e3;
+    background: linear-gradient(135deg, #8ff0e2 0%, #54d8c6 100%);
+}
+
+html[data-theme="dark"] .skeleton-block {
+    background: linear-gradient(90deg, rgba(26, 50, 48, 0.9) 25%, rgba(36, 70, 66, 0.95) 37%, rgba(26, 50, 48, 0.9) 63%);
+}
+
 @keyframes skeleton-loading {
     0% {
         background-position: 100% 50%;

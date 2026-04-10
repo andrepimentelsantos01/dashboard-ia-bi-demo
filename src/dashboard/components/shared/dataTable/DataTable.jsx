@@ -1,95 +1,12 @@
 import React, { useMemo, useCallback, useState } from "react";
-import { FiFileText, FiGrid } from "react-icons/fi";
+import { FiFileText, FiGrid, FiSearch } from "react-icons/fi";
 import { utils, writeFile } from "xlsx";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import "./DataTable.css";
 import { useFormatter } from "../../../hooks/useFormatter";
 import { useDataTableState } from "./dataTable.state";
-
-const colorMap = {
-    Ativo: "#0f4f4c",
-    Alterado: "#12635e",
-    Aprovado: "#177972",
-    Arquivado: "#93a9a6",
-    Disponivel: "#1b8f86",
-    "Disponível": "#1b8f86",
-    "Aguardando Aprovação": "#22a69b",
-    "Aguardando Julgamento": "#40b8ad",
-    "Aguardando Resposta de Envio Parcial": "#40b8ad",
-    "Aguardando Qualificação": "#12635e",
-    "Aguardando Envio": "#63c9c0",
-    "Aguardando Complemento": "#22a69b",
-    "Em Recebimento": "#1b8f86",
-    Bloqueado: "#0e4946",
-    Ocupado: "#40b8ad",
-    Cancelado: "#0e4946",
-    Fechado: "#93a9a6",
-    "Concluído": "#177972",
-    Entregue: "#177972",
-    Desclassificado: "#93a9a6",
-    Rascunho: "#b4c6c3",
-    Habilitado: "#177972",
-    Expirado: "#93a9a6",
-    Falhou: "#0e4946",
-    "Totalmente Enviado": "#177972",
-    "Totalmente Utilizado": "#177972",
-    "Em Progresso": "#1b8f86",
-    "Em Revisão": "#22a69b",
-    "Em Distribuição": "#1b8f86",
-    "Em Treinamento": "#63c9c0",
-    "Em Trânsito": "#40b8ad",
-    Inativo: "#93a9a6",
-    Inabilitado: "#0e4946",
-    Integrado: "#0f4f4c",
-    Convidado: "#1b8f86",
-    Faturado: "#177972",
-    "Item Implantado": "#177972",
-    "Em Julgamento": "#40b8ad",
-    "Em Manutenção": "#22a69b",
-    "Em Revisão Mundimed": "#22a69b",
-    "Sem Propostas": "#93a9a6",
-    "Não Aprovado": "#0e4946",
-    Offline: "#93a9a6",
-    "Em Pausa": "#22a69b",
-    Afastado: "#93a9a6",
-    Aberto: "#1b8f86",
-    "Recebido Parcial": "#1b8f86",
-    "Envio Parcial Aprovado": "#177972",
-    "Envio Parcial Rejeitado": "#0e4946",
-    "Parcialmente Entregue": "#1b8f86",
-    "Parcialmente Vigente": "#1b8f86",
-    "Parcialmente Faturado": "#1b8f86",
-    "Parcialmente Devolvido": "#40b8ad",
-    "Parcialmente Enviado": "#1b8f86",
-    "Parcialmente Utilizado": "#1b8f86",
-    "Senha Expirada": "#0e4946",
-    Pendente: "#22a69b",
-    "Aguardando Ativação": "#22a69b",
-    "Aguardando Exclusão": "#0e4946",
-    "Separação em Andamento": "#1b8f86",
-    Qualificado: "#177972",
-    "Aguardando Empenho": "#22a69b",
-    "Ordem de Compra Gerada": "#177972",
-    Cotado: "#1b8f86",
-    Rejeitado: "#0e4946",
-    Liberado: "#177972",
-    Devolvido: "#40b8ad",
-    "Devolvido para Correção": "#40b8ad",
-    "Amostra Recebida": "#177972",
-    "Amostra Solicitada": "#22a69b",
-    "Amostra Enviada": "#1b8f86",
-    Padronizado: "#177972",
-    Suspenso: "#0e4946",
-    Encerrado: "#93a9a6",
-    "Recebido Total": "#177972",
-    "Período de Teste": "#1b8f86",
-    "Em Disputa": "#1b8f86",
-    "Em Avaliação": "#22a69b",
-    "Em Habilitação": "#1b8f86",
-    "Em Cotação": "#1b8f86",
-    Desconhecido: "#0f4f4c"
-};
+import { normalizeStatusLabel, STATUS_COLOR_MAP } from "../../../selectors/shared/dashboardStatus";
 
 const sanitizeFilePart = (value) =>
     String(value || "exportacao")
@@ -112,6 +29,35 @@ const buildTimestamp = () => {
         pad(now.getHours()),
         pad(now.getMinutes())
     ].join("");
+};
+
+const getRowStatusValue = (row = {}, columnKey = "") => {
+    if (columnKey === "item_status" || columnKey === "order_status" || columnKey === "status") {
+        return row.logistics_status || row.item_status || row.order_status || row.status;
+    }
+
+    return row[columnKey];
+};
+
+const formatCellValue = ({ column, row, autoFormat }) => {
+    const rawValue = getRowStatusValue(row.original ?? row, column.key);
+
+    if (column.key.toLowerCase().includes("status")) {
+        return normalizeStatusLabel(rawValue, { fallback: "Desconhecido" });
+    }
+
+    if (column.key === "unit_price" || column.label === "Valor Unitário") {
+        const numeric = typeof rawValue === "number" ? rawValue : Number(String(rawValue ?? "").replace(",", "."));
+
+        if (Number.isFinite(numeric)) {
+            return numeric.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL"
+            });
+        }
+    }
+
+    return autoFormat(column.label || column.key, row.original?.[column.key] ?? row[column.key]);
 };
 
 const DataTable = ({
@@ -143,14 +89,6 @@ const DataTable = ({
         handleSort(columnKey);
     }, [handleSort]);
 
-    const getStatusStyle = useCallback((value) => {
-        if (colorMap[value]) {
-            return { backgroundColor: colorMap[value], color: "#fff" };
-        }
-
-        return "neutral";
-    }, []);
-
     const filteredRows = useMemo(() => {
         if (!search) return sortedRows;
 
@@ -158,11 +96,16 @@ const DataTable = ({
 
         return sortedRows.filter((row) =>
             normalizedColumns.some((column) => {
-                const value = row.original?.[column.key] ?? row[column.key];
-                return String(value ?? "").toLowerCase().includes(term);
+                const displayValue = formatCellValue({
+                    column,
+                    row,
+                    autoFormat
+                });
+
+                return String(displayValue ?? "").toLowerCase().includes(term);
             })
         );
-    }, [normalizedColumns, search, sortedRows]);
+    }, [autoFormat, normalizedColumns, search, sortedRows]);
 
     const rowsForExportSource = useMemo(
         () => (Array.isArray(exportRows) && exportRows.length ? exportRows : filteredRows),
@@ -174,8 +117,11 @@ const DataTable = ({
             const formatted = {};
 
             normalizedColumns.forEach((column) => {
-                const value = row.original?.[column.key] ?? row[column.key];
-                formatted[column.key] = autoFormat(column.key, value);
+                formatted[column.key] = formatCellValue({
+                    column,
+                    row,
+                    autoFormat
+                });
             });
 
             return { original: row, formatted };
@@ -187,8 +133,11 @@ const DataTable = ({
             const formattedRow = {};
 
             normalizedColumns.forEach((column) => {
-                const value = row.original?.[column.key] ?? row[column.key];
-                formattedRow[column.label] = autoFormat(column.key, value);
+                formattedRow[column.label] = formatCellValue({
+                    column,
+                    row,
+                    autoFormat
+                });
             });
 
             return formattedRow;
@@ -251,13 +200,16 @@ const DataTable = ({
     return (
         <div className="datatable-wrapper">
             <div className="datatable-toolbar">
-                <input
-                    type="text"
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Buscar..."
-                    className="datatable-search-input"
-                />
+                <label className="datatable-search-shell">
+                    <FiSearch className="datatable-search-icon" />
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder="Buscar..."
+                        className="datatable-search-input"
+                    />
+                </label>
 
                 <div className="datatable-toolbar-actions">
                     <button
@@ -280,65 +232,69 @@ const DataTable = ({
                 </div>
             </div>
 
-            <table className="datatable-table table table-hover">
-                <thead>
-                    <tr className="datatable-header-row">
-                        {normalizedColumns.map((column) => (
-                            <th
-                                key={column.key}
-                                className="datatable-header-cell"
-                                onClick={() => handleSortMemo(column.key)}
+            <div className="datatable-table-shell">
+                <table className="datatable-table">
+                    <thead>
+                        <tr className="datatable-header-row">
+                            {normalizedColumns.map((column) => (
+                                <th
+                                    key={column.key}
+                                    className="datatable-header-cell"
+                                    onClick={() => handleSortMemo(column.key)}
+                                >
+                                    <span>{column.label}</span>
+                                    {sortColumn === column.key && (
+                                        <span className="datatable-sort-indicator">
+                                            {sortDirection === "asc" ? "▲" : "▼"}
+                                        </span>
+                                    )}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {rowsToRender.length ? rowsToRender.map((row, index) => (
+                            <tr
+                                key={index}
+                                className={`datatable-row ${index % 2 === 0 ? "even" : "odd"}`}
                             >
-                                {column.label}
-                                {sortColumn === column.key && (
-                                    <span className="datatable-sort-indicator">
-                                        {sortDirection === "asc" ? "▲" : "▼"}
-                                    </span>
-                                )}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
+                                {normalizedColumns.map((column) => {
+                                    const cell = row.formatted[column.key];
+                                    const isStatus = column.key.toLowerCase().includes("status");
 
-                <tbody>
-                    {rowsToRender.map((row, index) => (
-                        <tr
-                            key={index}
-                            className={`datatable-row ${index % 2 === 0 ? "even" : "odd"}`}
-                        >
-                            {normalizedColumns.map((column) => {
-                                const cell = row.formatted[column.key];
-                                const isStatus = column.key.toLowerCase().includes("status");
+                                    if (!isStatus) {
+                                        return (
+                                            <td key={column.key} className="datatable-cell">
+                                                {cell}
+                                            </td>
+                                        );
+                                    }
 
-                                if (!isStatus) {
+                                    const badgeColor = STATUS_COLOR_MAP[cell] || STATUS_COLOR_MAP.Desconhecido;
+
                                     return (
-                                        <td key={column.key} className="datatable-cell">
-                                            {cell}
+                                        <td key={column.key} className="datatable-cell datatable-cell--status">
+                                            <span
+                                                className="datatable-status"
+                                                style={{ backgroundColor: badgeColor }}
+                                            >
+                                                {cell}
+                                            </span>
                                         </td>
                                     );
-                                }
-
-                                const styleOrClass = getStatusStyle(cell);
-                                const isColor = typeof styleOrClass === "object";
-
-                                return (
-                                    <td key={column.key} className="datatable-cell">
-                                        {isColor ? (
-                                            <span className="datatable-status" style={styleOrClass}>
-                                                {cell}
-                                            </span>
-                                        ) : (
-                                            <span className={`datatable-status ${styleOrClass}`}>
-                                                {cell}
-                                            </span>
-                                        )}
-                                    </td>
-                                );
-                            })}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                                })}
+                            </tr>
+                        )) : (
+                            <tr className="datatable-empty-row">
+                                <td className="datatable-empty-cell" colSpan={normalizedColumns.length || 1}>
+                                    Nenhum registro encontrado para os filtros aplicados.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

@@ -3,45 +3,60 @@
 }
 
 .datatable-wrapper {
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.06);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-    background: #ffffff;
-    max-height: 500px;
-    overflow-y: auto;
+    border-radius: 20px;
+    border: 1px solid rgba(20, 79, 75, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(246, 251, 250, 0.98) 100%);
+    box-shadow: 0 18px 40px rgba(12, 56, 53, 0.1);
+    overflow: hidden;
     position: relative;
-    will-change: scroll-position;
 }
 
 .datatable-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: calc(10px * var(--datatable-zoom)) calc(12px * var(--datatable-zoom)) 0;
+    gap: 16px;
+    padding: calc(14px * var(--datatable-zoom)) calc(16px * var(--datatable-zoom));
     flex-wrap: wrap;
     position: sticky;
     top: 0;
-    z-index: 4;
-    background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.94) 100%);
-    backdrop-filter: blur(8px);
+    z-index: 5;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 251, 250, 0.96) 100%);
+    border-bottom: 1px solid rgba(20, 79, 75, 0.08);
+    backdrop-filter: blur(14px);
+}
+
+.datatable-search-shell {
+    min-width: min(100%, 320px);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: calc(10px * var(--datatable-zoom)) calc(14px * var(--datatable-zoom));
+    border-radius: 14px;
+    border: 1px solid rgba(20, 79, 75, 0.1);
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.datatable-search-icon {
+    color: #62807c;
+    font-size: 15px;
+    flex-shrink: 0;
 }
 
 .datatable-search-input {
-    width: min(320px, calc(100% - 24px));
-    padding: calc(6px * var(--datatable-zoom)) calc(10px * var(--datatable-zoom));
+    width: 100%;
+    padding: 0;
     margin: 0;
-    border: 1px solid rgba(0,0,0,0.06);
-    border-radius: 8px;
-    font-size: calc(0.8rem * var(--datatable-zoom));
-    background: #ffffff;
+    border: 0;
+    font-size: calc(0.84rem * var(--datatable-zoom));
+    color: #143f3d;
+    background: transparent;
     outline: none;
-    transition: all 0.2s ease;
 }
 
-.datatable-search-input:focus {
-    border-color: #17877e;
-    box-shadow: 0 0 0 2px rgba(23,135,126,0.15);
+.datatable-search-input::placeholder {
+    color: rgba(92, 117, 114, 0.82);
 }
 
 .datatable-toolbar-actions {
@@ -55,21 +70,22 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    border: 1px solid rgba(14, 73, 70, 0.12);
+    border: 1px solid rgba(20, 79, 75, 0.12);
     border-radius: 999px;
-    padding: 8px 14px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(242,248,247,0.98) 100%);
+    padding: 10px 14px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 249, 247, 0.98) 100%);
     color: #166762;
-    font-size: calc(0.78rem * var(--datatable-zoom));
-    font-weight: 600;
-    box-shadow: 0 10px 18px rgba(12, 56, 53, 0.08);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    font-size: calc(0.77rem * var(--datatable-zoom));
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    box-shadow: 0 10px 22px rgba(12, 56, 53, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
 .datatable-export-button:hover {
     transform: translateY(-1px);
-    border-color: rgba(25, 181, 159, 0.28);
-    box-shadow: 0 12px 22px rgba(12, 56, 53, 0.12);
+    border-color: rgba(25, 181, 159, 0.26);
+    box-shadow: 0 14px 28px rgba(12, 56, 53, 0.12);
 }
 
 .datatable-export-button svg {
@@ -84,36 +100,40 @@
     color: #0f6f69;
 }
 
-.datatable-table {
-    margin: 0;
-    width: 100%;
-    background: #ffffff;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: calc(0.86rem * var(--datatable-zoom));
+.datatable-table-shell {
+    max-height: 540px;
+    overflow: auto;
 }
 
-.datatable-table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 3;
-    background: inherit;
+.datatable-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: transparent;
+    font-size: calc(0.85rem * var(--datatable-zoom));
+    margin: 0;
 }
 
 .datatable-header-row {
     background: linear-gradient(90deg, #0f4f4c, #17877e);
-    color: white;
-    font-size: calc(0.78rem * var(--datatable-zoom));
-    text-align: center;
-    height: calc(38px * var(--datatable-zoom));
-    cursor: pointer;
+    color: #ffffff;
 }
 
 .datatable-header-cell {
-    padding: calc(6px * var(--datatable-zoom)) calc(10px * var(--datatable-zoom));
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    padding: calc(11px * var(--datatable-zoom)) calc(12px * var(--datatable-zoom));
     white-space: nowrap;
     user-select: none;
-    border-right: 1px solid rgba(255,255,255,0.25);
+    cursor: pointer;
+    text-align: center;
+    font-size: calc(0.74rem * var(--datatable-zoom));
+    font-weight: 700;
+    letter-spacing: 0.015em;
+    background: inherit;
+    border-right: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .datatable-header-cell:last-child {
@@ -121,62 +141,169 @@
 }
 
 .datatable-sort-indicator {
-    margin-left: 6px;
+    display: inline-flex;
+    margin-left: 8px;
+    font-size: 0.68rem;
+    opacity: 0.9;
 }
 
 .datatable-row {
     text-align: center;
     vertical-align: middle;
-    transition: background 0.2s ease;
-    height: calc(34px * var(--datatable-zoom));
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .datatable-row.even {
-    background-color: #f7f7f7;
+    background: rgba(247, 251, 250, 0.78);
 }
 
 .datatable-row.odd {
-    background-color: #ffffff;
+    background: rgba(255, 255, 255, 0.98);
 }
 
 .datatable-row:hover {
-    background-color: rgba(23,135,126,0.06);
+    background: rgba(25, 181, 159, 0.08);
 }
 
 .datatable-cell {
-    padding: calc(6px * var(--datatable-zoom)) calc(10px * var(--datatable-zoom));
+    padding: calc(10px * var(--datatable-zoom)) calc(12px * var(--datatable-zoom));
     white-space: nowrap;
-    border-right: 1px solid rgba(0,0,0,0.05);
-    line-height: 1.35;
+    line-height: 1.4;
+    color: #163f3d;
+    border-right: 1px solid rgba(20, 79, 75, 0.06);
+    border-bottom: 1px solid rgba(20, 79, 75, 0.06);
+    background: transparent;
 }
 
 .datatable-cell:last-child {
     border-right: none;
 }
 
+.datatable-cell--status {
+    min-width: 138px;
+}
+
 .datatable-status {
-    padding: calc(4px * var(--datatable-zoom)) calc(8px * var(--datatable-zoom));
-    border-radius: 4px;
-    font-size: calc(0.7rem * var(--datatable-zoom));
-    font-weight: 600;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 92px;
+    padding: calc(6px * var(--datatable-zoom)) calc(10px * var(--datatable-zoom));
+    border-radius: 999px;
+    font-size: calc(0.69rem * var(--datatable-zoom));
+    font-weight: 700;
+    line-height: 1;
     color: #ffffff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 8px 16px rgba(12, 56, 53, 0.18);
 }
 
-.datatable-status.success {
-    background: #1a9f93;
+.datatable-empty-row {
+    background: rgba(255, 255, 255, 0.98);
 }
 
-.datatable-status.danger {
-    background: #0f5f59;
+.datatable-empty-cell {
+    padding: 28px 16px;
+    text-align: center;
+    color: #5d7370;
+    font-weight: 600;
+    background: transparent;
 }
 
-.datatable-status.neutral {
-    background: #6c7f7c;
+.datatable-table-shell::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
 }
 
-.datatable-status.warning {
-    background: #22b6a3;
+.datatable-table-shell::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(14, 73, 70, 0.42), rgba(25, 181, 159, 0.4));
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.datatable-table-shell::-webkit-scrollbar-track {
+    background: rgba(232, 242, 240, 0.85);
+    border-radius: 999px;
+}
+
+html[data-theme="dark"] .datatable-wrapper {
+    border-color: rgba(111, 213, 200, 0.14);
+    background: linear-gradient(180deg, rgba(9, 24, 23, 0.98) 0%, rgba(11, 29, 27, 0.98) 100%);
+    box-shadow: 0 20px 42px rgba(0, 0, 0, 0.34);
+}
+
+html[data-theme="dark"] .datatable-toolbar {
+    background: linear-gradient(180deg, rgba(11, 28, 27, 0.98) 0%, rgba(14, 33, 31, 0.97) 100%);
+    border-bottom-color: rgba(111, 213, 200, 0.1);
+}
+
+html[data-theme="dark"] .datatable-search-shell {
+    background: rgba(14, 33, 31, 0.96);
+    border-color: rgba(111, 213, 200, 0.16);
+    box-shadow: inset 0 1px 0 rgba(190, 245, 238, 0.05);
+}
+
+html[data-theme="dark"] .datatable-search-icon {
+    color: #8fb8b3;
+}
+
+html[data-theme="dark"] .datatable-search-input {
+    color: #d8eeeb;
+}
+
+html[data-theme="dark"] .datatable-search-input::placeholder {
+    color: rgba(188, 223, 218, 0.6);
+}
+
+html[data-theme="dark"] .datatable-export-button {
+    background: linear-gradient(135deg, rgba(12, 32, 30, 0.98) 0%, rgba(18, 44, 41, 0.98) 100%);
+    color: #8fe4d7;
+    border-color: rgba(111, 213, 200, 0.18);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+}
+
+html[data-theme="dark"] .datatable-export-button:hover {
+    border-color: rgba(123, 229, 213, 0.34);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .datatable-table {
+    color: #d8eeeb;
+}
+
+html[data-theme="dark"] .datatable-header-row {
+    background: linear-gradient(90deg, #113f3d, #1c6e68);
+}
+
+html[data-theme="dark"] .datatable-row.even {
+    background: rgba(11, 28, 27, 0.96);
+}
+
+html[data-theme="dark"] .datatable-row.odd {
+    background: rgba(14, 33, 31, 0.98);
+}
+
+html[data-theme="dark"] .datatable-row:hover {
+    background: rgba(79, 188, 174, 0.1);
+}
+
+html[data-theme="dark"] .datatable-cell {
+    color: #d8eeeb;
+    border-right-color: rgba(111, 213, 200, 0.08);
+    border-bottom-color: rgba(111, 213, 200, 0.08);
+}
+
+html[data-theme="dark"] .datatable-empty-row,
+html[data-theme="dark"] .datatable-empty-cell {
+    background: transparent;
+    color: #9bc8c2;
+}
+
+html[data-theme="dark"] .datatable-table-shell::-webkit-scrollbar-thumb {
+    border-color: rgba(10, 28, 27, 0.92);
+}
+
+html[data-theme="dark"] .datatable-table-shell::-webkit-scrollbar-track {
+    background: rgba(22, 48, 46, 0.88);
 }
 
 @media (max-width: 767px) {
@@ -184,7 +311,7 @@
         align-items: stretch;
     }
 
-    .datatable-search-input {
+    .datatable-search-shell {
         width: 100%;
     }
 
@@ -195,5 +322,11 @@
     .datatable-export-button {
         flex: 1 1 calc(50% - 5px);
         justify-content: center;
+    }
+
+    .datatable-cell,
+    .datatable-header-cell {
+        padding-left: 10px;
+        padding-right: 10px;
     }
 }

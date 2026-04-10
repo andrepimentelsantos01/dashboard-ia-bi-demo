@@ -30,7 +30,7 @@ export const normalizeOrdersAnalytics = (rows = []) =>
         glosa: toNumber(row.glosa) || 0,
         dataCriacao: row.order_date,
         dataEntregaReal: null,
-        status: cleanString(row.item_status || row.order_status),
+        status: cleanString(row.logistics_status || row.item_status || row.order_status),
         parsedDateCriacao: row.order_date ? new Date(row.order_date) : null
     }));
 

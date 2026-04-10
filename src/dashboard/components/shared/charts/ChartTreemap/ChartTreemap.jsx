@@ -22,7 +22,7 @@ const colorMap = {
     Ocupado: "#40b8ad",
     Cancelado: "#0e4946",
     Fechado: "#93a9a6",
-    "Concluído": "#177972",
+    Concluído: "#177972",
     Entregue: "#177972",
     Desclassificado: "#93a9a6",
     Rascunho: "#b4c6c3",
@@ -36,6 +36,7 @@ const colorMap = {
     "Em Distribuição": "#1b8f86",
     "Em Treinamento": "#63c9c0",
     "Em Trânsito": "#40b8ad",
+    Atrasado: "#12635e",
     Inativo: "#93a9a6",
     Inabilitado: "#0e4946",
     Integrado: "#0f4f4c",
@@ -85,6 +86,7 @@ const colorMap = {
     "Em Avaliação": "#22a69b",
     "Em Habilitação": "#1b8f86",
     "Em Cotação": "#1b8f86",
+    "Sem status": "#93a9a6",
     Desconhecido: "#26717e"
 };
 

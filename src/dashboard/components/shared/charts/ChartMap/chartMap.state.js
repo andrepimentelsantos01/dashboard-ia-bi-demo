@@ -1,7 +1,8 @@
 import { useState, useMemo, useCallback } from "react";
 import * as echarts from "echarts";
-import brasilMap from "/src/dashboard/mocks/brasil.geo.json";
+import brasilMap from "/src/mocks/dashboard/brasil.geo.json";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
+import { useChartThemeTokens } from "../chartTheme";
 
 echarts.registerMap("brazil", brasilMap);
 
@@ -32,6 +33,7 @@ export const useChartMapState = ({ backendData, onCrossFilter }) => {
     const [open, setOpen] = useState(false);
     const [selectedUF, setSelectedUF] = useState(null);
     const [chartKey, setChartKey] = useState(0);
+    const themeTokens = useChartThemeTokens();
 
     const handleRefresh = useCallback(() => {
         setSelectedUF(null);
@@ -192,7 +194,7 @@ export const useChartMapState = ({ backendData, onCrossFilter }) => {
                 left: 20,
                 bottom: 20,
                 text: ["Alto", "Baixo"],
-                textStyle: { color: "#4b5563" },
+                textStyle: { color: themeTokens.mapText },
                 inRange: {
                     color: visualMapColors
                 },
@@ -211,19 +213,19 @@ export const useChartMapState = ({ backendData, onCrossFilter }) => {
                         show: false
                     },
                     itemStyle: {
-                        areaColor: "#e8eef5",
-                        borderColor: "#c5ccd4",
+                        areaColor: themeTokens.mapArea,
+                        borderColor: themeTokens.mapBorder,
                         borderWidth: 0.8
                     },
                     emphasis: {
-                        label: { show: true, color: "#0e4946" },
-                        itemStyle: { areaColor: "#9ddfd6" }
+                        label: { show: true, color: themeTokens.mapEmphasisLabel },
+                        itemStyle: { areaColor: themeTokens.mapEmphasisArea }
                     },
                     data: formattedData
                 }
             ]
         };
-    }, [aggregated.byUF, formattedData, maxValue, nameToUF, visualMapColors]);
+    }, [aggregated.byUF, formattedData, maxValue, nameToUF, themeTokens, visualMapColors]);
 
     return {
         open,

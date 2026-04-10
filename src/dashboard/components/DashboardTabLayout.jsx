@@ -1,11 +1,13 @@
 import React, { useMemo } from "react";
 import { Button } from "react-bootstrap";
+import { FiMoon, FiSun } from "react-icons/fi";
 import FilterSection from "./FilterSection";
 import KpiSection from "./KpiSection";
 import OperationalDataSection from "./OperationalDataSection";
 import OverviewSection from "./OverviewSection";
 import SectionWrapper from "./SectionWrapper";
 import DashboardDateFilterModal from "./DashboardDateFilterModal";
+import { useThemeMode } from "../../hooks/useThemeMode";
 
 const DashboardTabLayout = ({
     scopeClassName = "bi-scope",
@@ -31,6 +33,7 @@ const DashboardTabLayout = ({
     dateModal,
     overviewResetKey = true
 }) => {
+    const { isDark, toggleTheme } = useThemeMode();
     const filterSectionKey = useMemo(() => {
         const filterSchema = Object.keys(filterOptions).sort().join("|");
         return `${kpiTitle}-${filterSchema}`;
@@ -99,14 +102,27 @@ const DashboardTabLayout = ({
             </SectionWrapper>
 
             {showFloatingClear ? (
-                <Button
-                    variant="outline-info"
-                    size="sm"
-                    onClick={clearFilters}
-                    className="floating-clear-button"
-                >
-                    Limpar
-                </Button>
+                <div className="floating-action-stack">
+                    <Button
+                        variant="outline-info"
+                        size="sm"
+                        onClick={toggleTheme}
+                        className="floating-theme-button"
+                        aria-label={isDark ? "Ativar tema claro" : "Ativar tema escuro"}
+                        title={isDark ? "Ativar tema claro" : "Ativar tema escuro"}
+                    >
+                        {isDark ? <FiSun /> : <FiMoon />}
+                    </Button>
+
+                    <Button
+                        variant="outline-info"
+                        size="sm"
+                        onClick={clearFilters}
+                        className="floating-clear-button"
+                    >
+                        Limpar
+                    </Button>
+                </div>
             ) : null}
         </div>
     );

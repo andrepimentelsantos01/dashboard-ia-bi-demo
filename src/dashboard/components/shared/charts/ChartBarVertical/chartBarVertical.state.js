@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
+import { useChartThemeTokens } from "../chartTheme";
 
 export const formatNumber = (num) => Math.round(num).toLocaleString("pt-BR");
 
@@ -194,7 +195,8 @@ export const buildBarVerticalOptions = ({
                                             aggregated,
                                             color,
                                             valueFormat,
-                                            showTrendLine
+                                            showTrendLine,
+                                            themeTokens
                                         }) => {
     const totalItems = labels.length;
     const manyItems = totalItems > 10;
@@ -213,7 +215,7 @@ export const buildBarVerticalOptions = ({
         label: {
             show: true,
             position: "top",
-            color: "#171515",
+            color: themeTokens.chartLabelStrong,
             fontSize: 10,
             formatter: ({ value }) => formatValue(value, valueFormat)
         },
@@ -251,9 +253,9 @@ export const buildBarVerticalOptions = ({
             type: "category",
             data: labels,
             axisTick: { show: false },
-            axisLine: { lineStyle: { color: "rgba(0,0,0,0.35)" } },
+            axisLine: { lineStyle: { color: themeTokens.axisLine } },
             axisLabel: {
-                color: "#4b5864",
+                color: themeTokens.textSecondary,
                 fontSize: 10,
                 rotate: manyItems ? 40 : 0,
                 margin: 10,
@@ -266,10 +268,10 @@ export const buildBarVerticalOptions = ({
             axisLine: { show: false },
             axisTick: { show: false },
             splitLine: {
-                lineStyle: { color: "rgba(0,0,0,0.08)", type: "dashed" }
+                lineStyle: { color: themeTokens.splitLine, type: "dashed" }
             },
             axisLabel: {
-                color: "#4b5864",
+                color: themeTokens.textSecondary,
                 fontSize: 10,
                 formatter: (value) => formatValue(value, valueFormat)
             }
@@ -281,7 +283,7 @@ export const buildBarVerticalOptions = ({
                 height: 10,
                 bottom: 8,
                 borderColor: "transparent",
-                fillerColor: "rgba(0,136,212,0.15)",
+                fillerColor: themeTokens.sliderFill,
                 handleIcon: "path://M512 64L576 128 512 192 448 128z",
                 handleSize: "80%",
                 handleColor: color,
@@ -310,12 +312,13 @@ export const useChartBarVerticalState = ({
                                              valueFormat = "currency",
                                              filterType = "mes",
                                              onCrossFilter,
-                                             showTrendLine
-                                         }) => {
+                                         showTrendLine
+                                     }) => {
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState(null);
     const [orderState, setOrderState] = useState("LTR");
     const [chartKey, setChartKey] = useState(0);
+    const themeTokens = useChartThemeTokens();
 
     const aggregated = useBarVerticalAggregation(backendData || [], filterType);
 
@@ -373,9 +376,10 @@ export const useChartBarVerticalState = ({
             aggregated,
             color,
             valueFormat,
-            showTrendLine
+            showTrendLine,
+            themeTokens
         }),
-        [aggregated, color, orderedLabels, orderedValues, showTrendLine, valueFormat]
+        [aggregated, color, orderedLabels, orderedValues, showTrendLine, themeTokens, valueFormat]
     );
 
     return {

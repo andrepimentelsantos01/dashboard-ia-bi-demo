@@ -83,6 +83,22 @@
     min-width: 90px;
 }
 
+html[data-theme="dark"] .section-wrapper-card {
+    border-color: rgba(111, 213, 200, 0.12);
+    background: linear-gradient(180deg, rgba(12, 31, 29, 0.98) 0%, rgba(9, 24, 23, 0.96) 100%);
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.32);
+}
+
+html[data-theme="dark"] .section-wrapper-header {
+    background: linear-gradient(180deg, rgba(14, 32, 31, 0.98) 0%, rgba(11, 27, 26, 0.96) 100%);
+    border-bottom-color: rgba(111, 213, 200, 0.08);
+}
+
+html[data-theme="dark"] .section-wrapper-title,
+html[data-theme="dark"] .section-wrapper-collapse-button {
+    color: #dff5f1;
+}
+
 @media (max-width: 767px) {
     .section-wrapper-card {
         border-radius: 18px;

@@ -1,6 +1,6 @@
 import ReactECharts from "echarts-for-react";
 import ModalComponent from "/src/components/ModalV2";
-import brasilMap from "/src/dashboard/mocks/brasil.geo.json";
+import brasilMap from "/src/mocks/dashboard/brasil.geo.json";
 import * as echarts from "echarts";
 import React, { useCallback, useMemo } from "react";
 import { FiRefreshCcw, FiMaximize2 } from "react-icons/fi";
