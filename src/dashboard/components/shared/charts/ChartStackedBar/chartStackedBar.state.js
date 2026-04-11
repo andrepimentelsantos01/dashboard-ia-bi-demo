@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback } from "react";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 import { useChartThemeTokens } from "../chartTheme";
 import { normalizeStatusLabel, STATUS_COLOR_MAP } from "../../../../selectors/shared/dashboardStatus";
+import { formatCompactCurrencyValue, formatCurrencyValue } from "../../../../utils/intlFormat";
 
 const STACKED_STATUS_COLOR_MAP = {
     Entregue: "#2E8B57",
@@ -37,7 +38,7 @@ const sortStatuses = (statuses) => {
     });
 };
 
-const buildStackedData = (rows = [], metric = "quantity") => {
+const buildStackedData = (rows = [], metric = "quantity", themeTokens) => {
     const monthsMap = new Map();
     const matrix = {};
     const totalsByMonth = {};
@@ -74,7 +75,9 @@ const buildStackedData = (rows = [], metric = "quantity") => {
             stack: "total",
             emphasis: { focus: "series" },
             itemStyle: {
-                color: STACKED_STATUS_COLOR_MAP[status] || STATUS_COLOR_MAP[status] || STACKED_STATUS_COLOR_MAP.Desconhecido,
+                color: themeTokens.statusPalette[status]
+                    || STATUS_COLOR_MAP[status]
+                    || themeTokens.statusPalette.Desconhecido,
                 borderRadius: [4, 4, 0, 0]
             },
             data: months.map((month) => matrix[status]?.[month] || 0)
@@ -82,12 +85,9 @@ const buildStackedData = (rows = [], metric = "quantity") => {
     };
 };
 
-const formatMetric = (value, metric) => {
+const formatMetric = (value, metric, currencyCode = "BRL", locale = "pt-BR") => {
     if (metric === "amount") {
-        return Number(value || 0).toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL"
-        });
+        return formatCurrencyValue(value, { currencyCode, locale });
     }
 
     return Math.round(Number(value || 0)).toLocaleString("pt-BR");
@@ -96,7 +96,9 @@ const formatMetric = (value, metric) => {
 export const useChartStackedBarState = ({
     backendData,
     onCrossFilter,
-    metric = "quantity"
+    metric = "quantity",
+    currencyCode = "BRL",
+    locale = "pt-BR"
 }) => {
     const [open, setOpen] = useState(false);
     const [selectedKey, setSelectedKey] = useState(null);
@@ -104,8 +106,8 @@ export const useChartStackedBarState = ({
     const themeTokens = useChartThemeTokens();
 
     const stackedData = useMemo(
-        () => buildStackedData(backendData || [], metric),
-        [backendData, metric]
+        () => buildStackedData(backendData || [], metric, themeTokens),
+        [backendData, metric, themeTokens]
     );
 
     const handleRefresh = useCallback(() => {
@@ -147,7 +149,7 @@ export const useChartStackedBarState = ({
                 const total = stackedData.totalsByMonth[month] || 0;
                 const lines = params
                     .filter((item) => Number(item.data) > 0)
-                    .map((item) => `${item.marker} ${item.seriesName}: <b>${formatMetric(item.data, metric)}</b>`)
+                    .map((item) => `${item.marker} ${item.seriesName}: <b>${formatMetric(item.data, metric, currencyCode, locale)}</b>`)
                     .join("<br/>");
 
                 return `
@@ -197,7 +199,10 @@ export const useChartStackedBarState = ({
                 axisLabel: {
                     color: themeTokens.textSecondary,
                     fontSize: 10,
-                    formatter: (value) => formatMetric(value, metric)
+                    formatter: (value) =>
+                        metric === "amount"
+                            ? formatCompactCurrencyValue(value, { currencyCode, locale })
+                            : formatMetric(value, metric, currencyCode, locale)
                 }
             },
             dataZoom: [
@@ -210,7 +215,7 @@ export const useChartStackedBarState = ({
                     fillerColor: themeTokens.sliderFill,
                     handleIcon: "path://M512 64L576 128 512 192 448 128z",
                     handleSize: "80%",
-                    handleColor: "#17877e",
+                    handleColor: themeTokens.chartPrimary,
                     start: 0,
                     end: zoomEnd
                 },
@@ -226,7 +231,7 @@ export const useChartStackedBarState = ({
             ],
             series: stackedData.series
         };
-    }, [metric, stackedData, themeTokens]);
+    }, [currencyCode, locale, metric, stackedData, themeTokens]);
 
     return {
         open,

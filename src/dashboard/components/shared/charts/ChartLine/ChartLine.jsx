@@ -7,7 +7,12 @@ import { useChartLineState } from "./chartLine.state";
 
 const chartOpts = { renderer: "canvas" };
 
-const ChartLine = ({ backendData, onCrossFilter }) => {
+const ChartLine = ({
+    backendData,
+    onCrossFilter,
+    currencyCode = "BRL",
+    locale = "pt-BR"
+}) => {
     const {
         open,
         setOpen,
@@ -18,7 +23,9 @@ const ChartLine = ({ backendData, onCrossFilter }) => {
         setChartKey
     } = useChartLineState({
         backendData,
-        onCrossFilter
+        onCrossFilter,
+        currencyCode,
+        locale
     });
 
     const refreshChart = useCallback(() => {

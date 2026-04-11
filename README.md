@@ -1,63 +1,62 @@
-# BI Dashboard Platform
+﻿# Dashboard Portfolio de Datasets Reais
 
 ## Visao geral
 
-Dashboard analitico standalone em React 18 + Vite 6, com tema claro/escuro, filtros combinaveis, cross-filter entre graficos e camada local de dados mockados mantendo contrato proximo ao de uma API REST.
+Projeto de portfolio em React 18 + Vite 6 para publicar dashboards analiticos sobre datasets reais, com foco em reaproveitamento de componentes, identidade visual por dataset e experiencia de exploracao analitica.
 
-O projeto esta estruturado para separar:
+A arquitetura foi preparada para que cada aba represente a analise de uma fonte real diferente, preservando shell, layout, tabela operacional, filtros e componentes compartilhados.
 
-- contrato e simulacao de dados;
-- derivacao analitica por dominio;
-- estado e filtros por aba;
-- layout compartilhado;
-- componentes reutilizaveis de chart, KPI e tabela.
+## Status das abas
 
-## Estado atual
+- `Adidas Sales Dataset`: implementada com dataset real da Adidas.
+- `Produtos`: em construcao.
+- `Clientes`: em construcao.
+- `Fornecedores`: em construcao.
+- `Cotacoes`: em construcao.
+- `Pedidos & Logistica`: em construcao.
 
-Abas disponiveis:
+## Primeira entrega real
 
-- `Visao Geral`
-- `Produtos`
-- `Clientes`
-- `Fornecedores`
-- `Cotacoes`
-- `Pedidos & Logistica`
+A primeira aba real do portfolio utiliza o `Adidas US Sales Dataset`, disponibilizado no Kaggle e normalizado para o contrato interno do dashboard.
 
-Recursos implementados:
+Escopo atual da aba Adidas:
 
-- filtros por dominio com cross-filter;
-- KPIs, rankings, mapas e series temporais;
-- tabela operacional com exportacao para XLSX e PDF;
-- tema claro/escuro com persistencia;
+- KPIs analiticos;
+- filtros dedicados ao dataset;
+- cross-filter entre graficos e tabela;
+- rankings, serie temporal, dispersao e heatmap;
+- tabela operacional com exportacao;
+- schema visual isolado da marca.
+
+## Capacidades da plataforma
+
+- filtros combinaveis por aba;
+- cross-filter entre visualizacoes;
+- tema claro/escuro;
+- schema visual desacoplado por dataset/empresa;
 - charts reutilizaveis baseados em ECharts;
-- mocks locais no mesmo formato esperado por uma camada REST.
+- exportacao da tabela para XLSX e PDF;
+- camada local de dados simulando contrato de API REST.
 
-## Otimizacoes de desempenho aplicadas
+## Arquitetura
 
-O estado atual ja incorpora as seguintes otimizações seguras:
+```mermaid
+flowchart LR
+    A["Datasets reais / mocks normalizados"] --> B["src/services/rest.js"]
+    B --> C["tabs/*.state.js"]
+    C --> D["selectors por dominio"]
+    D --> E["tabs/*.jsx"]
+    E --> F["DashboardTabLayout"]
+    F --> G["KPIs / Charts / DataTable"]
+```
 
-- lazy loading por aba com `React.lazy` + `Suspense`;
-- prefetch ocioso das abas via `requestIdleCallback` e prefetch em `hover/focus`;
-- troca de abas com `startTransition` para reduzir bloqueio de interacao;
-- `ErrorBoundary` por aba e por secao critica;
-- exportacao da tabela com `xlsx`, `jspdf` e `jspdf-autotable` carregados sob demanda;
-- busca da tabela usando `useDeferredValue` para digitação mais fluida;
-- montagem tardia de conteudo pesado em modais, evitando render desnecessario fora da tela;
-- charts principais com `lazyUpdate` e renderer `canvas`.
+Camadas principais:
 
-Impacto observado no build:
-
-- o chunk principal do modulo caiu de aproximadamente `2.2 MB` para `1.5 MB` minificado;
-- `xlsx` e `jspdf` deixaram de contaminar o bundle inicial e passaram a ser carregados apenas no fluxo de exportacao.
-
-## Limites atuais
-
-Os dois maiores pontos ainda restantes sao:
-
-- `brasil.geo.json`, que continua gerando um asset muito grande;
-- `dashboardSelectors`, que ainda concentra bastante logica analitica em um chunk grande.
-
-Esses pontos nao foram reestruturados agora para evitar risco de regressao visual ou funcional.
+- `src/services`: acesso, normalizacao e montagem das respostas consumidas pelas abas;
+- `src/dashboard/selectors`: derivacoes analiticas e agregacoes;
+- `src/dashboard/tabs/*/*.state.js`: estado, filtros e interacoes por aba;
+- `src/dashboard/components`: layout compartilhado;
+- `src/dashboard/components/shared`: infraestrutura reutilizavel de chart, KPI e tabela.
 
 ## Stack
 
@@ -103,70 +102,28 @@ Preview:
 npm run preview
 ```
 
-## Arquitetura
-
-```mermaid
-flowchart LR
-    A["Mocks JSON / GeoJSON"] --> B["src/services/rest.js"]
-    B --> C["tabs/*.state.js"]
-    C --> D["selectors de dominio"]
-    D --> E["tabs/*.jsx"]
-    E --> F["DashboardTabLayout"]
-    F --> G["KPIs / Charts / Tabela"]
-```
-
-Camadas principais:
-
-- `src/services`: simulacao de backend, filtros e responses;
-- `src/dashboard/selectors`: derivacao analitica por dominio;
-- `src/dashboard/tabs/*/*.state.js`: orquestracao e estado por aba;
-- `src/dashboard/components`: layout compartilhado das abas;
-- `src/dashboard/components/shared`: charts, tabela, KPI card e boundary reutilizavel.
-
 ## Estrutura principal
 
 ```text
 src/
-├─ App.jsx
-├─ main.jsx
-├─ services/
-│  └─ rest.js
-├─ mocks/dashboard/
-├─ dashboard/
-│  ├─ index.jsx
-│  ├─ hooks/
-│  ├─ selectors/
-│  ├─ components/
-│  └─ tabs/
-└─ styles/
+|-- App.jsx
+|-- main.jsx
+|-- services/
+|   |-- rest.js
+|-- mocks/
+|   |-- dashboard/
+|   |-- datasetReal/
+|-- dashboard/
+|   |-- index.jsx
+|   |-- selectors/
+|   |-- components/
+|   |-- tabs/
+|-- styles/
 ```
 
-## Contrato de dados
+## Roadmap imediato
 
-As responses do frontend seguem o formato:
-
-- `fact`: base analitica;
-- `table`: base operacional;
-- `kpis`: indicadores agregados;
-- `alertas`: estruturas auxiliares de exibicao.
-
-Campos frequentes:
-
-- `client_id`, `client_name`
-- `supplier_id`, `supplier_name`
-- `product_id`, `product_name`
-- `product_class_material_name`
-- `client_state`
-- `order_date`
-- `year_months`
-- `purchase_order_id`
-- `quotation_code`
-- `quantity_requested`, `sum_quantity`
-- `unit_price`, `avg_unit_price`
-- `total_amount`, `sum_total_amount`
-- `item_status`, `order_status`, `quotation_status`, `logistics_status`
-- `abc_classification`, `xyz_classification`
-
-## Observacao sobre hidratacao
-
-Este projeto hoje e uma SPA client-side pura em Vite, sem SSR. Portanto, nao existe hidratacao de servidor para otimizar. As tecnicas aplicadas foram as equivalentes e corretas para esse contexto: code splitting, prefetch ocioso, transicoes, fallback de erro e adiamento de montagem/carga.
+- adicionar novas abas baseadas em datasets reais;
+- manter schema visual desacoplado por fonte;
+- substituir gradualmente mocks genericos por dados reais;
+- preservar compatibilidade do shell compartilhado durante a migracao.

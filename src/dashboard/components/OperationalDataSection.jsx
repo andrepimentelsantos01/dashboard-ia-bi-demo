@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useTransition } from "react";
 import { Row, Col, Button } from "react-bootstrap";
 import { FiMaximize2, FiMinus, FiPlus } from "react-icons/fi";
 import DataTable from "./shared/dataTable";
@@ -15,15 +15,19 @@ const COLUMN_LABELS = {
     client_name: "Cliente",
     client_city: "Cidade",
     client_state: "UF",
+    region: "Região",
     supplier_name: "Fornecedor",
     product_name: "Produto",
     product_class_material_name: "Categoria",
     quantity_requested: "Quantidade",
     unit_price: "Valor Unitário",
     total_amount: "Valor Total",
+    operating_profit: "Lucro Operacional",
+    operating_margin_percent: "Margem Operacional (%)",
     total_amount_received: "Valor Recebido",
     total_amount_rejection: "Valor Rejeitado",
     item_status: "Status Pedido",
+    sales_method: "Canal de Venda",
     expected_delivery_date: "Entrega Prevista",
     actual_delivery_date: "Entrega Real",
     delay_days: "Dias de Atraso",
@@ -75,6 +79,7 @@ const OperationalDataSection = ({ tabela }) => {
         zoom: 0.96,
         open: false
     });
+    const [isPending, startTransition] = useTransition();
 
     const { expanded, zoom, open } = state;
 
@@ -143,8 +148,10 @@ const OperationalDataSection = ({ tabela }) => {
     );
 
     const toggleExpanded = useCallback(() => {
-        setExpanded(!expanded);
-    }, [expanded, setExpanded]);
+        startTransition(() => {
+            setExpanded(!expanded);
+        });
+    }, [expanded, setExpanded, startTransition]);
 
     return (
         <div className="operational-section-wrapper">
@@ -216,8 +223,13 @@ const OperationalDataSection = ({ tabela }) => {
                                 size="sm"
                                 onClick={toggleExpanded}
                                 className="operational-view-more-button"
+                                disabled={isPending}
                             >
-                                {expanded ? "Ver menos" : `Ver todos (${normalizedTable.length})`}
+                                {isPending
+                                    ? "Carregando tabela..."
+                                    : expanded
+                                        ? "Ver menos"
+                                        : `Ver todos (${normalizedTable.length})`}
                             </Button>
                         </div>
                     )}

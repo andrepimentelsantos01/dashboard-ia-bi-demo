@@ -45,6 +45,52 @@ html[data-theme="dark"] {
   --action-btn-icon: #9ce8dc;
 }
 
+html[data-dashboard-schema="adidas"][data-theme="light"] {
+  --app-text: #111111;
+  --app-bg-radial: rgba(0, 0, 0, 0.08);
+  --app-bg-base-start: #fafafa;
+  --app-bg-base-end: #f0f0f0;
+  --app-hero-start: #050505;
+  --app-hero-end: #2a2a2a;
+  --app-hero-shadow: rgba(0, 0, 0, 0.18);
+  --app-hero-text-soft: rgba(255, 255, 255, 0.82);
+  --app-hero-accent: #d8d8d8;
+  --app-theme-btn-bg: rgba(255, 255, 255, 0.1);
+  --app-theme-btn-bg-hover: rgba(255, 255, 255, 0.18);
+  --app-theme-btn-border: rgba(255, 255, 255, 0.22);
+  --app-theme-btn-text: #ffffff;
+  --action-btn-bg: rgba(255, 255, 255, 0.96);
+  --action-btn-bg-hover: rgba(245, 245, 245, 0.98);
+  --action-btn-border: rgba(17, 17, 17, 0.14);
+  --action-btn-border-hover: rgba(17, 17, 17, 0.28);
+  --action-btn-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  --action-btn-shadow-hover: 0 14px 24px rgba(0, 0, 0, 0.12);
+  --action-btn-icon: #111111;
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] {
+  --app-text: #f3f3f3;
+  --app-bg-radial: rgba(255, 255, 255, 0.06);
+  --app-bg-base-start: #040404;
+  --app-bg-base-end: #111111;
+  --app-hero-start: #000000;
+  --app-hero-end: #232323;
+  --app-hero-shadow: rgba(0, 0, 0, 0.42);
+  --app-hero-text-soft: rgba(245, 245, 245, 0.78);
+  --app-hero-accent: #d0d0d0;
+  --app-theme-btn-bg: rgba(255, 255, 255, 0.08);
+  --app-theme-btn-bg-hover: rgba(255, 255, 255, 0.14);
+  --app-theme-btn-border: rgba(255, 255, 255, 0.18);
+  --app-theme-btn-text: #ffffff;
+  --action-btn-bg: rgba(18, 18, 18, 0.94);
+  --action-btn-bg-hover: rgba(28, 28, 28, 0.98);
+  --action-btn-border: rgba(255, 255, 255, 0.14);
+  --action-btn-border-hover: rgba(255, 255, 255, 0.26);
+  --action-btn-shadow: 0 12px 22px rgba(0, 0, 0, 0.3);
+  --action-btn-shadow-hover: 0 16px 28px rgba(0, 0, 0, 0.36);
+  --action-btn-icon: #f1f1f1;
+}
+
 :root {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: var(--app-text);

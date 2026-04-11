@@ -36,8 +36,47 @@ const getRowStatusValue = (row = {}, columnKey = "") => {
     return row[columnKey];
 };
 
+const isDateColumn = (column) => {
+    const key = String(column.key || "").toLowerCase();
+    const label = String(column.label || "").toLowerCase();
+
+    return key.includes("date")
+        || key === "data"
+        || label.includes("data");
+};
+
+const formatHumanDate = (value) => {
+    if (!value) return value;
+
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+
+    const hasTime =
+        date.getHours() !== 0
+        || date.getMinutes() !== 0
+        || date.getSeconds() !== 0;
+
+    return new Intl.DateTimeFormat("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        ...(hasTime
+            ? {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+            : {})
+    }).format(date);
+};
+
 const formatCellValue = ({ column, row, autoFormat }) => {
     const rawValue = getRowStatusValue(row.original ?? row, column.key);
+    const currencyCode = row.original?.currency_code ?? row.currency_code ?? "BRL";
+    const locale = currencyCode === "USD" ? "en-US" : "pt-BR";
+
+    if (isDateColumn(column)) {
+        return formatHumanDate(rawValue);
+    }
 
     if (column.key.toLowerCase().includes("status")) {
         return normalizeStatusLabel(rawValue, { fallback: "Desconhecido" });
@@ -47,14 +86,14 @@ const formatCellValue = ({ column, row, autoFormat }) => {
         const numeric = typeof rawValue === "number" ? rawValue : Number(String(rawValue ?? "").replace(",", "."));
 
         if (Number.isFinite(numeric)) {
-            return numeric.toLocaleString("pt-BR", {
+            return numeric.toLocaleString(locale, {
                 style: "currency",
-                currency: "BRL"
+                currency: currencyCode
             });
         }
     }
 
-    return autoFormat(column.label || column.key, row.original?.[column.key] ?? row[column.key]);
+    return autoFormat(column.label || column.key, row.original?.[column.key] ?? row[column.key], row.original ?? row);
 };
 
 const DataTable = ({

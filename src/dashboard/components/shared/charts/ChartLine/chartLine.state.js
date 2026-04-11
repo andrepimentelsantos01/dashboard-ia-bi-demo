@@ -1,10 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 import { useChartThemeTokens } from "../chartTheme";
-
-const LINE_COLOR = "#17877e";
-const LINE_FILL = "rgba(23, 135, 126, 0.24)";
-const SLIDER_FILL = "rgba(25, 181, 159, 0.18)";
+import { formatCompactCurrencyValue, formatCurrencyValue } from "../../../../utils/intlFormat";
 
 const toNumber = (value) => {
     if (typeof value === "number") return value;
@@ -12,13 +9,24 @@ const toNumber = (value) => {
     return Number(value.toString().replace(/\./g, "").replace(",", ".").replace(/[^\d.-]/g, "")) || 0;
 };
 
-const formatShort = (value) => `R$ ${Number(value).toFixed(2).replace(".", ",")}`;
+const formatShort = (value, currencyCode, locale) =>
+    formatCurrencyValue(value, {
+        currencyCode,
+        locale
+    });
 
-export const useChartLineState = ({ backendData, onCrossFilter }) => {
+export const useChartLineState = ({
+    backendData,
+    onCrossFilter,
+    currencyCode = "BRL",
+    locale = "pt-BR"
+}) => {
     const [open, setOpen] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState(null);
     const [chartKey, setChartKey] = useState(0);
     const themeTokens = useChartThemeTokens();
+    const lineColor = themeTokens.chartPrimary;
+    const lineFill = themeTokens.chartAreaFill;
 
     const handleRefresh = useCallback(() => {
         setSelectedMonth(null);
@@ -185,7 +193,7 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                 axisLabel: {
                     color: themeTokens.textSecondary,
                     fontSize: 10,
-                    formatter: (value) => formatShort(value)
+                    formatter: (value) => formatCompactCurrencyValue(value, { currencyCode, locale })
                 },
                 splitLine: {
                     lineStyle: { color: themeTokens.splitLine, type: "dashed" }
@@ -201,7 +209,7 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                     fillerColor: themeTokens.sliderFill,
                     handleIcon: "path://M512 64L576 128 512 192 448 128z",
                     handleSize: "80%",
-                    handleColor: LINE_COLOR,
+                    handleColor: lineColor,
                     start: 0,
                     end: zoomEnd
                 },
@@ -220,22 +228,22 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                     type: "line",
                     data: averages,
                     smooth: true,
-                    lineStyle: { width: 3, color: LINE_COLOR },
-                    itemStyle: { color: LINE_COLOR },
+                    lineStyle: { width: 3, color: lineColor },
+                    itemStyle: { color: lineColor },
                     symbolSize: 6,
                     animationDuration: 600,
-                    areaStyle: { opacity: 1, color: LINE_FILL },
+                    areaStyle: { opacity: 1, color: lineFill },
                     label: {
                         show: true,
                         position: "top",
                         fontSize: 10,
-                        color: themeTokens.isDark ? "#6de1d0" : LINE_COLOR,
-                        formatter: (point) => formatShort(point.value)
+                        color: themeTokens.chartLabelStrong,
+                        formatter: (point) => formatShort(point.value, currencyCode, locale)
                     }
                 }
             ]
         };
-    }, [aggregated, averages, months, themeTokens]);
+    }, [aggregated, averages, currencyCode, lineColor, lineFill, locale, months, themeTokens]);
 
     return {
         open,

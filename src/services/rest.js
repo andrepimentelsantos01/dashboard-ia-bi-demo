@@ -4,7 +4,9 @@ import productsMock from "../mocks/dashboard/dashboardProducts.mock.json";
 import clientsMock from "../mocks/dashboard/dashboardClients.mock.json";
 import suppliersMock from "../mocks/dashboard/dashboardSuppliers.mock.json";
 import quotationsMock from "../mocks/dashboard/dashboardQuotations.mock.json";
+import adidasSalesRows from "../mocks/datasetReal/adidasUsSales.json";
 import { normalizeStatusLabel, slugifyStatus } from "../dashboard/selectors/shared/dashboardStatus";
+import { formatCurrencyValue } from "../dashboard/utils/intlFormat";
 
 const safeDate = (value) => {
   if (!value) return null;
@@ -44,6 +46,53 @@ const compareDateRange = (dateValue, range) => {
   if (start && value < start) return false;
   if (end && value > end) return false;
   return true;
+};
+
+const normalizeToken = (value, fallback) =>
+  String(value || fallback || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const parseNumericValue = (value) => {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  if (value === null || value === undefined || value === "") return 0;
+
+  const normalized = String(value)
+    .trim()
+    .replace(/\s+/g, "")
+    .replace(/[^\d,.-]/g, "");
+
+  if (!normalized) return 0;
+
+  const commaCount = (normalized.match(/,/g) || []).length;
+  const dotCount = (normalized.match(/\./g) || []).length;
+
+  if (commaCount > 0 && dotCount > 0) {
+    return Number(normalized.replace(/,/g, "")) || 0;
+  }
+
+  if (commaCount > 0) {
+    const lastCommaIndex = normalized.lastIndexOf(",");
+    const digitsAfterComma = normalized.length - lastCommaIndex - 1;
+
+    if (commaCount > 1 || digitsAfterComma === 3) {
+      return Number(normalized.replace(/,/g, "")) || 0;
+    }
+
+    return Number(normalized.replace(",", ".")) || 0;
+  }
+
+  return Number(normalized) || 0;
+};
+
+const parsePercentValue = (value) => {
+  const numeric = parseNumericValue(value);
+  if (!numeric) return 0;
+  return numeric > 1 ? numeric / 100 : numeric;
 };
 
 const buildIndexMap = (values, prefix) => {
@@ -190,7 +239,83 @@ const formatCurrency = (value) =>
     currency: "BRL"
   });
 
+const formatUsdCurrency = (value) =>
+  formatCurrencyValue(value, {
+    currencyCode: "USD",
+    locale: "en-US"
+  });
+
 const countDistinct = (rows, key) => new Set(rows.map((row) => row[key]).filter(Boolean)).size;
+
+const buildAdidasPurchaseOrderId = (retailerId, index) =>
+  `INV-${String(retailerId || "NA")}-${String(index + 1).padStart(5, "0")}`;
+
+const buildAdidasClientId = (state) => `state-${normalizeToken(state, "unknown")}`;
+const buildAdidasSupplierId = (retailer) => `retailer-${normalizeToken(retailer, "unknown")}`;
+const buildAdidasProductId = (product) => `product-${normalizeToken(product, "unknown")}`;
+
+const adidasOverviewRows = adidasSalesRows
+  .map((row, index) => {
+    const retailer = row.Retailer?.trim();
+    const retailerId = row["Retailer ID"];
+    const invoiceDate = safeDate(row["Invoice Date"]);
+    const region = row.Region?.trim();
+    const state = row.State?.trim();
+    const city = row.City?.trim();
+    const product = row.Product?.trim();
+    const salesMethod = row["Sales Method"]?.trim();
+    const unitsSold = parseNumericValue(row["Units Sold"]);
+    const totalSales = parseNumericValue(row["Total Sales"]);
+    const pricePerUnit =
+      parseNumericValue(row["Price per Unit"]) || (unitsSold ? totalSales / unitsSold : 0);
+    const operatingProfit = parseNumericValue(row["Operating Profit"]);
+    const operatingMargin = parsePercentValue(row["Operating Margin"]);
+
+    if (!invoiceDate || !retailer || !region || !state || !product || !salesMethod) {
+      return null;
+    }
+
+    return {
+      row_id: index + 1,
+      currency_code: "USD",
+      client_id: buildAdidasClientId(state),
+      client_name: state,
+      client_city: city,
+      client_state: state,
+      supplier_id: buildAdidasSupplierId(retailer),
+      supplier_name: retailer,
+      product_id: buildAdidasProductId(product),
+      product_name: product,
+      product_class_material_name: region,
+      order_date: invoiceDate.toISOString(),
+      invoice_date: invoiceDate.toISOString(),
+      year_months: toYearMonth(invoiceDate),
+      purchase_order_id: buildAdidasPurchaseOrderId(retailerId, index),
+      quantity_requested: unitsSold,
+      sum_quantity_requested: unitsSold,
+      sum_quantity: unitsSold,
+      total_amount: totalSales,
+      sum_total_amount: totalSales,
+      avg_unit_price: pricePerUnit,
+      unit_price: pricePerUnit,
+      item_status: salesMethod,
+      order_status: salesMethod,
+      logistics_status: salesMethod,
+      quotation_status: slugifyStatus(salesMethod),
+      glosa: 0,
+      sum_glosa_amount: 0,
+      abc_classification: null,
+      xyz_classification: null,
+      classificacaoABC: null,
+      classificacaoXYZ: null,
+      region,
+      sales_method: salesMethod,
+      retailer_id: retailerId,
+      operating_profit: operatingProfit,
+      operating_margin: operatingMargin
+    };
+  })
+  .filter(Boolean);
 
 const overviewRows = normalizeRows(overviewMock.tabelaConsolidada, {
   dateKey: "data",
@@ -259,6 +384,71 @@ const buildOverviewResponse = (rows) => {
   };
 };
 
+const buildAdidasOverviewResponse = (rows) => {
+  const totalSales = rows.reduce((sum, row) => sum + Number(row.sum_total_amount || 0), 0);
+  const totalProfit = rows.reduce((sum, row) => sum + Number(row.operating_profit || 0), 0);
+  const totalUnits = rows.reduce((sum, row) => sum + Number(row.sum_quantity || 0), 0);
+  const weightedMargin = totalSales > 0 ? totalProfit / totalSales : 0;
+  const monthlyBuckets = rows.reduce((acc, row) => {
+    const month = row.year_months;
+    if (!month) return acc;
+
+    if (!acc[month]) {
+      acc[month] = {
+        sales: 0,
+        profit: 0,
+        units: 0
+      };
+    }
+
+    acc[month].sales += Number(row.sum_total_amount || 0);
+    acc[month].profit += Number(row.operating_profit || 0);
+    acc[month].units += Number(row.sum_quantity || 0);
+    return acc;
+  }, {});
+  const orderedMonths = Object.keys(monthlyBuckets).sort();
+  const currentMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 1]] || {
+    sales: 0,
+    profit: 0,
+    units: 0
+  };
+  const previousMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 2]] || {
+    sales: 0,
+    profit: 0,
+    units: 0
+  };
+  const currentMargin = currentMonth.sales > 0 ? currentMonth.profit / currentMonth.sales : 0;
+  const previousMargin = previousMonth.sales > 0 ? previousMonth.profit / previousMonth.sales : 0;
+  const calculateVariation = (current, previous) => {
+    if (!previous && !current) return 0;
+    if (!previous) return current > 0 ? 100 : 0;
+    return ((current - previous) / previous) * 100;
+  };
+
+  return {
+    kpis: {
+      "Receita Total": {
+        value: formatUsdCurrency(totalSales),
+        variation: calculateVariation(currentMonth.sales, previousMonth.sales)
+      },
+      "Lucro Operacional": {
+        value: formatUsdCurrency(totalProfit),
+        variation: calculateVariation(currentMonth.profit, previousMonth.profit)
+      },
+      "Margem Operacional M\u00e9dia": {
+        value: `${(weightedMargin * 100).toFixed(1)}%`,
+        variation: calculateVariation(currentMargin, previousMargin)
+      },
+      "Unidades Vendidas": {
+        value: totalUnits.toLocaleString("pt-BR"),
+        variation: calculateVariation(currentMonth.units, previousMonth.units)
+      }
+    },
+    fact: rows,
+    table: rows
+  };
+};
+
 const buildQuotationsResponse = (rows) => {
   const finalizedRows = rows.filter((row) => row.quotation_status === "finalized");
 
@@ -287,7 +477,7 @@ const delay = async () => {
 
 export const biOverview = async (filters = {}) => {
   await delay();
-  return buildOverviewResponse(applyCommonFilters(overviewRows, filters));
+  return buildAdidasOverviewResponse(applyCommonFilters(adidasOverviewRows, filters));
 };
 
 export const biOrdersLogistics = async (filters = {}) => {

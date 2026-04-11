@@ -8,7 +8,13 @@ import { useChartMapMorphState } from "./chartMapMorph.state";
 const chartStyle = { width: "100%", height: "100%" };
 const chartOpts = { renderer: "canvas" };
 
-const ChartMapMorph = ({ backendData, onCrossFilter }) => {
+const ChartMapMorph = ({
+    backendData,
+    onCrossFilter,
+    geography = "brazil",
+    currencyCode = "BRL",
+    locale = "pt-BR"
+}) => {
     const {
         open,
         setOpen,
@@ -19,7 +25,10 @@ const ChartMapMorph = ({ backendData, onCrossFilter }) => {
         viewMode
     } = useChartMapMorphState({
         backendData,
-        onCrossFilter
+        onCrossFilter,
+        geography,
+        currencyCode,
+        locale
     });
 
     const refreshChart = useCallback(() => {

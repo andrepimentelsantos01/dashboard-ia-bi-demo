@@ -39,8 +39,17 @@ export const useFilterSectionOptions = (
     categorias,
     produtos,
     orders,
-    numeroCotacao
+    numeroCotacao,
+    status,
+    customFilters
 ) => {
+    const normalizedCustomFilters = useMemo(
+        () => (customFilters || []).map((filter) => ({
+            ...filter,
+            data: sortSmart(normalize(filter?.data))
+        })),
+        [customFilters]
+    );
     const normalizedFornecedores = useMemo(
         () => sortSmart(normalize(fornecedores)),
         [fornecedores]
@@ -69,6 +78,10 @@ export const useFilterSectionOptions = (
     const normalizedNumeroCotacao = useMemo(
         () => sortSmart(normalize(numeroCotacao)),
         [numeroCotacao]
+    );
+    const normalizedStatus = useMemo(
+        () => sortSmart(normalize(status)),
+        [status]
     );
 
     return useMemo(() => {

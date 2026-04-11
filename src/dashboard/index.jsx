@@ -27,12 +27,12 @@ const Skeleton = React.memo(() => (
 ));
 
 const TABS = [
-    { key: "overview", label: "Vis\u00e3o Geral", component: Overview, preload: loadOverview },
-    { key: "products", label: "Produtos", component: Products, preload: loadProducts },
-    { key: "clients", label: "Clientes", component: Clients, preload: loadClients },
-    { key: "suppliers", label: "Fornecedores", component: Suppliers, preload: loadSuppliers },
-    { key: "quotations", label: "Cota\u00e7\u00f5es", component: Quotations, preload: loadQuotations },
-    { key: "orders", label: "Pedidos & Log\u00edstica", component: Orders, preload: loadOrders }
+    { key: "overview", label: "Adidas Sales Dataset", component: Overview, preload: loadOverview, schema: "adidas" },
+    { key: "products", label: "Produtos", component: Products, preload: loadProducts, schema: "default" },
+    { key: "clients", label: "Clientes", component: Clients, preload: loadClients, schema: "default" },
+    { key: "suppliers", label: "Fornecedores", component: Suppliers, preload: loadSuppliers, schema: "default" },
+    { key: "quotations", label: "Cota\u00e7\u00f5es", component: Quotations, preload: loadQuotations, schema: "default" },
+    { key: "orders", label: "Pedidos & Log\u00edstica", component: Orders, preload: loadOrders, schema: "default" }
 ];
 
 const Dashboard = () => {
@@ -72,12 +72,23 @@ const Dashboard = () => {
         [activeTab]
     );
 
+    useEffect(() => {
+        if (typeof document === "undefined") return undefined;
+
+        const root = document.documentElement;
+        root.setAttribute("data-dashboard-schema", currentTabConfig?.schema || "default");
+
+        return () => {
+            root.setAttribute("data-dashboard-schema", "default");
+        };
+    }, [currentTabConfig]);
+
     const tabButtons = useMemo(
         () =>
             TABS.map(({ key, label }) => (
                 <Button
                     key={key}
-                    className="dashboard-tab-btn"
+                    className={`dashboard-tab-btn ${key === "overview" ? "dashboard-tab-btn--adidas" : ""}`}
                     variant={activeTab === key ? "primary" : "outline-primary"}
                     onClick={() => handleTabChange(key)}
                     onMouseEnter={() => preloadTab(key)}
@@ -92,7 +103,7 @@ const Dashboard = () => {
     const CurrentComponent = currentTabConfig?.component;
 
     return (
-        <div className="dashboard-container">
+        <div className={`dashboard-container ${activeTab === "overview" ? "dashboard-container--adidas-active" : ""}`}>
             <ButtonGroup className="dashboard-btn-group d-flex flex-wrap">
                 {tabButtons}
             </ButtonGroup>

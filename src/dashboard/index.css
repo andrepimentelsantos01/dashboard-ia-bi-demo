@@ -59,6 +59,29 @@
     background: linear-gradient(135deg, #1bc8af 0%, #146d65 100%);
 }
 
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-outline-primary {
+    color: #111111;
+    border-color: rgba(17, 17, 17, 0.78);
+    background: rgba(255, 255, 255, 0.96);
+}
+
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-outline-primary:hover,
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-outline-primary:focus {
+    color: #111111;
+    border-color: #111111;
+    background: rgba(17, 17, 17, 0.06);
+}
+
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-primary,
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-primary:hover,
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-primary:focus,
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-primary:active {
+    color: #ffffff;
+    border-color: #111111;
+    background: linear-gradient(135deg, #111111 0%, #2c2c2c 100%);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
 .skeleton-wrapper {
     padding: 1rem;
 }
@@ -112,6 +135,28 @@ html[data-theme="dark"] .dashboard-tab-btn.btn-primary:active {
     color: #031312;
     border-color: #9af0e3;
     background: linear-gradient(135deg, #8ff0e2 0%, #54d8c6 100%);
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-outline-primary {
+    color: #f5f5f5;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(18, 18, 18, 0.92);
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-outline-primary:hover,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-outline-primary:focus {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.7);
+    background: rgba(42, 42, 42, 0.96);
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-primary,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-primary:hover,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-primary:focus,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-primary:active {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.72);
+    background: linear-gradient(135deg, #000000 0%, #262626 100%);
 }
 
 html[data-theme="dark"] .skeleton-block {

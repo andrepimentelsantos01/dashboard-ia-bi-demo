@@ -1,24 +1,10 @@
 import { useMemo, useState, useCallback } from "react";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 import { useChartThemeTokens } from "../chartTheme";
+import { formatCompactCurrencyValue, formatCurrencyValue } from "../../../../utils/intlFormat";
 
 const MAX_VISIBLE_POINTS = 260;
 const MAX_VISIBLE_CATEGORIES = 6;
-
-const SCATTER_COLORS = [
-    "#19b59f",
-    "#159689",
-    "#2f7f7a",
-    "#5aaea6",
-    "#78c8be",
-    "#3a6f91"
-];
-
-const formatCurrency = (value) =>
-    Number(value || 0).toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-    });
 
 const formatNumber = (value) => Math.round(Number(value || 0)).toLocaleString("pt-BR");
 
@@ -65,9 +51,10 @@ const pickScatterSample = (rows) => {
     return [...guaranteed, ...sampled];
 };
 
-const buildScatterAggregateData = (rows = []) => {
+const buildScatterAggregateData = (rows = [], themeTokens) => {
     const normalized = normalizeRows(rows);
     const byCategory = new Map();
+    const scatterPalette = themeTokens.scatterPalette;
 
     normalized.forEach((row) => {
         const current = byCategory.get(row.category) || {
@@ -121,7 +108,9 @@ const buildScatterAggregateData = (rows = []) => {
                 return Math.max(8, Math.min(22, Math.sqrt(total) / 6));
             },
             itemStyle: {
-                color: category === "Outros" ? "#7b93a8" : SCATTER_COLORS[index % SCATTER_COLORS.length],
+                color: category === "Outros"
+                    ? themeTokens.scatterOtherColor
+                    : scatterPalette[index % scatterPalette.length],
                 opacity: 0.82
             },
             emphasis: {
@@ -155,15 +144,20 @@ const buildScatterAggregateData = (rows = []) => {
     };
 };
 
-export const useChartScatterAggregateState = ({ backendData, onCrossFilter }) => {
+export const useChartScatterAggregateState = ({
+    backendData,
+    onCrossFilter,
+    currencyCode = "BRL",
+    locale = "pt-BR"
+}) => {
     const [open, setOpen] = useState(false);
     const [selectedKey, setSelectedKey] = useState(null);
     const [viewMode, setViewMode] = useState("scatter");
     const themeTokens = useChartThemeTokens();
 
     const scatterData = useMemo(
-        () => buildScatterAggregateData(backendData || []),
-        [backendData]
+        () => buildScatterAggregateData(backendData || [], themeTokens),
+        [backendData, themeTokens]
     );
 
     const handleRefresh = useCallback(() => {
@@ -236,7 +230,7 @@ export const useChartScatterAggregateState = ({ backendData, onCrossFilter }) =>
 
                 return `
                     <b>${item.name}</b><br/>
-                    Valor movimentado: <b>${formatCurrency(item.value)}</b><br/>
+                    Valor movimentado: <b>${formatCurrencyValue(item.value, { currencyCode, locale })}</b><br/>
                     Volume movimentado: <b>${formatNumber(item.quantity)}</b><br/>
                     Registros: <b>${formatNumber(item.count)}</b>
                 `;
@@ -248,9 +242,9 @@ export const useChartScatterAggregateState = ({ backendData, onCrossFilter }) =>
             return `
                 <b>${data.category}</b><br/>
                 Mes: <b>${data.month || "-"}</b><br/>
-                Valor unitario: <b>${formatCurrency(data.value?.[0])}</b><br/>
+                Valor unitario: <b>${formatCurrencyValue(data.value?.[0], { currencyCode, locale })}</b><br/>
                 Quantidade: <b>${formatNumber(data.value?.[1])}</b><br/>
-                Valor total: <b>${formatCurrency(data.value?.[2])}</b><br/><br/>
+                Valor total: <b>${formatCurrencyValue(data.value?.[2], { currencyCode, locale })}</b><br/><br/>
                 Produto: <b>${data.product}</b><br/>
                 Cliente: <b>${data.client}</b>
             `;
@@ -282,9 +276,7 @@ export const useChartScatterAggregateState = ({ backendData, onCrossFilter }) =>
                         fontSize: 10,
                         formatter: (value) => {
                             const parsed = Number(value || 0);
-                            if (parsed >= 1_000_000) return `R$ ${(parsed / 1_000_000).toFixed(1)} mi`;
-                            if (parsed >= 1_000) return `R$ ${(parsed / 1_000).toFixed(0)} mil`;
-                            return `R$ ${parsed.toFixed(0)}`;
+                            return formatCompactCurrencyValue(parsed, { currencyCode, locale });
                         }
                     }
                 },
@@ -313,7 +305,7 @@ export const useChartScatterAggregateState = ({ backendData, onCrossFilter }) =>
                             groupId: barCategories[index],
                             value,
                             itemStyle: {
-                                color: SCATTER_COLORS[index % SCATTER_COLORS.length],
+                                color: themeTokens.scatterPalette[index % themeTokens.scatterPalette.length],
                                 borderRadius: [0, 6, 6, 0]
                             }
                         })),
@@ -323,7 +315,7 @@ export const useChartScatterAggregateState = ({ backendData, onCrossFilter }) =>
                             position: "right",
                             color: themeTokens.chartLabelStrong,
                             fontSize: 10,
-                            formatter: ({ value }) => formatCurrency(value)
+                            formatter: ({ value }) => formatCurrencyValue(value, { currencyCode, locale })
                         }
                     }
                 ]
@@ -366,7 +358,7 @@ export const useChartScatterAggregateState = ({ backendData, onCrossFilter }) =>
                 axisLabel: {
                     color: themeTokens.textSecondary,
                     fontSize: 10,
-                    formatter: (value) => formatCurrency(value)
+                    formatter: (value) => formatCompactCurrencyValue(value, { currencyCode, locale })
                 },
                 name: "Valor Unitario",
                 nameLocation: "middle",
@@ -402,7 +394,7 @@ export const useChartScatterAggregateState = ({ backendData, onCrossFilter }) =>
             },
             series: scatterData.scatterSeries
         };
-    }, [scatterData, themeTokens, viewMode]);
+    }, [currencyCode, locale, scatterData, themeTokens, viewMode]);
 
     return {
         open,

@@ -14,6 +14,8 @@ const FilterSection = ({
     produtos,
     orders,
     numeroCotacao,
+    status,
+    filterInputs,
     hiddenFilterNames = []
 }) => {
     const scrollRef = useRef(null);
@@ -22,18 +24,19 @@ const FilterSection = ({
         canScrollRight: false
     });
 
-    const filterInputs = useFilterSectionOptions(
+    const defaultFilterInputs = useFilterSectionOptions(
         fornecedores,
         clientes,
         categorias,
         produtos,
         orders,
-        numeroCotacao
+        numeroCotacao,
+        status
     );
 
     const visibleFilterInputs = useMemo(
-        () => filterInputs.filter(({ name }) => !hiddenFilterNames.includes(name)),
-        [filterInputs, hiddenFilterNames]
+        () => (filterInputs || defaultFilterInputs).filter(({ name }) => !hiddenFilterNames.includes(name)),
+        [defaultFilterInputs, filterInputs, hiddenFilterNames]
     );
 
     const handleSelectChange = useCallback(

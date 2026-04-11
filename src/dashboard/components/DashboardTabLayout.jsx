@@ -18,6 +18,7 @@ const DashboardTabLayout = ({
     clearButtonRef,
     showFloatingClear,
     filterOptions = {},
+    filterInputs,
     hiddenFilterNames = [],
     filterSectionClassName = "filter-section-wrapper filter-body-override",
     contentSectionClassName,
@@ -37,8 +38,9 @@ const DashboardTabLayout = ({
     const { isDark, toggleTheme } = useThemeMode();
     const filterSectionKey = useMemo(() => {
         const filterSchema = Object.keys(filterOptions).sort().join("|");
-        return `${kpiTitle}-${filterSchema}`;
-    }, [filterOptions, kpiTitle]);
+        const filterInputSchema = (filterInputs || []).map(({ name }) => name).sort().join("|");
+        return `${kpiTitle}-${filterSchema}-${filterInputSchema}`;
+    }, [filterInputs, filterOptions, kpiTitle]);
 
     const filterActions = useMemo(() => (
         <Button
@@ -77,6 +79,7 @@ const DashboardTabLayout = ({
                     filters={filters}
                     onChange={onFilterChange}
                     onClear={clearFilters}
+                    filterInputs={filterInputs}
                     hiddenFilterNames={hiddenFilterNames}
                     {...filterOptions}
                 />

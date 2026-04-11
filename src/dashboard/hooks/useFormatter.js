@@ -21,13 +21,13 @@ export const useFormatter = () => {
         return isNaN(num) ? value : num;
     }, []);
 
-    const formatCurrencyBR = useCallback(
-        value => {
+    const formatCurrency = useCallback(
+        (value, currencyCode = "BRL", locale = "pt-BR") => {
             const num = parseNumber(value);
             if (typeof num !== "number") return value;
-            return num.toLocaleString("pt-BR", {
+            return num.toLocaleString(locale, {
                 style: "currency",
-                currency: "BRL"
+                currency: currencyCode
             });
         },
         [parseNumber]
@@ -66,31 +66,33 @@ export const useFormatter = () => {
     const columnCache = useMemo(() => new Map(), []);
 
     const autoFormat = useCallback(
-        (col, value) => {
+        (col, value, row = {}) => {
             if (!columnCache.has(col)) {
                 columnCache.set(col, detectColumnType(col));
             }
 
             const type = columnCache.get(col);
+            const currencyCode = row.currency_code || "BRL";
+            const locale = currencyCode === "USD" ? "en-US" : "pt-BR";
 
-            if (type.currency) return formatCurrencyBR(value);
+            if (type.currency) return formatCurrency(value, currencyCode, locale);
             if (type.integer) return formatIntegerBR(value);
 
             if (type.total) {
                 const num = parseNumber(value);
                 if (typeof num !== "number") return value;
                 const hasDecimal = String(value).includes(".") || String(value).includes(",");
-                return hasDecimal ? formatCurrencyBR(num) : formatIntegerBR(num);
+                return hasDecimal ? formatCurrency(num, currencyCode, locale) : formatIntegerBR(num);
             }
 
             return value;
         },
-        [columnCache, detectColumnType, formatCurrencyBR, formatIntegerBR, parseNumber]
+        [columnCache, detectColumnType, formatCurrency, formatIntegerBR, parseNumber]
     );
 
     return {
         autoFormat,
-        formatCurrencyBR,
+        formatCurrencyBR: formatCurrency,
         formatIntegerBR
     };
 };

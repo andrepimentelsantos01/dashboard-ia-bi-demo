@@ -1,1 +1,134 @@
 @import "../shared/dashboardTabTheme.css";
+
+.adidas-scope {
+    --bi-surface: rgba(255, 255, 255, 0.92);
+    --bi-surface-strong: rgba(255, 255, 255, 0.98);
+    --bi-surface-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 247, 247, 0.98) 100%);
+    --bi-border: rgba(17, 17, 17, 0.1);
+    --bi-border-strong: rgba(17, 17, 17, 0.2);
+    --bi-shadow-soft: 0 16px 36px rgba(0, 0, 0, 0.06);
+    --bi-shadow-card: 0 14px 32px rgba(0, 0, 0, 0.08);
+    --bi-shadow-float: 0 20px 40px rgba(0, 0, 0, 0.16);
+    --bi-text: #111111;
+    --bi-text-soft: #4f4f4f;
+    --bi-brand: #111111;
+    --bi-brand-strong: #000000;
+    --bi-accent: #2b2b2b;
+    --bi-accent-soft: rgba(17, 17, 17, 0.08);
+}
+
+html[data-theme="dark"] .adidas-scope {
+    --bi-surface: rgba(14, 14, 14, 0.9);
+    --bi-surface-strong: rgba(18, 18, 18, 0.96);
+    --bi-surface-soft: linear-gradient(180deg, rgba(18, 18, 18, 0.98) 0%, rgba(10, 10, 10, 0.98) 100%);
+    --bi-border: rgba(255, 255, 255, 0.12);
+    --bi-border-strong: rgba(255, 255, 255, 0.18);
+    --bi-shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.36);
+    --bi-shadow-card: 0 16px 34px rgba(0, 0, 0, 0.4);
+    --bi-shadow-float: 0 24px 44px rgba(0, 0, 0, 0.46);
+    --bi-text: #f5f5f5;
+    --bi-text-soft: #b8b8b8;
+    --bi-brand: #ffffff;
+    --bi-brand-strong: #ffffff;
+    --bi-accent: #d9d9d9;
+    --bi-accent-soft: rgba(255, 255, 255, 0.08);
+}
+
+html[data-dashboard-schema="adidas"] .adidas-scope .section-wrapper-header {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(245, 245, 245, 0.92) 100%);
+    border-bottom-color: rgba(17, 17, 17, 0.08);
+}
+
+html[data-dashboard-schema="adidas"] .adidas-scope .filter-section-wrapper .section-wrapper-header {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(243, 243, 243, 0.96) 100%);
+}
+
+html[data-dashboard-schema="adidas"] .adidas-scope .filter-section-card {
+    background: linear-gradient(180deg, rgba(249, 249, 249, 0.96) 0%, rgba(255, 255, 255, 0.98) 100%);
+    border: 1px solid rgba(17, 17, 17, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 8px 18px rgba(0, 0, 0, 0.05);
+}
+
+html[data-dashboard-schema="adidas"] .adidas-scope .filter-section-card:hover {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78), 0 12px 22px rgba(0, 0, 0, 0.08);
+}
+
+html[data-dashboard-schema="adidas"] .adidas-scope .operational-view-more-button,
+html[data-dashboard-schema="adidas"] .adidas-scope .floating-theme-button {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(243, 243, 243, 0.96) 100%) !important;
+    border-color: rgba(17, 17, 17, 0.18) !important;
+    color: #111111 !important;
+}
+
+html[data-dashboard-schema="adidas"] .adidas-scope .floating-clear-button {
+    border-color: rgba(17, 17, 17, 0.22) !important;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(36, 36, 36, 0.98) 100%) !important;
+    color: #ffffff !important;
+}
+
+html[data-dashboard-schema="adidas"] .adidas-scope .floating-theme-button:hover,
+html[data-dashboard-schema="adidas"] .adidas-scope .operational-view-more-button:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(235, 235, 235, 1) 100%) !important;
+}
+
+html[data-dashboard-schema="adidas"] .adidas-scope .floating-clear-button:hover {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 1) 0%, rgba(20, 20, 20, 1) 100%) !important;
+}
+
+html[data-dashboard-schema="adidas"] .adidas-scope .operational-zoom-button,
+html[data-dashboard-schema="adidas"] .adidas-scope .section-wrapper-actions .btn {
+    border-color: rgba(17, 17, 17, 0.16);
+    color: #111111;
+}
+
+html[data-dashboard-schema="adidas"] .adidas-scope .dropdownMenu::-webkit-scrollbar-thumb,
+html[data-dashboard-schema="adidas"] .adidas-scope .operational-table-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(17, 17, 17, 0.42), rgba(90, 90, 90, 0.36));
+    border-color: rgba(255, 255, 255, 0.75);
+}
+
+html[data-dashboard-schema="adidas"] .adidas-scope .dropdownMenu::-webkit-scrollbar-track,
+html[data-dashboard-schema="adidas"] .adidas-scope .operational-table-container::-webkit-scrollbar-track {
+    background: rgba(236, 236, 236, 0.85);
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .adidas-scope .section-wrapper-header,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .adidas-scope .filter-section-wrapper .section-wrapper-header {
+    background: linear-gradient(180deg, rgba(16, 16, 16, 0.98) 0%, rgba(10, 10, 10, 0.96) 100%);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .adidas-scope .filter-section-card {
+    background: linear-gradient(180deg, rgba(18, 18, 18, 0.96) 0%, rgba(12, 12, 12, 0.98) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 28px rgba(0, 0, 0, 0.24);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .adidas-scope .operational-view-more-button,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .adidas-scope .floating-theme-button {
+    background: linear-gradient(135deg, rgba(18, 18, 18, 0.98) 0%, rgba(32, 32, 32, 0.96) 100%) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .adidas-scope .floating-clear-button {
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(28, 28, 28, 0.98) 100%) !important;
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .adidas-scope .operational-zoom-button,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .adidas-scope .section-wrapper-actions .btn {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .adidas-scope .dropdownMenu::-webkit-scrollbar-thumb,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .adidas-scope .operational-table-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(210, 210, 210, 0.26), rgba(110, 110, 110, 0.24));
+    border-color: rgba(10, 10, 10, 0.92);
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .adidas-scope .dropdownMenu::-webkit-scrollbar-track,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .adidas-scope .operational-table-container::-webkit-scrollbar-track {
+    background: rgba(28, 28, 28, 0.88);
+}

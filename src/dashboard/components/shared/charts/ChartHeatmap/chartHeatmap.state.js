@@ -1,12 +1,7 @@
 import { useMemo, useState, useCallback } from "react";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 import { useChartThemeTokens } from "../chartTheme";
-
-const formatCurrency = (value) =>
-    Number(value || 0).toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-    });
+import { formatCurrencyValue } from "../../../../utils/intlFormat";
 
 const buildHeatmapData = (rows = []) => {
     const monthsSet = new Set();
@@ -46,7 +41,9 @@ const buildHeatmapData = (rows = []) => {
 
 export const useChartHeatmapState = ({
     backendData,
-    onCrossFilter
+    onCrossFilter,
+    currencyCode = "BRL",
+    locale = "pt-BR"
 }) => {
     const [open, setOpen] = useState(false);
     const [selectedKey, setSelectedKey] = useState(null);
@@ -99,7 +96,7 @@ export const useChartHeatmapState = ({
             return `
                 <b>${category}</b><br/>
                 Mês: <b>${month}</b><br/>
-                Valor movimentado: <b>${formatCurrency(value)}</b>
+                Valor movimentado: <b>${formatCurrencyValue(value, { currencyCode, locale })}</b>
             `;
         }),
         grid: {
@@ -146,7 +143,7 @@ export const useChartHeatmapState = ({
                 fontSize: 10
             },
             inRange: {
-                color: ["#d9f4ef", "#8fd8cf", "#43bfae", "#17877e", "#0f4f4c"]
+                color: themeTokens.heatmapScale
             }
         },
         series: [
@@ -167,7 +164,7 @@ export const useChartHeatmapState = ({
                 }
             }
         ]
-    }), [heatmapData, themeTokens]);
+    }), [currencyCode, heatmapData, locale, themeTokens]);
 
     return {
         open,
