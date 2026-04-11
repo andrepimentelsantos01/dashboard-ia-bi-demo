@@ -17,7 +17,10 @@ import {
     normalizeSupplierAnalytics
 } from "../../selectors/suppliersSelectors";
 
-export const initialFilters = createDashboardFilters();
+export const initialFilters = createDashboardFilters({
+    classificacaoABC: null,
+    classificacaoXYZ: null
+});
 
 export const useSuppliersState = () => {
     const { key, passport } = useAuth();
@@ -37,7 +40,13 @@ export const useSuppliersState = () => {
     } = useDashboardTabUi();
 
     const apiFilters = useMemo(
-        () => buildDashboardApiFilters(filters, { includeOrders: true }),
+        () => buildDashboardApiFilters(filters, {
+            includeOrders: true,
+            extra: {
+                classificacao_abc: currentFilters => currentFilters.classificacaoABC,
+                classificacao_xyz: currentFilters => currentFilters.classificacaoXYZ
+            }
+        }),
         [filters]
     );
 
@@ -78,7 +87,11 @@ export const useSuppliersState = () => {
         [bumpResetToken]
     );
     const handleCrossFilter = useCallback(
-        createCrossFilterHandler(setFilters, clearFilters, createCrossFilterMap()),
+        createCrossFilterHandler(
+            setFilters,
+            clearFilters,
+            createCrossFilterMap({ includeAbc: true, includeXyz: true })
+        ),
         [clearFilters]
     );
 

@@ -1,7 +1,12 @@
 import React, { useMemo, useCallback } from "react";
 import ChartBarVertical from "../../components/shared/charts/ChartBarVertical";
+import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal";
+import ChartMapMorph from "../../components/shared/charts/ChartMapMorph";
 import ChartPie from "../../components/shared/charts/ChartPie";
+import ChartScatterAggregate from "../../components/shared/charts/ChartScatterAggregate";
+import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
+import ChartTreemap from "../../components/shared/charts/ChartTreemap";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
 import GaugeCount from "../../components/shared/charts/GaugeCount";
 import { useSuppliersState } from "./suppliers.state";
@@ -32,22 +37,28 @@ const Suppliers = () => {
     const tabela = data.operacionais?.tabela || [];
     const overview = data.overview || {};
 
-    const safeOverview = useMemo(() => ({
-        historicoMeses: overview.historicoMeses || [],
-        historicoValores: overview.historicoValores || [],
-        rankingSLA: overview.rankingSLA || [],
-        rankingGlosa: overview.rankingGlosa || [],
-        rankingVolume: overview.rankingVolume || [],
-        categoriasPizza: overview.categoriasPizza || [],
-        slaMedio: overview.slaMedio || 0,
-        percentualGlosa: overview.percentualGlosa || 0,
-        percentualAtrasos: overview.percentualAtrasos || 0
-    }), [overview]);
+    const safeOverview = useMemo(
+        () => ({
+            historicoMeses: overview.historicoMeses || [],
+            historicoValores: overview.historicoValores || [],
+            rankingSLA: overview.rankingSLA || [],
+            rankingGlosa: overview.rankingGlosa || [],
+            rankingVolume: overview.rankingVolume || [],
+            categoriasPizza: overview.categoriasPizza || [],
+            slaMedio: overview.slaMedio || 0,
+            percentualGlosa: overview.percentualGlosa || 0,
+            percentualAtrasos: overview.percentualAtrasos || 0,
+            curvaABCTreemap: overview.curvaABCTreemap || [],
+            curvaXYZTreemap: overview.curvaXYZTreemap || [],
+            matrizAbcXyzTreemap: overview.matrizAbcXyzTreemap || []
+        }),
+        [overview]
+    );
 
     const produtosRanking = useMemo(() => {
         const items = new Map();
 
-        tabela.forEach(row => {
+        tabela.forEach((row) => {
             const current = items.get(row.produto) || { name: row.produto, valor: 0 };
             current.valor += row.valorTotal || 0;
             items.set(row.produto, current);
@@ -63,144 +74,230 @@ const Suppliers = () => {
 
     const kpisFiltrados = useMemo(() => {
         const {
-            ["Ticket MÃ©dio"]: ticketMedioQuebrado,
-            ["Ticket Médio"]: ticketMedioCorreto,
+            ["Ticket MÃƒÂ©dio"]: ticketMedioQuebrado,
+            ["Ticket MÃ©dio"]: ticketMedioCorreto,
             ...restKpis
         } = data.kpis || {};
 
         return {
             ...restKpis,
-            "Ticket Médio": ticketMedioCorreto ?? ticketMedioQuebrado ?? ticketMedio
+            "Ticket Medio": ticketMedioCorreto ?? ticketMedioQuebrado ?? ticketMedio
         };
     }, [data.kpis, ticketMedio]);
 
-    const rankingVolumeParsed = useMemo(() => ({
-        labels: safeOverview.rankingVolume.map(item => item.name),
-        values: safeOverview.rankingVolume.map(item => item.valor)
-    }), [safeOverview.rankingVolume]);
+    const rankingVolumeParsed = useMemo(
+        () => ({
+            labels: safeOverview.rankingVolume.map((item) => item.name),
+            values: safeOverview.rankingVolume.map((item) => item.valor)
+        }),
+        [safeOverview.rankingVolume]
+    );
 
-    const charts = useMemo(() => [
-        {
-            title: "Indicadores Percentuais",
-            height: 260,
-            component: (
-                <div
-                    style={{
-                        width: "100%",
-                        height: "100%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: "32px"
-                    }}
-                >
-                    <div style={{ flex: 1 }}>
-                        <GaugeCount
-                            value={safeOverview.slaMedio}
-                            backendData={tabela}
-                            onCrossFilter={handleCrossFilter}
-                            filterType="fornecedor"
-                            invertColors={true}
-                        />
-                        <div style={{ textAlign: "center", marginTop: 8 }}>SLA Médio</div>
-                    </div>
+    const charts = useMemo(
+        () => [
+            {
+                title: "Indicadores Percentuais",
+                height: 260,
+                component: (
+                    <div
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "32px"
+                        }}
+                    >
+                        <div style={{ flex: 1 }}>
+                            <GaugeCount
+                                value={safeOverview.slaMedio}
+                                backendData={tabela}
+                                onCrossFilter={handleCrossFilter}
+                                filterType="fornecedor"
+                                invertColors
+                            />
+                            <div style={{ textAlign: "center", marginTop: 8 }}>SLA Medio</div>
+                        </div>
 
-                    <div style={{ flex: 1 }}>
-                        <GaugeCount
-                            value={safeOverview.percentualGlosa}
-                            backendData={tabela}
-                            onCrossFilter={handleCrossFilter}
-                            filterType="fornecedor"
-                        />
-                        <div style={{ textAlign: "center", marginTop: 8 }}>Percentual de Glosa</div>
-                    </div>
+                        <div style={{ flex: 1 }}>
+                            <GaugeCount
+                                value={safeOverview.percentualGlosa}
+                                backendData={tabela}
+                                onCrossFilter={handleCrossFilter}
+                                filterType="fornecedor"
+                            />
+                            <div style={{ textAlign: "center", marginTop: 8 }}>Percentual de Glosa</div>
+                        </div>
 
-                    <div style={{ flex: 1 }}>
-                        <GaugeCount
-                            value={safeOverview.percentualAtrasos}
-                            backendData={tabela}
-                            onCrossFilter={handleCrossFilter}
-                            filterType="fornecedor"
-                        />
-                        <div style={{ textAlign: "center", marginTop: 8 }}>Percentual de Atrasos</div>
+                        <div style={{ flex: 1 }}>
+                            <GaugeCount
+                                value={safeOverview.percentualAtrasos}
+                                backendData={tabela}
+                                onCrossFilter={handleCrossFilter}
+                                filterType="fornecedor"
+                            />
+                            <div style={{ textAlign: "center", marginTop: 8 }}>Percentual de Atrasos</div>
+                        </div>
                     </div>
-                </div>
-            )
-        },
-        {
-            title: "Histórico Mensal Valor Consumido",
-            height: 260,
-            component: (
-                <ChartBarVertical
-                    labels={safeOverview.historicoMeses}
-                    values={safeOverview.historicoValores}
-                    backendData={tabela}
-                    onCrossFilter={handleCrossFilter}
-                    valueFormat="currency"
-                    filterType="mes"
-                />
-            )
-        },
-        {
-            title: "Percentual Glosa por Fornecedor",
-            height: 260,
-            component: (
-                <ChartHorizontal
-                    title="Glosa por Fornecedor"
-                    data={safeOverview.rankingGlosa}
-                    backendData={tabela}
-                    order="ASC"
-                    height={250}
-                    onCrossFilter={handleCrossFilter}
-                    filterType="fornecedor"
-                    valueFormat="percent"
-                />
-            )
-        },
-        {
-            title: "Histórico Mensal Valor Movimentado por Fornecedor",
-            height: 260,
-            component: (
-                <ChartBarVertical
-                    labels={rankingVolumeParsed.labels}
-                    values={rankingVolumeParsed.values}
-                    backendData={tabela}
-                    onCrossFilter={handleCrossFilter}
-                    filterType="fornecedor"
-                    valueFormat="volume"
-                    showTrendLine={false}
-                />
-            )
-        },
-        {
-            title: "Ranking de Produtos Por Valor",
-            height: 260,
-            component: (
-                <ChartHorizontal
-                    title="Ranking de Produtos"
-                    data={produtosRanking}
-                    backendData={tabela}
-                    order="ASC"
-                    height={250}
-                    onCrossFilter={handleCrossFilter}
-                    filterType="produto"
-                    valueFormat="currency"
-                />
-            )
-        },
-        {
-            title: "Distribuição de Categoria Por Valor",
-            height: 260,
-            component: (
-                <ChartPie
-                    data={safeOverview.categoriasPizza}
-                    backendData={tabela}
-                    onCrossFilter={handleCrossFilter}
-                    filterType="categoria"
-                />
-            )
-        }
-    ], [tabela, safeOverview, rankingVolumeParsed, produtosRanking, handleCrossFilter]);
+                )
+            },
+            {
+                title: "Curva ABC de Fornecedores",
+                height: 250,
+                component: (
+                    <ChartTreemap
+                        dataOverride={safeOverview.curvaABCTreemap}
+                        onCrossFilter={handleCrossFilter}
+                        hideValues
+                        classificationMode="abc"
+                        abcXyzLegend="suppliers"
+                    />
+                )
+            },
+            {
+                title: "Curva XYZ de Fornecedores",
+                height: 250,
+                component: (
+                    <ChartTreemap
+                        dataOverride={safeOverview.curvaXYZTreemap}
+                        onCrossFilter={handleCrossFilter}
+                        hideValues
+                        classificationMode="xyz"
+                        abcXyzLegend="suppliers"
+                    />
+                )
+            },
+            {
+                title: "Matriz ABC-XYZ de Fornecedores",
+                height: 250,
+                component: (
+                    <ChartTreemap
+                        dataOverride={safeOverview.matrizAbcXyzTreemap}
+                        onCrossFilter={handleCrossFilter}
+                        hideValues
+                        classificationMode="abcxyz"
+                        abcXyzLegend="suppliers"
+                    />
+                )
+            },
+            {
+                title: "Historico Mensal Valor Consumido",
+                height: 260,
+                component: (
+                    <ChartBarVertical
+                        labels={safeOverview.historicoMeses}
+                        values={safeOverview.historicoValores}
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                        valueFormat="currency"
+                        filterType="mes"
+                    />
+                )
+            },
+            {
+                title: "Evolucao Logistica por Status",
+                height: 280,
+                component: (
+                    <ChartStackedBar
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                        metric="quantity"
+                    />
+                )
+            },
+            {
+                title: "Mapa de Calor Categoria x Mes",
+                height: 280,
+                component: (
+                    <ChartHeatmap
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Mapa de Valor Por Estado",
+                height: 260,
+                component: (
+                    <ChartMapMorph
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Dispersao de Preco x Volume",
+                height: 300,
+                component: (
+                    <ChartScatterAggregate
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Percentual Glosa por Fornecedor",
+                height: 260,
+                component: (
+                    <ChartHorizontal
+                        title="Glosa por Fornecedor"
+                        data={safeOverview.rankingGlosa}
+                        backendData={tabela}
+                        order="ASC"
+                        height={250}
+                        onCrossFilter={handleCrossFilter}
+                        filterType="fornecedor"
+                        valueFormat="percent"
+                    />
+                )
+            },
+            {
+                title: "Historico Mensal Valor Movimentado por Fornecedor",
+                height: 260,
+                component: (
+                    <ChartBarVertical
+                        labels={rankingVolumeParsed.labels}
+                        values={rankingVolumeParsed.values}
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                        filterType="fornecedor"
+                        valueFormat="volume"
+                        showTrendLine={false}
+                    />
+                )
+            },
+            {
+                title: "Ranking de Produtos Por Valor",
+                height: 260,
+                component: (
+                    <ChartHorizontal
+                        title="Ranking de Produtos"
+                        data={produtosRanking}
+                        backendData={tabela}
+                        order="ASC"
+                        height={250}
+                        onCrossFilter={handleCrossFilter}
+                        filterType="produto"
+                        valueFormat="currency"
+                    />
+                )
+            },
+            {
+                title: "Distribuicao de Categoria Por Valor",
+                height: 260,
+                component: (
+                    <ChartPie
+                        data={safeOverview.categoriasPizza}
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                        filterType="categoria"
+                    />
+                )
+            }
+        ],
+        [handleCrossFilter, produtosRanking, rankingVolumeParsed, safeOverview, tabela]
+    );
 
     const handleCloseDateModal = useCallback(() => {
         setOpenDateModal(false);
@@ -208,12 +305,12 @@ const Suppliers = () => {
 
     const handleClearDate = useCallback(() => {
         setTempDateRange(null);
-        setFilters(previous => ({ ...previous, dateRange: null }));
+        setFilters((previous) => ({ ...previous, dateRange: null }));
         setOpenDateModal(false);
     }, [setTempDateRange, setFilters, setOpenDateModal]);
 
     const handleApplyDate = useCallback(() => {
-        setFilters(previous => ({ ...previous, dateRange: tempDateRange }));
+        setFilters((previous) => ({ ...previous, dateRange: tempDateRange }));
         setOpenDateModal(false);
     }, [tempDateRange, setFilters, setOpenDateModal]);
 
@@ -233,7 +330,7 @@ const Suppliers = () => {
             }}
             contentSectionClassName="section-gap"
             kpiTitle="KPIs de Fornecedores"
-            overviewTitle="Visão Geral dos Fornecedores"
+            overviewTitle="Visao Geral dos Fornecedores"
             kpis={kpisFiltrados}
             onCrossFilter={handleCrossFilter}
             resetToken={resetToken}
@@ -245,7 +342,7 @@ const Suppliers = () => {
                 onClear: handleClearDate,
                 onApply: handleApplyDate,
                 value: tempDateRange,
-                onChange: event => setTempDateRange(event.target.value),
+                onChange: (event) => setTempDateRange(event.target.value),
                 modalClassName: "suppliers-date-modal"
             }}
         />

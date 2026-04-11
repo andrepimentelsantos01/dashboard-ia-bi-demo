@@ -1,12 +1,13 @@
 import { useState, useMemo, useCallback } from "react";
 import { normalizeStatusLabel } from "../../../../selectors/shared/dashboardStatus";
 
-const toNumber = (v) => {
-    if (typeof v === "number") return v;
-    if (!v) return 0;
+const toNumber = (value) => {
+    if (typeof value === "number") return value;
+    if (!value) return 0;
+
     return (
         Number(
-            v
+            value
                 .toString()
                 .replace(/\./g, "")
                 .replace(",", ".")
@@ -20,7 +21,11 @@ const normalizeStatus = (value) => {
     return normalizeStatusLabel(value, { fallback: "Desconhecido" });
 };
 
-export const useChartTreemapState = ({ backendData, dataOverride, onCrossFilter }) => {
+export const useChartTreemapState = ({
+    backendData,
+    dataOverride,
+    onCrossFilter
+}) => {
     const [open, setOpen] = useState(false);
     const [last, setLast] = useState(null);
 
@@ -30,15 +35,17 @@ export const useChartTreemapState = ({ backendData, dataOverride, onCrossFilter 
         }
 
         const source = backendData || [];
-        const map = {};
+        const groupedRows = {};
         const resultMap = {};
 
-        for (let i = 0; i < source.length; i++) {
-            const item = source[i];
-            const statusLabel = normalizeStatus(item.logistics_status || item.item_status || item.status);
+        for (let index = 0; index < source.length; index += 1) {
+            const item = source[index];
+            const statusLabel = normalizeStatus(
+                item.logistics_status || item.item_status || item.status
+            );
 
-            if (!map[statusLabel]) {
-                map[statusLabel] = [];
+            if (!groupedRows[statusLabel]) {
+                groupedRows[statusLabel] = [];
                 resultMap[statusLabel] = {
                     name: statusLabel,
                     statusKey: statusLabel,
@@ -56,26 +63,33 @@ export const useChartTreemapState = ({ backendData, dataOverride, onCrossFilter 
 
             const group = resultMap[statusLabel];
             const valor = toNumber(item.valorTotal ?? item.total_amount);
-            const qtd = Number(item.quantidade || item.quantity_requested || item.sum_quantity || 0);
+            const quantidade = Number(
+                item.quantidade || item.quantity_requested || item.sum_quantity || 0
+            );
 
-            map[statusLabel].push(item);
-
+            groupedRows[statusLabel].push(item);
             group.value += 1;
-            group.volume += qtd;
+            group.volume += quantidade;
 
             if (item.categoria) {
-                group.categoriaValor[item.categoria] = (group.categoriaValor[item.categoria] || 0) + valor;
-                group.categoriaQtd[item.categoria] = (group.categoriaQtd[item.categoria] || 0) + qtd;
+                group.categoriaValor[item.categoria] =
+                    (group.categoriaValor[item.categoria] || 0) + valor;
+                group.categoriaQtd[item.categoria] =
+                    (group.categoriaQtd[item.categoria] || 0) + quantidade;
             }
 
             if (item.fornecedor) {
-                group.fornecedorValor[item.fornecedor] = (group.fornecedorValor[item.fornecedor] || 0) + valor;
-                group.fornecedorQtd[item.fornecedor] = (group.fornecedorQtd[item.fornecedor] || 0) + qtd;
+                group.fornecedorValor[item.fornecedor] =
+                    (group.fornecedorValor[item.fornecedor] || 0) + valor;
+                group.fornecedorQtd[item.fornecedor] =
+                    (group.fornecedorQtd[item.fornecedor] || 0) + quantidade;
             }
 
             if (item.produto) {
-                group.produtoValor[item.produto] = (group.produtoValor[item.produto] || 0) + valor;
-                group.produtoQtd[item.produto] = (group.produtoQtd[item.produto] || 0) + qtd;
+                group.produtoValor[item.produto] =
+                    (group.produtoValor[item.produto] || 0) + valor;
+                group.produtoQtd[item.produto] =
+                    (group.produtoQtd[item.produto] || 0) + quantidade;
             }
 
             if (item.cliente) {
@@ -83,69 +97,64 @@ export const useChartTreemapState = ({ backendData, dataOverride, onCrossFilter 
             }
         }
 
-        const getTop = (obj) => {
-            let maxKey = "—";
-            let maxVal = -Infinity;
+        const getTop = (map) => {
+            let maxKey = "-";
+            let maxValue = -Infinity;
 
-            for (const k in obj) {
-                if (obj[k] > maxVal) {
-                    maxVal = obj[k];
-                    maxKey = k;
+            Object.keys(map).forEach((key) => {
+                if (map[key] > maxValue) {
+                    maxValue = map[key];
+                    maxKey = key;
                 }
-            }
+            });
 
             return maxKey;
         };
 
-        const data = Object.values(resultMap).map((g) => ({
-            name: g.name,
-            statusKey: g.statusKey,
-            value: g.value,
-            volume: g.volume,
-            categoriaLeaderValor: getTop(g.categoriaValor),
-            categoriaLeaderQtd: getTop(g.categoriaQtd),
-            fornecedorLeaderValor: getTop(g.fornecedorValor),
-            fornecedorLeaderQtd: getTop(g.fornecedorQtd),
-            produtoLeaderValor: getTop(g.produtoValor),
-            produtoLeaderQtd: getTop(g.produtoQtd),
-            clientesAtendidos: g.clientes.size
-        }));
-
-        return { grouped: map, data };
+        return {
+            grouped: groupedRows,
+            data: Object.values(resultMap).map((item) => ({
+                name: item.name,
+                statusKey: item.statusKey,
+                value: item.value,
+                volume: item.volume,
+                categoriaLeaderValor: getTop(item.categoriaValor),
+                categoriaLeaderQtd: getTop(item.categoriaQtd),
+                fornecedorLeaderValor: getTop(item.fornecedorValor),
+                fornecedorLeaderQtd: getTop(item.fornecedorQtd),
+                produtoLeaderValor: getTop(item.produtoValor),
+                produtoLeaderQtd: getTop(item.produtoQtd),
+                clientesAtendidos: item.clientes.size
+            }))
+        };
     }, [backendData, dataOverride]);
 
     const handleClick = useCallback(
         (params) => {
-            const name = params?.data?.name;
-            const statusKey = params?.data?.statusKey;
+            const dataPoint = params?.data;
+            const currentKey = dataPoint?.name || dataPoint?.statusKey;
 
-            if (!name || !onCrossFilter) return;
+            if (!currentKey || !onCrossFilter) return;
 
-            if (last === name) {
+            if (last === currentKey) {
                 setLast(null);
                 onCrossFilter({ type: "reset" });
                 return;
             }
 
-            setLast(name);
+            setLast(currentKey);
 
-            if (dataOverride) {
-                if (name === "A" || name === "B" || name === "C") {
-                    onCrossFilter({ type: "abc", value: name });
-                    return;
-                }
-                if (name === "X" || name === "Y" || name === "Z") {
-                    onCrossFilter({ type: "xyz", value: name });
-                    return;
-                }
+            if (dataPoint?.filterPayload) {
+                onCrossFilter(dataPoint.filterPayload);
+                return;
             }
 
             onCrossFilter({
                 type: "status",
-                value: statusKey?.trim()
+                value: dataPoint?.statusKey?.trim()
             });
         },
-        [last, onCrossFilter, dataOverride]
+        [last, onCrossFilter]
     );
 
     return {

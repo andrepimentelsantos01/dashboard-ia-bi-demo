@@ -1,0 +1,42 @@
+.chart-scatter-aggregate-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.chart-scatter-aggregate-refresh-btn,
+.chart-scatter-aggregate-expand-btn {
+    position: absolute;
+    top: 6px;
+    z-index: 3;
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(23, 135, 126, 0.18);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.96);
+    color: #0f4f4c;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 20px rgba(12, 56, 53, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.chart-scatter-aggregate-refresh-btn:hover,
+.chart-scatter-aggregate-expand-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 24px rgba(12, 56, 53, 0.14);
+}
+
+.chart-scatter-aggregate-refresh-btn {
+    right: 42px;
+}
+
+.chart-scatter-aggregate-expand-btn {
+    right: 6px;
+}
+
+.chart-scatter-aggregate-icon {
+    width: 14px;
+    height: 14px;
+}

@@ -6,6 +6,7 @@ import {
     cleanString,
     mapToMetricArray
 } from "./shared/dashboardSelectors";
+import { buildClassificationTreemapData } from "./shared/classificationSelectors";
 
 export const normalizeProductAnalytics = (rows = []) =>
     rows.map(row => {
@@ -31,6 +32,15 @@ export const normalizeProductAnalytics = (rows = []) =>
     });
 
 export const buildProductsDerivedData = (analytics = []) => {
+    const classifications = buildClassificationTreemapData(analytics, {
+        entityKey: "produto",
+        valueKey: "valorTotal",
+        quantityKey: "quantidade",
+        monthKey: "data",
+        abcKey: "classificacaoABC",
+        xyzKey: "classificacaoXYZ"
+    });
+
     const acc = {
         historicoValores: {},
         historicoQuantidade: {},
@@ -103,6 +113,9 @@ export const buildProductsDerivedData = (analytics = []) => {
                 item.total ? (item.cancelados / item.total) * 100 : 0
             )
         },
+        curvaABCTreemap: classifications.abcTreemap,
+        curvaXYZTreemap: classifications.xyzTreemap,
+        matrizAbcXyzTreemap: classifications.abcXyzMatrixTreemap,
         curvaABC: {
             labels: Object.keys(acc.abc),
             values: Object.values(acc.abc)

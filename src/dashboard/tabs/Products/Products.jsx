@@ -1,8 +1,11 @@
 import React, { useMemo, useCallback } from "react";
 import ChartBarVertical from "../../components/shared/charts/ChartBarVertical/ChartBarVertical";
+import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal/ChartHorizontal";
 import ChartLine from "../../components/shared/charts/ChartLine/ChartLine";
 import ChartPie from "../../components/shared/charts/ChartPie";
+import ChartScatterAggregate from "../../components/shared/charts/ChartScatterAggregate";
+import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
 import ChartTreemap from "../../components/shared/charts/ChartTreemap/ChartTreemap";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
 import { useProductsState } from "./products.state";
@@ -10,7 +13,7 @@ import "./Products.css";
 
 const PRODUCT_KPI_LABELS = {
     valorTotal: "Valor Total",
-    ticketMedioProduto: "Ticket Médio por Produto",
+    ticketMedioProduto: "Ticket Medio por Produto",
     produtoTop: "Produto Maior Valor"
 };
 
@@ -38,34 +41,6 @@ const Products = () => {
 
     const tabela = data.operacionais.tabela || [];
 
-    useMemo(() => {
-        const canceladosItems = [];
-        const atrasadosItems = [];
-        const produtosCancelados = {};
-        const fornecedoresCancelados = {};
-        const produtosAtrasados = {};
-        const fornecedoresAtrasados = {};
-
-        tabela.forEach(row => {
-            if (row.status === "Cancelado") {
-                canceladosItems.push(row);
-                produtosCancelados[row.produto] = (produtosCancelados[row.produto] || 0) + 1;
-                fornecedoresCancelados[row.fornecedor] = (fornecedoresCancelados[row.fornecedor] || 0) + 1;
-            }
-
-            if (row.status === "Atrasado") {
-                atrasadosItems.push(row);
-                produtosAtrasados[row.produto] = (produtosAtrasados[row.produto] || 0) + 1;
-                fornecedoresAtrasados[row.fornecedor] = (fornecedoresAtrasados[row.fornecedor] || 0) + 1;
-            }
-        });
-
-        return {
-            cancelados: canceladosItems,
-            atrasados: atrasadosItems
-        };
-    }, [tabela]);
-
     const sortedGlosa = useMemo(() => {
         const labels = data.glosaProdutos?.labels || [];
         const values = data.glosaProdutos?.values || [];
@@ -80,7 +55,7 @@ const Products = () => {
 
         const output = {};
 
-        Object.keys(data.kpis).forEach(key => {
+        Object.keys(data.kpis).forEach((key) => {
             if (key === "percentualCancelados") return;
 
             if (key === "ticketMedioProduto") {
@@ -94,64 +69,137 @@ const Products = () => {
         return output;
     }, [data.kpis]);
 
-    const charts = useMemo(() => [
-        {
-            title: "Distribuição de Categoria Por Valor",
-            height: 250,
-            component: (
-                <ChartPie
-                    data={data.produtosPorCategoriaPie}
-                    backendData={tabela}
-                    onCrossFilter={handleCrossFilter}
-                />
-            )
-        },
-        {
-            title: "Ranking de Produtos Por Valor",
-            height: 250,
-            component: (
-                <ChartHorizontal
-                    data={data.produtosRanking}
-                    backendData={tabela}
-                    onCrossFilter={handleCrossFilter}
-                />
-            )
-        },
-        {
-            title: "Evolução Valor Unitário por Mês",
-            height: 250,
-            component: (
-                <ChartLine
-                    backendData={tabela}
-                    onCrossFilter={handleCrossFilter}
-                />
-            )
-        },
-        {
-            title: "Percentual Glosa por Produto",
-            height: 250,
-            component: (
-                <ChartBarVertical
-                    labels={sortedGlosa.map(item => item.label)}
-                    values={sortedGlosa.map(item => item.value)}
-                    backendData={tabela}
-                    onCrossFilter={handleCrossFilter}
-                    valueFormat="percent"
-                    filterType="produto"
-                />
-            )
-        },
-        {
-            title: "Status das Entregas",
-            height: 250,
-            component: (
-                <ChartTreemap
-                    backendData={tabela}
-                    onCrossFilter={handleCrossFilter}
-                />
-            )
-        }
-    ], [data.produtosPorCategoriaPie, data.produtosRanking, tabela, handleCrossFilter, sortedGlosa]);
+    const charts = useMemo(
+        () => [
+            {
+                title: "Distribuicao de Categoria Por Valor",
+                height: 250,
+                component: (
+                    <ChartPie
+                        data={data.produtosPorCategoriaPie}
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Status das Entregas",
+                height: 250,
+                component: (
+                    <ChartTreemap
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Curva ABC de Produtos",
+                height: 250,
+                component: (
+                    <ChartTreemap
+                        dataOverride={data.curvaABCTreemap}
+                        onCrossFilter={handleCrossFilter}
+                        hideValues
+                        classificationMode="abc"
+                        abcXyzLegend="products"
+                    />
+                )
+            },
+            {
+                title: "Curva XYZ de Produtos",
+                height: 250,
+                component: (
+                    <ChartTreemap
+                        dataOverride={data.curvaXYZTreemap}
+                        onCrossFilter={handleCrossFilter}
+                        hideValues
+                        classificationMode="xyz"
+                        abcXyzLegend="products"
+                    />
+                )
+            },
+            {
+                title: "Matriz ABC-XYZ de Produtos",
+                height: 250,
+                component: (
+                    <ChartTreemap
+                        dataOverride={data.matrizAbcXyzTreemap}
+                        onCrossFilter={handleCrossFilter}
+                        hideValues
+                        classificationMode="abcxyz"
+                        abcXyzLegend="products"
+                    />
+                )
+            },
+            {
+                title: "Evolucao Logistica por Status",
+                height: 280,
+                component: (
+                    <ChartStackedBar
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                        metric="quantity"
+                    />
+                )
+            },
+            {
+                title: "Mapa de Calor Categoria x Mes",
+                height: 280,
+                component: (
+                    <ChartHeatmap
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Dispersao de Preco x Volume",
+                height: 300,
+                component: (
+                    <ChartScatterAggregate
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Ranking de Produtos Por Valor",
+                height: 250,
+                component: (
+                    <ChartHorizontal
+                        data={data.produtosRanking}
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Evolucao Valor Unitario por Mes",
+                height: 250,
+                component: (
+                    <ChartLine
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Percentual Glosa por Produto",
+                height: 250,
+                component: (
+                    <ChartBarVertical
+                        labels={sortedGlosa.map((item) => item.label)}
+                        values={sortedGlosa.map((item) => item.value)}
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                        valueFormat="percent"
+                        filterType="produto"
+                    />
+                )
+            }
+        ],
+        [data, handleCrossFilter, sortedGlosa, tabela]
+    );
 
     const handleCloseDateModal = useCallback(() => {
         setOpenDateModal(false);
@@ -159,12 +207,12 @@ const Products = () => {
 
     const handleClearDate = useCallback(() => {
         setTempDateRange(null);
-        setFilters(previous => ({ ...previous, dateRange: null }));
+        setFilters((previous) => ({ ...previous, dateRange: null }));
         setOpenDateModal(false);
     }, [setTempDateRange, setFilters, setOpenDateModal]);
 
     const handleApplyDate = useCallback(() => {
-        setFilters(previous => ({ ...previous, dateRange: tempDateRange }));
+        setFilters((previous) => ({ ...previous, dateRange: tempDateRange }));
         setOpenDateModal(false);
     }, [tempDateRange, setFilters, setOpenDateModal]);
 
@@ -185,7 +233,7 @@ const Products = () => {
             }}
             contentSectionClassName="mt-24"
             kpiTitle="KPIs de Produtos"
-            overviewTitle="Visão Geral de Produtos"
+            overviewTitle="Visao Geral de Produtos"
             kpis={kpisProductsParsed}
             onCrossFilter={handleCrossFilter}
             resetToken={resetToken}
@@ -197,7 +245,7 @@ const Products = () => {
                 onClear: handleClearDate,
                 onApply: handleApplyDate,
                 value: tempDateRange,
-                onChange: event => setTempDateRange(event.target.value),
+                onChange: (event) => setTempDateRange(event.target.value),
                 modalClassName: "products-date-modal"
             }}
         />

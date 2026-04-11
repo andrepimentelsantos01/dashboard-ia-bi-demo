@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback } from "react";
 import ChartBarVertical from "../../components/shared/charts/ChartBarVertical";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal";
-import ChartMap from "../../components/shared/charts/ChartMap";
+import ChartMapMorph from "../../components/shared/charts/ChartMapMorph";
 import ChartTreemap from "../../components/shared/charts/ChartTreemap";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
 import { useOrdersState } from "./orders.state";
@@ -71,7 +71,7 @@ const Orders = () => {
             title: "Mapa de Valor Por Estado",
             height: 260,
             component: (
-                <ChartMap
+                <ChartMapMorph
                     data={overview.mapaUF || []}
                     backendData={tabela}
                     onCrossFilter={handleCrossFilter}

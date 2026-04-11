@@ -6,6 +6,7 @@ import {
     cleanString,
     mapToMetricArray
 } from "./shared/dashboardSelectors";
+import { buildClassificationTreemapData } from "./shared/classificationSelectors";
 
 export const normalizeClientAnalytics = (rows = []) =>
     rows.map(row => {
@@ -32,6 +33,15 @@ export const normalizeClientAnalytics = (rows = []) =>
     });
 
 export const buildClientsDerivedData = (analytics = []) => {
+    const classifications = buildClassificationTreemapData(analytics, {
+        entityKey: "cliente",
+        valueKey: "valorTotal",
+        quantityKey: "quantidade",
+        monthKey: "data",
+        abcKey: "classificacaoABC",
+        xyzKey: "classificacaoXYZ"
+    });
+
     const acc = {
         historicoMovimentado: {},
         historicoConsumo: {},
@@ -145,6 +155,9 @@ export const buildClientsDerivedData = (analytics = []) => {
             categoriasPizza,
             curvaABCClientes,
             curvaXYZClientes,
+            curvaABCTreemap: classifications.abcTreemap,
+            curvaXYZTreemap: classifications.xyzTreemap,
+            matrizAbcXyzTreemap: classifications.abcXyzMatrixTreemap,
             ticketMedioMensal,
             produtosRanking,
             fornecedoresRanking,

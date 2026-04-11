@@ -7,6 +7,7 @@ import {
     cleanString,
     mapToMetricArray
 } from "./shared/dashboardSelectors";
+import { buildClassificationTreemapData } from "./shared/classificationSelectors";
 
 export const normalizeSupplierAnalytics = (rows = []) =>
     rows.map(row => {
@@ -27,11 +28,22 @@ export const normalizeSupplierAnalytics = (rows = []) =>
             leadTime: null,
             numeroPedido: row.purchase_order_id || null,
             data: row.year_months,
-            status: cleanString(row.item_status)
+            status: cleanString(row.item_status),
+            classificacaoABC: row.classificacaoABC ?? row.abc_classification ?? null,
+            classificacaoXYZ: row.classificacaoXYZ ?? row.xyz_classification ?? null
         };
     });
 
 export const buildSuppliersDerivedData = (analytics = []) => {
+    const classifications = buildClassificationTreemapData(analytics, {
+        entityKey: "fornecedor",
+        valueKey: "valorTotal",
+        quantityKey: "quantidade",
+        monthKey: "data",
+        abcKey: "classificacaoABC",
+        xyzKey: "classificacaoXYZ"
+    });
+
     const acc = {
         historicoMovimentado: {},
         historicoVolume: {},
@@ -137,7 +149,10 @@ export const buildSuppliersDerivedData = (analytics = []) => {
             rankingAtrasos,
             rankingGlosa,
             rankingVolume,
-            categoriasPizza
+            categoriasPizza,
+            curvaABCTreemap: classifications.abcTreemap,
+            curvaXYZTreemap: classifications.xyzTreemap,
+            matrizAbcXyzTreemap: classifications.abcXyzMatrixTreemap
         },
         alertas: {
             miniCards: {

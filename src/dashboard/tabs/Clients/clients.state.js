@@ -40,7 +40,12 @@ export const useClientsState = () => {
     } = useDashboardTabUi();
 
     const apiFilters = useMemo(
-        () => buildDashboardApiFilters(filters),
+        () => buildDashboardApiFilters(filters, {
+            extra: {
+                classificacao_abc: currentFilters => currentFilters.classificacaoABC,
+                classificacao_xyz: currentFilters => currentFilters.classificacaoXYZ
+            }
+        }),
         [filters]
     );
 

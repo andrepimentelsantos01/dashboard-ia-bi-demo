@@ -1,0 +1,55 @@
+.chart-stacked-bar-container {
+    width: 100%;
+    height: 100%;
+    min-height: 260px;
+    position: relative;
+}
+
+.chart-stacked-bar-expand-btn,
+.chart-stacked-bar-refresh-btn {
+    position: absolute;
+    top: -52px;
+    z-index: 10;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.75);
+    border: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.25);
+    transition: background 0.2s ease, border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chart-stacked-bar-expand-btn {
+    right: -5px;
+}
+
+.chart-stacked-bar-refresh-btn {
+    right: 28px;
+}
+
+.chart-stacked-bar-expand-btn:hover,
+.chart-stacked-bar-refresh-btn:hover {
+    background: rgba(255,255,255,0.9);
+    border: 1px solid rgba(0,0,0,0.2);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+
+.chart-stacked-bar-icon {
+    color: #2e3642;
+    font-size: 12px;
+}
+
+html[data-theme="dark"] .chart-stacked-bar-expand-btn,
+html[data-theme="dark"] .chart-stacked-bar-refresh-btn {
+    background: rgba(10, 28, 27, 0.82);
+    border-color: rgba(111, 213, 200, 0.18);
+}
+
+html[data-theme="dark"] .chart-stacked-bar-icon {
+    color: #dff5f1;
+}

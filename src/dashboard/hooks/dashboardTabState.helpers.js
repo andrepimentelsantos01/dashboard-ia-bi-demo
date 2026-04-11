@@ -102,6 +102,7 @@ export const createCrossFilterMap = (options = {}) => {
     } = options;
 
     return {
+        merge: payload => payload.filters || {},
         cliente: payload => ({ clients: [{ id: payload.id, name: payload.value }] }),
         fornecedor: payload => ({ suppliers: [{ id: payload.id, name: payload.value }] }),
         categoria: payload => ({ categorias: [{ name: payload.value }] }),

@@ -5,93 +5,102 @@ import "./ChartTreemap.css";
 import { useChartTreemapState } from "./chartTreemap.state";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 
-const colorMap = {
-    Ativo: "#0f4f4c",
-    Alterado: "#12635e",
-    Aprovado: "#177972",
-    Arquivado: "#93a9a6",
-    "Disponível": "#1b8f86",
-    "Aguardando Aprovação": "#22a69b",
-    "Aguardando Julgamento": "#40b8ad",
-    "Aguardando Resposta de Envio Parcial": "#40b8ad",
-    "Aguardando Qualificação": "#12635e",
-    "Aguardando Envio": "#63c9c0",
-    "Aguardando Complemento": "#22a69b",
-    "Em Recebimento": "#1b8f86",
-    Bloqueado: "#0e4946",
-    Ocupado: "#40b8ad",
+const STATUS_COLOR_MAP = {
     Cancelado: "#0e4946",
-    Fechado: "#93a9a6",
-    Concluído: "#177972",
     Entregue: "#177972",
-    Desclassificado: "#93a9a6",
-    Rascunho: "#b4c6c3",
-    Habilitado: "#177972",
-    Expirado: "#93a9a6",
-    Falhou: "#0e4946",
-    "Totalmente Enviado": "#177972",
-    "Totalmente Utilizado": "#177972",
-    "Em Progresso": "#1b8f86",
-    "Em Revisão": "#22a69b",
-    "Em Distribuição": "#1b8f86",
-    "Em Treinamento": "#63c9c0",
-    "Em Trânsito": "#40b8ad",
     Atrasado: "#12635e",
-    Inativo: "#93a9a6",
-    Inabilitado: "#0e4946",
-    Integrado: "#0f4f4c",
-    Convidado: "#1b8f86",
     Faturado: "#177972",
-    "Item Implantado": "#177972",
-    "Em Julgamento": "#40b8ad",
-    "Em Manutenção": "#22a69b",
-    "Em Revisão Mundimed": "#22a69b",
-    "Sem Propostas": "#93a9a6",
-    "Não Aprovado": "#0e4946",
-    Offline: "#93a9a6",
-    "Em Pausa": "#22a69b",
-    Afastado: "#93a9a6",
-    Aberto: "#1b8f86",
-    "Recebido Parcial": "#1b8f86",
-    "Envio Parcial Aprovado": "#177972",
-    "Envio Parcial Rejeitado": "#0e4946",
-    "Parcialmente Entregue": "#1b8f86",
-    "Parcialmente Vigente": "#1b8f86",
-    "Parcialmente Faturado": "#1b8f86",
-    "Parcialmente Devolvido": "#40b8ad",
-    "Parcialmente Enviado": "#1b8f86",
-    "Parcialmente Utilizado": "#1b8f86",
-    "Senha Expirada": "#0e4946",
     Pendente: "#22a69b",
-    "Aguardando Ativação": "#22a69b",
-    "Aguardando Exclusão": "#0e4946",
-    "Separação em Andamento": "#1b8f86",
-    Qualificado: "#177972",
-    "Aguardando Empenho": "#22a69b",
-    "Ordem de Compra Gerada": "#177972",
-    Cotado: "#1b8f86",
-    Rejeitado: "#0e4946",
-    Liberado: "#177972",
-    Devolvido: "#40b8ad",
-    "Devolvido para Correção": "#40b8ad",
-    "Amostra Recebida": "#177972",
-    "Amostra Solicitada": "#22a69b",
-    "Amostra Enviada": "#1b8f86",
-    Padronizado: "#177972",
-    Suspenso: "#0e4946",
-    Encerrado: "#93a9a6",
-    "Recebido Total": "#177972",
-    "Período de Teste": "#1b8f86",
-    "Em Disputa": "#1b8f86",
-    "Em Avaliação": "#22a69b",
-    "Em Habilitação": "#1b8f86",
-    "Em Cotação": "#1b8f86",
-    "Sem status": "#93a9a6",
-    Desconhecido: "#26717e"
+    "Em Trânsito": "#40b8ad",
+    Desconhecido: "#26717e",
+    "Sem status": "#93a9a6"
 };
 
-const abcColorMap = { A: "#0f4f4c", B: "#177972", C: "#63c9c0" };
-const xyzColorMap = { X: "#12635e", Y: "#1b8f86", Z: "#87dad3" };
+const ABC_COLOR_MAP = { A: "#0f4f4c", B: "#177972", C: "#63c9c0" };
+const XYZ_COLOR_MAP = { X: "#12635e", Y: "#1b8f86", Z: "#87dad3" };
+const MATRIX_COLOR_MAP = {
+    AX: "#0f4f4c",
+    AY: "#12635e",
+    AZ: "#177972",
+    BX: "#1b8f86",
+    BY: "#22a69b",
+    BZ: "#40b8ad",
+    CX: "#63c9c0",
+    CY: "#86d8cf",
+    CZ: "#b3ebe5"
+};
+
+const chartOpts = { renderer: "canvas" };
+
+const CLASSIFICATION_HELP = {
+    products: {
+        abc: {
+            A: "Itens com maior impacto financeiro e prioridade de abastecimento.",
+            B: "Itens com impacto intermediário e acompanhamento recorrente.",
+            C: "Itens de menor impacto financeiro individual."
+        },
+        xyz: {
+            X: "Itens com consumo estável e previsível.",
+            Y: "Itens com oscilação moderada e revisão periódica.",
+            Z: "Itens com consumo irregular ou eventual."
+        }
+    },
+    clients: {
+        abc: {
+            A: "Clientes que concentram a maior parcela do faturamento.",
+            B: "Clientes com contribuição intermediária.",
+            C: "Clientes de menor impacto financeiro individual."
+        },
+        xyz: {
+            X: "Clientes recorrentes e previsíveis.",
+            Y: "Clientes com comportamento variável ao longo do tempo.",
+            Z: "Clientes sazonais ou esporádicos."
+        }
+    },
+    suppliers: {
+        abc: {
+            A: "Fornecedores com maior peso financeiro no abastecimento.",
+            B: "Fornecedores de contribuição intermediária.",
+            C: "Fornecedores de menor impacto financeiro individual."
+        },
+        xyz: {
+            X: "Fornecedores com volume estável e previsível.",
+            Y: "Fornecedores com variação moderada de demanda.",
+            Z: "Fornecedores com comportamento mais irregular."
+        }
+    }
+};
+
+const getClassificationMessage = (name, legendContext, classificationMode) => {
+    const contextHelp = CLASSIFICATION_HELP[legendContext] || CLASSIFICATION_HELP.products;
+
+    if (classificationMode === "abcxyz") {
+        const abc = name?.[0];
+        const xyz = name?.[1];
+        const abcText = contextHelp.abc[abc] || "Classe ABC estratégica.";
+        const xyzText = contextHelp.xyz[xyz] || "Classe XYZ comportamental.";
+        return `${abcText} ${xyzText}`;
+    }
+
+    if (classificationMode === "xyz") {
+        return contextHelp.xyz[name] || "Classificação XYZ.";
+    }
+
+    return contextHelp.abc[name] || "Classificação ABC.";
+};
+
+const getNodeColor = (name, classificationMode) => {
+    if (classificationMode === "abc") return ABC_COLOR_MAP[name] || "#93a9a6";
+    if (classificationMode === "xyz") return XYZ_COLOR_MAP[name] || "#93a9a6";
+    if (classificationMode === "abcxyz") return MATRIX_COLOR_MAP[name] || "#93a9a6";
+    return STATUS_COLOR_MAP[name] || "#93a9a6";
+};
+
+const formatCurrency = (value) =>
+    Number(value || 0).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
 
 const ChartTreemap = ({
     backendData,
@@ -99,7 +108,8 @@ const ChartTreemap = ({
     onCrossFilter,
     height = 250,
     hideValues = false,
-    abcXyzLegend = "products"
+    abcXyzLegend = "products",
+    classificationMode = null
 }) => {
     const { open, setOpen, data, handleClick } = useChartTreemapState({
         backendData,
@@ -110,101 +120,76 @@ const ChartTreemap = ({
     const baseData = dataOverride || data;
 
     const treemapData = useMemo(
-        () => baseData.map((item) => ({
-            ...item,
-            itemStyle: {
-                color: colorMap[item.name] || abcColorMap[item.name] || xyzColorMap[item.name] || "#93a9a6",
-                borderRadius: 14,
-                shadowBlur: 18,
-                shadowColor: "rgba(12,56,53,0.20)",
-                shadowOffsetX: 0,
-                shadowOffsetY: 4,
-                borderColor: "rgba(255,255,255,0.65)",
-                borderWidth: 2
-            }
-        })),
-        [baseData]
+        () =>
+            baseData.map((item) => ({
+                ...item,
+                itemStyle: {
+                    color: getNodeColor(item.name, classificationMode),
+                    borderRadius: 14,
+                    shadowBlur: 18,
+                    shadowColor: "rgba(12,56,53,0.20)",
+                    shadowOffsetX: 0,
+                    shadowOffsetY: 4,
+                    borderColor: "rgba(255,255,255,0.65)",
+                    borderWidth: 2
+                }
+            })),
+        [baseData, classificationMode]
     );
 
-    const option = useMemo(() => ({
-        tooltip: buildResponsiveTooltip((params) => {
-            if (hideValues) {
-                if (abcXyzLegend === "clients") {
+    const option = useMemo(
+        () => ({
+            animation: false,
+            tooltip: buildResponsiveTooltip((params) => {
+                const dataPoint = params?.data;
+                if (!dataPoint) return "";
+
+                if (classificationMode) {
                     return `
-                        <strong>Curva ABC (Clientes)</strong><br/>
-                        A - Clientes que concentram a maior parcela do faturamento.<br/>
-                        B - Clientes com participação intermediária no faturamento.<br/>
-                        C - Clientes de baixo impacto financeiro individual.<br/><br/>
-                        <strong>Curva XYZ (Clientes)</strong><br/>
-                        X - Clientes recorrentes e previsíveis.<br/>
-                        Y - Clientes com variação no comportamento de compra.<br/>
-                        Z - Clientes esporádicos ou sazonais.<br/><br/>
-                        <strong>Matriz ABC-XYZ (Clientes)</strong><br/>
-                        AX - Clientes estratégicos e recorrentes; prioridade máxima de retenção.<br/>
-                        AY - Clientes estratégicos com oscilação; ações comerciais contínuas.<br/>
-                        AZ - Clientes estratégicos ocasionais; abordagem sob demanda.<br/>
-                        BX - Relacionamento contínuo e previsível.<br/>
-                        BY - Acompanhamento periódico.<br/>
-                        BZ - Ações comerciais pontuais.<br/>
-                        CX - Automação comercial.<br/>
-                        CY - Campanhas oportunísticas.<br/>
-                        CZ - Baixíssimo custo de manutenção.
+                        <b>${dataPoint.name}</b><br/>
+                        Valor representado: <b>${formatCurrency(dataPoint.value)}</b><br/>
+                        Participacao: <b>${Number(dataPoint.percentage || 0).toFixed(1)}%</b><br/>
+                        ${abcXyzLegend === "clients" ? "Clientes" : abcXyzLegend === "suppliers" ? "Fornecedores" : "Produtos"} na classe: <b>${dataPoint.entityCount || 0}</b><br/>
+                        Volume agregado: <b>${Number(dataPoint.totalQuantity || 0).toLocaleString("pt-BR")}</b><br/><br/>
+                        ${getClassificationMessage(dataPoint.name, abcXyzLegend, classificationMode)}
                     `;
                 }
 
                 return `
-                    <strong>Curva ABC</strong><br/>
-                    A - Alto impacto financeiro, poucos produtos que concentram grande parte do valor.<br/>
-                    B - Impacto moderado, participação intermediária no valor total.<br/>
-                    C - Baixo impacto financeiro, muitos produtos com pequena participação.<br/><br/>
-                    <strong>Curva XYZ</strong><br/>
-                    X - Consumo estável e previsível; demanda consistente.<br/>
-                    Y - Consumo variável; oscilações sazonais exigem revisão frequente.<br/>
-                    Z - Consumo irregular ou eventual; baixa previsibilidade, recomendação de uso sob demanda.<br/><br/>
-                    <strong>Matriz ABC-XYZ</strong><br/>
-                    AX - Alto impacto e demanda estável; itens críticos, requerem estoque mínimo garantido.<br/>
-                    AY - Alto impacto e demanda variável; monitoramento contínuo e ajustes finos.<br/>
-                    AZ - Alto impacto e uso eventual; compras sob demanda para evitar excesso.<br/>
-                    BX - Impacto moderado e consumo estável; adequados para reposição automática.<br/>
-                    BY - Impacto moderado e consumo variável; exige previsões atualizadas.<br/>
-                    BZ - Impacto moderado e uso eventual; reposição guiada pela demanda recente.<br/>
-                    CX - Baixo impacto e consumo estável; pode ter estoque maior com atenção à validade.<br/>
-                    CY - Baixo impacto e demanda variável; controle simples com revisão periódica.<br/>
-                    CZ - Baixo impacto e uso eventual; compras apenas sob demanda.
+                    <b>${dataPoint.name}</b><br/>
+                    Quantidade de Ordens: <b>${dataPoint.value}</b><br/><br/>
+                    <b>Volume Movimentado:</b> ${dataPoint.volume}<br/><br/>
+                    <b>Categoria Líder (Valor):</b> ${dataPoint.categoriaLeaderValor}<br/>
+                    <b>Categoria Líder (Quantidade):</b> ${dataPoint.categoriaLeaderQtd}<br/><br/>
+                    <b>Fornecedor Líder (Valor):</b> ${dataPoint.fornecedorLeaderValor}<br/>
+                    <b>Fornecedor Líder (Quantidade):</b> ${dataPoint.fornecedorLeaderQtd}<br/><br/>
+                    <b>Produto Líder (Valor):</b> ${dataPoint.produtoLeaderValor}<br/>
+                    <b>Produto Líder (Quantidade):</b> ${dataPoint.produtoLeaderQtd}<br/><br/>
+                    <b>Clientes Atendidos:</b> ${dataPoint.clientesAtendidos}<br/>
                 `;
-            }
-
-            const dataPoint = params.data;
-
-            return `
-                <b>${dataPoint.name}</b><br/>
-                Quantidade de Ordens: <b>${dataPoint.value}</b><br/><br/>
-                <b>Volume Movimentado:</b> ${dataPoint.volume}<br/><br/>
-                <b>Categoria Líder (Valor):</b> ${dataPoint.categoriaLeaderValor}<br/>
-                <b>Categoria Líder (Quantidade):</b> ${dataPoint.categoriaLeaderQtd}<br/><br/>
-                <b>Fornecedor Líder (Valor):</b> ${dataPoint.fornecedorLeaderValor}<br/>
-                <b>Fornecedor Líder (Quantidade):</b> ${dataPoint.fornecedorLeaderQtd}<br/><br/>
-                <b>Produto Líder (Valor):</b> ${dataPoint.produtoLeaderValor}<br/>
-                <b>Produto Líder (Quantidade):</b> ${dataPoint.produtoLeaderQtd}<br/><br/>
-                <b>Clientes Atendidos:</b> ${dataPoint.clientesAtendidos}<br/>
-            `;
-        }),
-        series: [
-            {
-                type: "treemap",
-                data: treemapData,
-                roam: false,
-                breadcrumb: { show: false },
-                sort: "none",
-                label: {
-                    show: true,
-                    formatter: (params) => (hideValues ? params.name : `${params.name}\n${params.value}`),
-                    color: "#ffffff",
-                    fontSize: 12
+            }),
+            series: [
+                {
+                    type: "treemap",
+                    data: treemapData,
+                    roam: false,
+                    breadcrumb: { show: false },
+                    sort: "none",
+                    nodeClick: false,
+                    label: {
+                        show: true,
+                        formatter: (params) =>
+                            hideValues
+                                ? `${params.name}\n${Number(params.data?.percentage || 0).toFixed(1)}%`
+                                : `${params.name}\n${params.value}`,
+                        color: "#ffffff",
+                        fontSize: 12
+                    }
                 }
-            }
-        ]
-    }), [abcXyzLegend, hideValues, treemapData]);
+            ]
+        }),
+        [abcXyzLegend, classificationMode, hideValues, treemapData]
+    );
 
     return (
         <>
@@ -213,16 +198,26 @@ const ChartTreemap = ({
                     option={option}
                     style={{ width: "100%", height: `${height}px`, borderRadius: "18px" }}
                     onEvents={{ click: handleClick }}
+                    lazyUpdate
+                    opts={chartOpts}
                 />
             </div>
 
             <ModalComponent
-                title="Visualização Ampliada"
+                title="Visualizacao Ampliada"
                 open={open}
                 setOpen={() => setOpen(false)}
-                content={<ReactECharts option={option} style={{ width: "100%", height: "100%" }} />}
-                isOpenInvoiced={false}
-                titleCard=""
+                content={
+                    open ? (
+                        <ReactECharts
+                            option={option}
+                            style={{ width: "100%", height: "100%" }}
+                            onEvents={{ click: handleClick }}
+                            lazyUpdate
+                            opts={chartOpts}
+                        />
+                    ) : null
+                }
             />
         </>
     );
