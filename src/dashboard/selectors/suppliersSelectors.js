@@ -10,7 +10,7 @@ import {
 import { buildClassificationTreemapData } from "./shared/classificationSelectors";
 
 export const normalizeSupplierAnalytics = (rows = []) =>
-    rows.map(row => {
+    rows.map((row) => {
         const quantidade = Number(row.sum_quantity_requested) || 0;
         const valorTotal = Number(row.sum_total_amount) || 0;
 
@@ -62,7 +62,7 @@ export const buildSuppliersDerivedData = (analytics = []) => {
     let pedidosEntregues = 0;
     let pedidosComGlosa = 0;
 
-    analytics.forEach(row => {
+    analytics.forEach((row) => {
         totalMovimentado += row.valorTotal;
         volumeTotal += row.quantidade;
         totalPedidos += 1;
@@ -106,8 +106,13 @@ export const buildSuppliersDerivedData = (analytics = []) => {
     });
 
     const historicoMeses = Object.keys(acc.historicoMovimentado).sort();
-    const historicoValores = historicoMeses.map(month => acc.historicoMovimentado[month]);
-    const historicoVolume = historicoMeses.map(month => acc.historicoVolume[month]);
+    const historicoValores = historicoMeses.map((month) => acc.historicoMovimentado[month]);
+    const historicoVolume = historicoMeses.map((month) => acc.historicoVolume[month]);
+    const historicoTicketMedio = historicoMeses.map((month) => {
+        const valor = acc.historicoMovimentado[month] || 0;
+        const volume = acc.historicoVolume[month] || 0;
+        return volume > 0 ? valor / volume : 0;
+    });
 
     const rankingSLA = Object.entries(acc.fornecedoresSla)
         .map(([name, values]) => ({
@@ -137,7 +142,10 @@ export const buildSuppliersDerivedData = (analytics = []) => {
                 value: volumeTotal,
                 variation: getKpiVariation(historicoVolume)
             },
-            "Ticket MÃ©dio": volumeTotal > 0 ? totalMovimentado / volumeTotal : 0
+            "Ticket Medio": {
+                value: volumeTotal > 0 ? totalMovimentado / volumeTotal : 0,
+                variation: getKpiVariation(historicoTicketMedio)
+            }
         },
         overview: {
             slaMedio: totalPedidos > 0 ? (pedidosEntregues / totalPedidos) * 100 : 0,
@@ -157,7 +165,7 @@ export const buildSuppliersDerivedData = (analytics = []) => {
         alertas: {
             miniCards: {
                 fornecedoresCriticos: pedidosAtrasados,
-                pedidosAtrasados: pedidosAtrasados,
+                pedidosAtrasados,
                 glosaAlta: pedidosCancelados
             }
         },

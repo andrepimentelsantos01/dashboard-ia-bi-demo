@@ -3,6 +3,17 @@ import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 import { useChartThemeTokens } from "../chartTheme";
 import { normalizeStatusLabel, STATUS_COLOR_MAP } from "../../../../selectors/shared/dashboardStatus";
 
+const STACKED_STATUS_COLOR_MAP = {
+    Entregue: "#2E8B57",
+    "Em Trânsito": "#2F80ED",
+    Faturado: "#8E44AD",
+    "Em Recebimento": "#F2994A",
+    Pendente: "#F2C94C",
+    Atrasado: "#EB5757",
+    Cancelado: "#6C757D",
+    Desconhecido: "#7F8C8D"
+};
+
 const STATUS_PRIORITY = [
     "Entregue",
     "Em Trânsito",
@@ -50,7 +61,7 @@ const buildStackedData = (rows = [], metric = "quantity") => {
         totalsByMonth[month] = (totalsByMonth[month] || 0) + value;
     });
 
-    const months = [...monthsMap.keys()].sort((a, b) => String(a).localeCompare(String(b)));
+    const months = [...monthsMap.keys()].sort((a, b) => String(a).localeCompare(String(b))).reverse();
     const statuses = sortStatuses(Object.keys(matrix));
 
     return {
@@ -63,7 +74,7 @@ const buildStackedData = (rows = [], metric = "quantity") => {
             stack: "total",
             emphasis: { focus: "series" },
             itemStyle: {
-                color: STATUS_COLOR_MAP[status] || STATUS_COLOR_MAP.Desconhecido,
+                color: STACKED_STATUS_COLOR_MAP[status] || STATUS_COLOR_MAP[status] || STACKED_STATUS_COLOR_MAP.Desconhecido,
                 borderRadius: [4, 4, 0, 0]
             },
             data: months.map((month) => matrix[status]?.[month] || 0)
@@ -209,8 +220,8 @@ export const useChartStackedBarState = ({
                     zoomOnMouseWheel: false,
                     moveOnMouseWheel: true,
                     moveOnMouseMove: true,
-                    start: totalItems <= visibleBars ? 0 : ((totalItems - visibleBars) / totalItems) * 100,
-                    end: 100
+                    start: 0,
+                    end: zoomEnd
                 }
             ],
             series: stackedData.series

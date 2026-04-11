@@ -285,7 +285,7 @@ html[data-theme="dark"] {
 .bi-scope .overview-curva-wrapper .overview-chart-container {
     margin-top: -24px;
     margin-bottom: 36px;
-    height: 170px !important;
+    height: auto !important;
     align-items: flex-start !important;
 }
 

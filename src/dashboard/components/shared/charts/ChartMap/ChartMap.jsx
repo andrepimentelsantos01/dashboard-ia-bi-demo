@@ -9,6 +9,8 @@ import { useChartMapState } from "./chartMap.state";
 
 echarts.registerMap("brazil", brasilMap);
 
+const chartOpts = { renderer: "canvas" };
+
 const ChartMap = ({ backendData, onCrossFilter }) => {
     const {
         open,
@@ -51,6 +53,8 @@ const ChartMap = ({ backendData, onCrossFilter }) => {
                     option={option}
                     style={chartStyle}
                     onEvents={chartEvents}
+                    lazyUpdate
+                    opts={chartOpts}
                 />
             </div>
 
@@ -58,13 +62,15 @@ const ChartMap = ({ backendData, onCrossFilter }) => {
                 title="Visualização Ampliada"
                 open={open}
                 setOpen={closeModal}
-                content={
+                content={open ? (
                     <ReactECharts
                         key={chartKey}
                         option={option}
                         style={chartStyle}
+                        lazyUpdate
+                        opts={chartOpts}
                     />
-                }
+                ) : null}
                 isOpenInvoiced={false}
                 titleCard=""
             />

@@ -6,9 +6,16 @@ import ChartMapMorph from "../../components/shared/charts/ChartMapMorph";
 import ChartPie from "../../components/shared/charts/ChartPie";
 import ChartScatterAggregate from "../../components/shared/charts/ChartScatterAggregate";
 import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
-import ChartTreemap from "../../components/shared/charts/ChartTreemap";
+import ClassificationCurvesButtons from "../../components/shared/classificationControls/ClassificationCurvesButtons";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
 import GaugeCount from "../../components/shared/charts/GaugeCount";
+import {
+    CURVE_BUTTONS_CONTEXT,
+    GAUGE_CONTEXT,
+    HEATMAP_CONTEXT,
+    SCATTER_CONTEXT,
+    STACKED_BAR_CONTEXT
+} from "../../components/shared/chartContext";
 import { useSuppliersState } from "./suppliers.state";
 import "./Suppliers.css";
 
@@ -81,7 +88,11 @@ const Suppliers = () => {
 
         return {
             ...restKpis,
-            "Ticket Medio": ticketMedioCorreto ?? ticketMedioQuebrado ?? ticketMedio
+            "Ticket Medio":
+                restKpis["Ticket Medio"] ??
+                ticketMedioCorreto ??
+                ticketMedioQuebrado ??
+                ticketMedio
         };
     }, [data.kpis, ticketMedio]);
 
@@ -116,6 +127,8 @@ const Suppliers = () => {
                                 onCrossFilter={handleCrossFilter}
                                 filterType="fornecedor"
                                 invertColors
+                                helpText={GAUGE_CONTEXT.sla}
+                                helpLabel="SLA Medio"
                             />
                             <div style={{ textAlign: "center", marginTop: 8 }}>SLA Medio</div>
                         </div>
@@ -126,6 +139,8 @@ const Suppliers = () => {
                                 backendData={tabela}
                                 onCrossFilter={handleCrossFilter}
                                 filterType="fornecedor"
+                                helpText={GAUGE_CONTEXT.glosa}
+                                helpLabel="Percentual de Glosa"
                             />
                             <div style={{ textAlign: "center", marginTop: 8 }}>Percentual de Glosa</div>
                         </div>
@@ -136,6 +151,8 @@ const Suppliers = () => {
                                 backendData={tabela}
                                 onCrossFilter={handleCrossFilter}
                                 filterType="fornecedor"
+                                helpText={GAUGE_CONTEXT.atraso}
+                                helpLabel="Percentual de Atrasos"
                             />
                             <div style={{ textAlign: "center", marginTop: 8 }}>Percentual de Atrasos</div>
                         </div>
@@ -143,41 +160,15 @@ const Suppliers = () => {
                 )
             },
             {
-                title: "Curva ABC de Fornecedores",
-                height: 250,
+                title: "",
+                height: 92,
+                fullWidth: true,
+                compactLayout: true,
+                caption: CURVE_BUTTONS_CONTEXT,
                 component: (
-                    <ChartTreemap
-                        dataOverride={safeOverview.curvaABCTreemap}
-                        onCrossFilter={handleCrossFilter}
-                        hideValues
-                        classificationMode="abc"
-                        abcXyzLegend="suppliers"
-                    />
-                )
-            },
-            {
-                title: "Curva XYZ de Fornecedores",
-                height: 250,
-                component: (
-                    <ChartTreemap
-                        dataOverride={safeOverview.curvaXYZTreemap}
-                        onCrossFilter={handleCrossFilter}
-                        hideValues
-                        classificationMode="xyz"
-                        abcXyzLegend="suppliers"
-                    />
-                )
-            },
-            {
-                title: "Matriz ABC-XYZ de Fornecedores",
-                height: 250,
-                component: (
-                    <ChartTreemap
-                        dataOverride={safeOverview.matrizAbcXyzTreemap}
-                        onCrossFilter={handleCrossFilter}
-                        hideValues
-                        classificationMode="abcxyz"
-                        abcXyzLegend="suppliers"
+                    <ClassificationCurvesButtons
+                        filters={filters}
+                        setFilters={setFilters}
                     />
                 )
             },
@@ -198,6 +189,7 @@ const Suppliers = () => {
             {
                 title: "Evolucao Logistica por Status",
                 height: 280,
+                caption: STACKED_BAR_CONTEXT,
                 component: (
                     <ChartStackedBar
                         backendData={tabela}
@@ -209,6 +201,7 @@ const Suppliers = () => {
             {
                 title: "Mapa de Calor Categoria x Mes",
                 height: 280,
+                caption: HEATMAP_CONTEXT,
                 component: (
                     <ChartHeatmap
                         backendData={tabela}
@@ -229,6 +222,7 @@ const Suppliers = () => {
             {
                 title: "Dispersao de Preco x Volume",
                 height: 300,
+                caption: SCATTER_CONTEXT,
                 component: (
                     <ChartScatterAggregate
                         backendData={tabela}
@@ -296,7 +290,7 @@ const Suppliers = () => {
                 )
             }
         ],
-        [handleCrossFilter, produtosRanking, rankingVolumeParsed, safeOverview, tabela]
+        [filters, handleCrossFilter, produtosRanking, rankingVolumeParsed, safeOverview, setFilters, tabela]
     );
 
     const handleCloseDateModal = useCallback(() => {

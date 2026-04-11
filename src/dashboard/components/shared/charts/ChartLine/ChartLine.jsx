@@ -5,6 +5,8 @@ import { FiRefreshCcw, FiMaximize2 } from "react-icons/fi";
 import "./ChartLine.css";
 import { useChartLineState } from "./chartLine.state";
 
+const chartOpts = { renderer: "canvas" };
+
 const ChartLine = ({ backendData, onCrossFilter }) => {
     const {
         open,
@@ -47,6 +49,8 @@ const ChartLine = ({ backendData, onCrossFilter }) => {
                     option={option}
                     style={chartStyle}
                     onEvents={chartEvents}
+                    lazyUpdate
+                    opts={chartOpts}
                 />
             </div>
 
@@ -54,13 +58,15 @@ const ChartLine = ({ backendData, onCrossFilter }) => {
                 title="Visualização Ampliada"
                 open={open}
                 setOpen={closeModal}
-                content={
+                content={open ? (
                     <ReactECharts
                         key={chartKey}
                         option={option}
                         style={chartStyle}
+                        lazyUpdate
+                        opts={chartOpts}
                     />
-                }
+                ) : null}
                 isOpenInvoiced={false}
                 titleCard=""
             />

@@ -2,7 +2,10 @@ const ABC_ORDER = ["A", "B", "C"];
 const XYZ_ORDER = ["X", "Y", "Z"];
 const MATRIX_ORDER = ["AX", "AY", "AZ", "BX", "BY", "BZ", "CX", "CY", "CZ"];
 
-const toNumber = (value) => (typeof value === "number" ? value : Number(value || 0));
+const toNumber = (value) => {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : 0;
+};
 
 const normalizeClassToken = (value, allowed) => {
     const token = String(value || "").trim().toUpperCase();
@@ -20,43 +23,6 @@ const getMostFrequentToken = (tokens, allowed) => {
 
     return [...counter.entries()]
         .sort((a, b) => b[1] - a[1] || allowed.indexOf(a[0]) - allowed.indexOf(b[0]))[0]?.[0] || null;
-};
-
-const deriveAbcClasses = (entities) => {
-    const sorted = [...entities].sort((a, b) => b.totalValue - a.totalValue);
-    const total = sorted.reduce((sum, item) => sum + item.totalValue, 0);
-    let cumulative = 0;
-
-    sorted.forEach((item) => {
-        cumulative += item.totalValue;
-        const share = total > 0 ? cumulative / total : 0;
-
-        if (share <= 0.8) {
-            item.derivedAbc = "A";
-        } else if (share <= 0.95) {
-            item.derivedAbc = "B";
-        } else {
-            item.derivedAbc = "C";
-        }
-    });
-};
-
-const deriveXyzClass = (seriesMap) => {
-    const values = Object.values(seriesMap).map(toNumber).filter((value) => value >= 0);
-    if (!values.length) return "Z";
-    if (values.length === 1) return values[0] > 0 ? "X" : "Z";
-
-    const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
-    if (mean <= 0) return "Z";
-
-    const variance =
-        values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length;
-    const stdDev = Math.sqrt(variance);
-    const cv = stdDev / mean;
-
-    if (cv <= 0.5) return "X";
-    if (cv <= 1) return "Y";
-    return "Z";
 };
 
 const createBucket = (name) => ({
@@ -89,10 +55,7 @@ const finalizeBuckets = (buckets, order, totalValue) =>
         };
     });
 
-export const buildClassificationTreemapData = (
-    rows = [],
-    config = {}
-) => {
+export const buildClassificationTreemapData = (rows = [], config = {}) => {
     const {
         entityKey,
         valueKey = "valorTotal",
@@ -122,21 +85,14 @@ export const buildClassificationTreemapData = (
         current.abcTokens.push(row[abcKey]);
         current.xyzTokens.push(row[xyzKey]);
 
-        const month = row[monthKey] || row.year_months;
-        if (month) {
-            current.monthlyTotals[month] =
-                (current.monthlyTotals[month] || 0) + toNumber(row[quantityKey] || row[valueKey]);
-        }
-
         entityMap.set(entityName, current);
     });
 
     const entities = [...entityMap.values()];
-    deriveAbcClasses(entities);
 
     entities.forEach((entity) => {
-        entity.abcClass = getMostFrequentToken(entity.abcTokens, ABC_ORDER) || entity.derivedAbc || "C";
-        entity.xyzClass = getMostFrequentToken(entity.xyzTokens, XYZ_ORDER) || deriveXyzClass(entity.monthlyTotals);
+        entity.abcClass = getMostFrequentToken(entity.abcTokens, ABC_ORDER) || "C";
+        entity.xyzClass = getMostFrequentToken(entity.xyzTokens, XYZ_ORDER) || "Z";
         entity.matrixClass = `${entity.abcClass}${entity.xyzClass}`;
     });
 
@@ -164,33 +120,4 @@ export const buildClassificationTreemapData = (
         xyzTreemap: finalizeBuckets(xyzBuckets, XYZ_ORDER, totalValue),
         abcXyzMatrixTreemap: finalizeBuckets(matrixBuckets, MATRIX_ORDER, totalValue)
     };
-};
-
-export const applyDerivedClassifications = (rows = [], config = {}) => {
-    const { entityKey, outputAbcKey = "classificacaoABC", outputXyzKey = "classificacaoXYZ" } = config;
-    const { entityClassifications } = buildClassificationTreemapData(rows, {
-        entityKey,
-        valueKey: "valorTotal",
-        quantityKey: "quantidade",
-        monthKey: "year_months",
-        abcKey: outputAbcKey,
-        xyzKey: outputXyzKey
-    });
-
-    const byEntity = new Map(
-        entityClassifications.map((item) => [item.name, item])
-    );
-
-    return rows.map((row) => {
-        const entity = byEntity.get(row[entityKey]);
-        if (!entity) return row;
-
-        return {
-            ...row,
-            [outputAbcKey]: entity.abcClass,
-            [outputXyzKey]: entity.xyzClass,
-            abc_classification: row.abc_classification ?? entity.abcClass,
-            xyz_classification: row.xyz_classification ?? entity.xyzClass
-        };
-    });
 };

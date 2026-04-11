@@ -6,6 +6,7 @@ import {
     mapToMetricArray,
     toNumber
 } from "./shared/dashboardSelectors";
+import { getKpiVariation } from "../hooks/useKpiVariation";
 
 const buildOrdersMonthKey = (value) => {
     const date = value ? new Date(value) : null;
@@ -91,12 +92,24 @@ export const buildOrdersDerivedData = (analytics = []) => {
     });
 
     const historicoMeses = Array.from(acc.historicoPedidos.keys()).sort();
+    const historicoValor = historicoMeses.map((month) => acc.historicoValor.get(month) || 0);
+    const historicoQuantidade = historicoMeses.map((month) => acc.historicoQuantidade.get(month) || 0);
+    const historicoPedidos = historicoMeses.map((month) => acc.historicoPedidos.get(month) || 0);
 
     return {
         kpis: {
-            valorMovimentado,
-            quantidadeMovimentada,
-            quantidadePedidos,
+            valorMovimentado: {
+                value: valorMovimentado,
+                variation: getKpiVariation(historicoValor)
+            },
+            quantidadeMovimentada: {
+                value: quantidadeMovimentada,
+                variation: getKpiVariation(historicoQuantidade)
+            },
+            quantidadePedidos: {
+                value: quantidadePedidos,
+                variation: getKpiVariation(historicoPedidos)
+            },
             ufTop: acc.estados.size > 0
                 ? Array.from(acc.estados.entries()).sort((a, b) => b[1] - a[1])[0][0]
                 : null

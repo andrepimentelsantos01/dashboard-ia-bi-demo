@@ -1,9 +1,12 @@
 import ReactECharts from "echarts-for-react";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import ModalComponent from "/src/components/ModalV2";
 import { FiChevronsLeft, FiChevronsRight, FiRefreshCcw, FiMaximize2 } from "react-icons/fi";
 import "./ChartBarVertical.css";
 import { useChartBarVerticalState } from "./chartBarVertical.state";
+
+const chartStyle = { width: "100%", height: "100%" };
+const chartOpts = { renderer: "canvas" };
 
 const ChartBarVertical = ({
                               labels,
@@ -49,10 +52,7 @@ const ChartBarVertical = ({
         setOpen(false);
     }, [setOpen]);
 
-    const events = useCallback(
-        { click: handleClickBar },
-        [handleClickBar]
-    );
+    const events = useMemo(() => ({ click: handleClickBar }), [handleClickBar]);
 
     return (
         <>
@@ -76,8 +76,11 @@ const ChartBarVertical = ({
                 <ReactECharts
                     key={chartKey}
                     option={option}
+                    style={chartStyle}
                     className="chart-bar-vertical-chart"
                     onEvents={events}
+                    lazyUpdate
+                    opts={chartOpts}
                 />
             </div>
 
@@ -85,12 +88,15 @@ const ChartBarVertical = ({
                 title="Visualização Ampliada"
                 open={open}
                 setOpen={closeModal}
-                content={
+                content={open ? (
                     <ReactECharts
                         option={option}
+                        style={chartStyle}
                         className="chart-bar-vertical-chart"
+                        lazyUpdate
+                        opts={chartOpts}
                     />
-                }
+                ) : null}
             />
         </>
     );

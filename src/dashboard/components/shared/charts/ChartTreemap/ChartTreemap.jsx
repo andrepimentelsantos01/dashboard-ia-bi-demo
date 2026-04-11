@@ -6,28 +6,29 @@ import { useChartTreemapState } from "./chartTreemap.state";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 
 const STATUS_COLOR_MAP = {
-    Cancelado: "#0e4946",
-    Entregue: "#177972",
-    Atrasado: "#12635e",
-    Faturado: "#177972",
-    Pendente: "#22a69b",
-    "Em Trânsito": "#40b8ad",
-    Desconhecido: "#26717e",
-    "Sem status": "#93a9a6"
+    Cancelado: "#d95f5f",
+    Entregue: "#2a9d8f",
+    Atrasado: "#f4a261",
+    Faturado: "#4f86c6",
+    Pendente: "#7b6fd6",
+    "Em Trânsito": "#2bb3c0",
+    "Em TrÃ¢nsito": "#2bb3c0",
+    Desconhecido: "#7a8aa0",
+    "Sem status": "#9aa6b2"
 };
 
-const ABC_COLOR_MAP = { A: "#0f4f4c", B: "#177972", C: "#63c9c0" };
-const XYZ_COLOR_MAP = { X: "#12635e", Y: "#1b8f86", Z: "#87dad3" };
+const ABC_COLOR_MAP = { A: "#4f86c6", B: "#2a9d8f", C: "#f4a261" };
+const XYZ_COLOR_MAP = { X: "#7b6fd6", Y: "#2bb3c0", Z: "#e76f51" };
 const MATRIX_COLOR_MAP = {
-    AX: "#0f4f4c",
-    AY: "#12635e",
-    AZ: "#177972",
-    BX: "#1b8f86",
-    BY: "#22a69b",
-    BZ: "#40b8ad",
-    CX: "#63c9c0",
-    CY: "#86d8cf",
-    CZ: "#b3ebe5"
+    AX: "#355c9a",
+    AY: "#4f86c6",
+    AZ: "#8db6f2",
+    BX: "#1f8a70",
+    BY: "#2bb3c0",
+    BZ: "#78d5dd",
+    CX: "#d97b2b",
+    CY: "#f4a261",
+    CZ: "#f7c58b"
 };
 
 const chartOpts = { renderer: "canvas" };
@@ -90,10 +91,10 @@ const getClassificationMessage = (name, legendContext, classificationMode) => {
 };
 
 const getNodeColor = (name, classificationMode) => {
-    if (classificationMode === "abc") return ABC_COLOR_MAP[name] || "#93a9a6";
-    if (classificationMode === "xyz") return XYZ_COLOR_MAP[name] || "#93a9a6";
-    if (classificationMode === "abcxyz") return MATRIX_COLOR_MAP[name] || "#93a9a6";
-    return STATUS_COLOR_MAP[name] || "#93a9a6";
+    if (classificationMode === "abc") return ABC_COLOR_MAP[name] || "#9aa6b2";
+    if (classificationMode === "xyz") return XYZ_COLOR_MAP[name] || "#9aa6b2";
+    if (classificationMode === "abcxyz") return MATRIX_COLOR_MAP[name] || "#9aa6b2";
+    return STATUS_COLOR_MAP[name] || "#9aa6b2";
 };
 
 const formatCurrency = (value) =>

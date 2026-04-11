@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useGaugeCountState } from "./gaugeCount.state";
 import "./GaugeCount.css";
 
-const GaugeCount = ({ value, extra, invertColors = false }) => {
+const GaugeCount = ({ value, extra, invertColors = false, helpText, helpLabel }) => {
     const numericValue = useMemo(() => {
         return typeof value === "string"
             ? Number(value.replace("%", "").trim())
@@ -38,6 +38,20 @@ const GaugeCount = ({ value, extra, invertColors = false }) => {
     return (
         <div className="gauge-count-container">
             <div ref={chartRef} className="gauge-count-wrapper" />
+            {helpText ? (
+                <div className="gauge-count-help">
+                    <button
+                        type="button"
+                        className="gauge-count-help-button"
+                        aria-label={`Ajuda sobre ${helpLabel || "este indicador"}`}
+                    >
+                        ?
+                    </button>
+                    <div className="gauge-count-help-tooltip" role="tooltip">
+                        {helpText}
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 };

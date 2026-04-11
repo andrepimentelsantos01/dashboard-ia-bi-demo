@@ -9,6 +9,11 @@ import ChartScatterAggregate from "../../components/shared/charts/ChartScatterAg
 import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
 import ChartTreemap from "../../components/shared/charts/ChartTreemap";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
+import {
+    HEATMAP_CONTEXT,
+    SCATTER_CONTEXT,
+    STACKED_BAR_CONTEXT
+} from "../../components/shared/chartContext";
 import { useOverviewState } from "./overview.state";
 import "./Overview.css";
 
@@ -78,6 +83,7 @@ const Overview = () => {
             {
                 title: "Evolucao Logistica por Status",
                 height: 280,
+                caption: STACKED_BAR_CONTEXT,
                 component: (
                     <ChartStackedBar
                         backendData={tabela}
@@ -89,6 +95,7 @@ const Overview = () => {
             {
                 title: "Dispersao de Preco x Volume",
                 height: 300,
+                caption: SCATTER_CONTEXT,
                 component: (
                     <ChartScatterAggregate
                         backendData={tabela}
@@ -113,6 +120,7 @@ const Overview = () => {
             {
                 title: "Mapa de Calor Categoria x Mes",
                 height: 280,
+                caption: HEATMAP_CONTEXT,
                 component: (
                     <ChartHeatmap
                         backendData={tabela}

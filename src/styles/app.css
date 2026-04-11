@@ -158,10 +158,11 @@ button {
   overflow: hidden;
 }
 
-.section-wrapper-collapse-button,
 .chart-bar-vertical-sort-btn,
 .chart-bar-vertical-expand-btn,
 .chart-bar-vertical-refresh-btn,
+.chart-heatmap-expand-btn,
+.chart-heatmap-refresh-btn,
 .chart-horizontal-expand-btn,
 .chart-horizontal-sort-btn,
 .chart-horizontal-refresh-btn,
@@ -169,8 +170,15 @@ button {
 .chart-line-refresh-btn,
 .chart-map-expand-btn,
 .chart-map-refresh-btn,
+.chart-map-morph-expand-btn,
+.chart-map-morph-refresh-btn,
+.chart-map-morph-toggle-btn,
 .chart-pie-expand-btn,
 .chart-pie-refresh-btn,
+.chart-scatter-aggregate-refresh-btn,
+.chart-scatter-aggregate-expand-btn,
+.chart-stacked-bar-expand-btn,
+.chart-stacked-bar-refresh-btn,
 .treemap-expand-btn {
   width: 30px !important;
   height: 30px !important;
@@ -188,10 +196,11 @@ button {
     color 0.2s ease !important;
 }
 
-.section-wrapper-collapse-button:hover,
 .chart-bar-vertical-sort-btn:hover,
 .chart-bar-vertical-expand-btn:hover,
 .chart-bar-vertical-refresh-btn:hover,
+.chart-heatmap-expand-btn:hover,
+.chart-heatmap-refresh-btn:hover,
 .chart-horizontal-expand-btn:hover,
 .chart-horizontal-sort-btn:hover,
 .chart-horizontal-refresh-btn:hover,
@@ -199,8 +208,15 @@ button {
 .chart-line-refresh-btn:hover,
 .chart-map-expand-btn:hover,
 .chart-map-refresh-btn:hover,
+.chart-map-morph-expand-btn:hover,
+.chart-map-morph-refresh-btn:hover,
+.chart-map-morph-toggle-btn:hover,
 .chart-pie-expand-btn:hover,
 .chart-pie-refresh-btn:hover,
+.chart-scatter-aggregate-refresh-btn:hover,
+.chart-scatter-aggregate-expand-btn:hover,
+.chart-stacked-bar-expand-btn:hover,
+.chart-stacked-bar-refresh-btn:hover,
 .treemap-expand-btn:hover {
   transform: translateY(-1px) scale(1.02);
   background: var(--action-btn-bg-hover) !important;
@@ -212,13 +228,18 @@ button {
 .chart-bar-vertical-sort-icon,
 .chart-bar-vertical-expand-icon,
 .chart-bar-vertical-refresh-icon,
+.chart-heatmap-icon,
 .chart-horizontal-icon,
 .chart-line-expand-icon,
 .chart-line-refresh-icon,
 .chart-map-expand-icon,
 .chart-map-refresh-icon,
+.chart-map-morph-icon,
+.chart-map-morph-toggle-glyph,
 .chart-pie-expand-icon,
 .chart-pie-refresh-icon,
+.chart-scatter-aggregate-icon,
+.chart-stacked-bar-icon,
 .treemap-expand-icon {
   color: inherit !important;
   font-size: 14px !important;

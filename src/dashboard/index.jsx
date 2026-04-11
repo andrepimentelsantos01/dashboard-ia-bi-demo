@@ -1,13 +1,21 @@
-import React, { useState, useMemo, Suspense, useCallback } from "react";
+import React, { useState, useMemo, Suspense, useCallback, useEffect, startTransition } from "react";
 import { ButtonGroup, Button } from "react-bootstrap";
+import DashboardErrorBoundary from "./components/shared/DashboardErrorBoundary";
 import "./index.css";
 
-const Overview = React.lazy(() => import("./tabs/Overview"));
-const Products = React.lazy(() => import("./tabs/Products/Products"));
-const Clients = React.lazy(() => import("./tabs/Clients/Clients"));
-const Suppliers = React.lazy(() => import("./tabs/Suppliers"));
-const Quotations = React.lazy(() => import("./tabs/Quotations"));
-const Orders = React.lazy(() => import("./tabs/Orders"));
+const loadOverview = () => import("./tabs/Overview");
+const loadProducts = () => import("./tabs/Products/Products");
+const loadClients = () => import("./tabs/Clients/Clients");
+const loadSuppliers = () => import("./tabs/Suppliers");
+const loadQuotations = () => import("./tabs/Quotations");
+const loadOrders = () => import("./tabs/Orders");
+
+const Overview = React.lazy(loadOverview);
+const Products = React.lazy(loadProducts);
+const Clients = React.lazy(loadClients);
+const Suppliers = React.lazy(loadSuppliers);
+const Quotations = React.lazy(loadQuotations);
+const Orders = React.lazy(loadOrders);
 
 const Skeleton = React.memo(() => (
     <div className="skeleton-wrapper">
@@ -19,27 +27,50 @@ const Skeleton = React.memo(() => (
 ));
 
 const TABS = [
-    { key: "overview", label: "Visão Geral", component: Overview },
-    { key: "products", label: "Produtos", component: Products },
-    { key: "clients", label: "Clientes", component: Clients },
-    { key: "suppliers", label: "Fornecedores", component: Suppliers },
-    { key: "quotations", label: "Cotações", component: Quotations },
-    { key: "orders", label: "Pedidos & Logística", component: Orders }
+    { key: "overview", label: "Vis\u00e3o Geral", component: Overview, preload: loadOverview },
+    { key: "products", label: "Produtos", component: Products, preload: loadProducts },
+    { key: "clients", label: "Clientes", component: Clients, preload: loadClients },
+    { key: "suppliers", label: "Fornecedores", component: Suppliers, preload: loadSuppliers },
+    { key: "quotations", label: "Cota\u00e7\u00f5es", component: Quotations, preload: loadQuotations },
+    { key: "orders", label: "Pedidos & Log\u00edstica", component: Orders, preload: loadOrders }
 ];
 
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState("overview");
 
     const handleTabChange = useCallback((key) => {
-        setActiveTab(key);
+        startTransition(() => {
+            setActiveTab(key);
+        });
     }, []);
 
-    const currentTab = useMemo(() => {
-        const found = TABS.find(t => t.key === activeTab);
-        if (!found) return <Overview key="overview" />;
-        const Component = found.component;
-        return <Component key={activeTab} />;
+    const preloadTab = useCallback((key) => {
+        const found = TABS.find((tab) => tab.key === key);
+        found?.preload?.();
+    }, []);
+
+    useEffect(() => {
+        const preloadNonActiveTabs = () => {
+            TABS.forEach(({ key, preload }) => {
+                if (key !== activeTab) preload?.();
+            });
+        };
+
+        if (typeof window === "undefined") return undefined;
+
+        if ("requestIdleCallback" in window) {
+            const idleId = window.requestIdleCallback(preloadNonActiveTabs, { timeout: 1200 });
+            return () => window.cancelIdleCallback?.(idleId);
+        }
+
+        const timeoutId = window.setTimeout(preloadNonActiveTabs, 600);
+        return () => window.clearTimeout(timeoutId);
     }, [activeTab]);
+
+    const currentTabConfig = useMemo(
+        () => TABS.find((tab) => tab.key === activeTab) ?? null,
+        [activeTab]
+    );
 
     const tabButtons = useMemo(
         () =>
@@ -49,21 +80,34 @@ const Dashboard = () => {
                     className="dashboard-tab-btn"
                     variant={activeTab === key ? "primary" : "outline-primary"}
                     onClick={() => handleTabChange(key)}
+                    onMouseEnter={() => preloadTab(key)}
+                    onFocus={() => preloadTab(key)}
                 >
                     {label}
                 </Button>
             )),
-        [activeTab, handleTabChange]
+        [activeTab, handleTabChange, preloadTab]
     );
+
+    const CurrentComponent = currentTabConfig?.component;
 
     return (
         <div className="dashboard-container">
             <ButtonGroup className="dashboard-btn-group d-flex flex-wrap">
                 {tabButtons}
             </ButtonGroup>
-            <Suspense fallback={<Skeleton />}>
-                {currentTab}
-            </Suspense>
+
+            <DashboardErrorBoundary
+                fallback={
+                    <div className="alert alert-warning mt-3" role="alert">
+                        Nao foi possivel carregar esta aba.
+                    </div>
+                }
+            >
+                <Suspense fallback={<Skeleton />}>
+                    {CurrentComponent ? <CurrentComponent key={activeTab} /> : null}
+                </Suspense>
+            </DashboardErrorBoundary>
         </div>
     );
 };

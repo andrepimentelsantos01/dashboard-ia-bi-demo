@@ -48,6 +48,11 @@ export const formatValue = (value, valueFormat) => {
     })}`;
 };
 
+const isTemporalLabel = (value) => {
+    const text = String(value || "").trim();
+    return /^\d{4}-\d{2}(-\d{2})?$/.test(text);
+};
+
 export const sortDesc = (record) =>
     Object.entries(record).sort((a, b) =>
         b[1] !== a[1] ? b[1] - a[1] : naturalAsc.compare(a[0], b[0])
@@ -196,7 +201,8 @@ export const buildBarVerticalOptions = ({
                                             color,
                                             valueFormat,
                                             showTrendLine,
-                                            themeTokens
+                                            themeTokens,
+                                            isTemporalOrder = false
                                         }) => {
     const totalItems = labels.length;
     const manyItems = totalItems > 10;
@@ -296,8 +302,8 @@ export const buildBarVerticalOptions = ({
                 zoomOnMouseWheel: false,
                 moveOnMouseWheel: true,
                 moveOnMouseMove: true,
-                start: totalItems <= visibleBars ? 0 : ((totalItems - visibleBars) / totalItems) * 100,
-                end: 100
+                start: 0,
+                end: isTemporalOrder ? zoomEnd : 100
             }
         ],
         series: showTrendLine ? [barSeries, trendSeries] : [barSeries]
@@ -314,9 +320,13 @@ export const useChartBarVerticalState = ({
                                              onCrossFilter,
                                          showTrendLine
                                      }) => {
+    const shouldDefaultDesc = useMemo(
+        () => filterType === "mes" || labels.every(isTemporalLabel),
+        [filterType, labels]
+    );
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState(null);
-    const [orderState, setOrderState] = useState("LTR");
+    const [orderState, setOrderState] = useState(shouldDefaultDesc ? "RTL" : "LTR");
     const [chartKey, setChartKey] = useState(0);
     const themeTokens = useChartThemeTokens();
 
@@ -343,9 +353,9 @@ export const useChartBarVerticalState = ({
 
     const handleRefresh = useCallback(() => {
         setSelected(null);
-        setOrderState("LTR");
+        setOrderState(shouldDefaultDesc ? "RTL" : "LTR");
         if (onCrossFilter) onCrossFilter({ type: "reset" });
-    }, [onCrossFilter]);
+    }, [onCrossFilter, shouldDefaultDesc]);
 
     const toggleOrder = useCallback(() => {
         setOrderState((current) => (current === "LTR" ? "RTL" : "LTR"));
@@ -377,9 +387,10 @@ export const useChartBarVerticalState = ({
             color,
             valueFormat,
             showTrendLine,
-            themeTokens
+            themeTokens,
+            isTemporalOrder: shouldDefaultDesc
         }),
-        [aggregated, color, orderedLabels, orderedValues, showTrendLine, themeTokens, valueFormat]
+        [aggregated, color, orderedLabels, orderedValues, shouldDefaultDesc, showTrendLine, themeTokens, valueFormat]
     );
 
     return {

@@ -37,7 +37,7 @@ const Quotations = () => {
     } = useQuotationsState();
 
     const tabela = data.operacionais?.tabela || [];
-    const fact = data.overview?.fact || [];
+    const fact = data.analytics?.fact || [];
     const kpis = data.kpis || {};
 
     const kpisParsed = useMemo(() => {

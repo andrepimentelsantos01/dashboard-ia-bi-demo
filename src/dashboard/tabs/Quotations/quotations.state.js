@@ -13,6 +13,7 @@ import {
 import { useDashboardTabUi } from "../../hooks/useDashboardTabUi";
 import {
     buildQuotationsAvailableFilters,
+    buildQuotationsDerivedKpis,
     normalizeQuotationsAnalytics,
     normalizeQuotationsTable
 } from "../../selectors/quotationsSelectors";
@@ -78,6 +79,11 @@ export const useQuotationsState = () => {
         [rawResponse.fact]
     );
 
+    const kpis = useMemo(
+        () => buildQuotationsDerivedKpis(analytics, rawResponse.kpis || {}),
+        [analytics, rawResponse.kpis]
+    );
+
     const tabela = useMemo(
         () => normalizeQuotationsTable(rawResponse.table || []),
         [rawResponse.table]
@@ -111,8 +117,8 @@ export const useQuotationsState = () => {
         filters,
         setFilters,
         data: {
-            kpis: rawResponse.kpis || {},
-            overview: {
+            kpis,
+            analytics: {
                 fact: analytics
             },
             operacionais: {

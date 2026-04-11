@@ -1,1 +1,13 @@
 @import "../shared/dashboardTabTheme.css";
+
+.suppliers-gauge-caption {
+    margin-top: 6px;
+    text-align: center;
+    font-size: 0.76rem;
+    line-height: 1.45;
+    color: #5f7774;
+}
+
+html[data-theme="dark"] .suppliers-gauge-caption {
+    color: rgba(223, 245, 241, 0.72);
+}

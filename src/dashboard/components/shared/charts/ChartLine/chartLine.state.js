@@ -113,7 +113,7 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
         return { grouped, byMonth };
     }, [backendData]);
 
-    const months = useMemo(() => Object.keys(aggregated.grouped).sort(), [aggregated]);
+    const months = useMemo(() => Object.keys(aggregated.grouped).sort().reverse(), [aggregated]);
 
     const averages = useMemo(
         () => months.map((month) => {
@@ -139,8 +139,8 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
 
     const option = useMemo(() => {
         const totalItems = months.length;
-        const startSlider = totalItems <= 12 ? 0 : ((totalItems - 12) / totalItems) * 100;
-        const startInside = totalItems <= 9 ? 0 : ((totalItems - 9) / totalItems) * 100;
+        const visibleItems = 12;
+        const zoomEnd = totalItems > visibleItems ? (visibleItems / totalItems) * 100 : 100;
 
         return {
             tooltip: buildResponsiveTooltip((params) => {
@@ -202,8 +202,8 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                     handleIcon: "path://M512 64L576 128 512 192 448 128z",
                     handleSize: "80%",
                     handleColor: LINE_COLOR,
-                    start: startSlider,
-                    end: 100
+                    start: 0,
+                    end: zoomEnd
                 },
                 {
                     type: "inside",
@@ -211,8 +211,8 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                     zoomOnMouseWheel: false,
                     moveOnMouseWheel: true,
                     moveOnMouseMove: true,
-                    start: startInside,
-                    end: 100
+                    start: 0,
+                    end: zoomEnd
                 }
             ],
             series: [

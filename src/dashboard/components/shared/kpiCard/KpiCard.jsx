@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { Card } from "react-bootstrap";
+import { KPI_VARIATION_CONTEXT } from "../chartContext";
 import "./KpiCard.css";
 import { useKpiCardState } from "./kpiCard.state";
 
@@ -24,13 +25,17 @@ const KpiCard = ({ label, value, variation }) => {
         <Card className="kpi-card text-center">
             <div className="kpi-card-overlay" />
             <Card.Body className="kpi-card-body d-flex flex-column justify-content-center">
-                <span className="kpi-card-label">{label}</span>
-                <span className="kpi-card-value">{isEmpty ? "–" : formatted}</span>
-                {/* {showVariation && (
-                    <span className={`kpi-card-variation ${variationClass}`}>
+                {showVariation ? (
+                    <span
+                        className={`kpi-card-variation ${variationClass}`}
+                        title={KPI_VARIATION_CONTEXT}
+                        aria-label={`${KPI_VARIATION_CONTEXT} Variacao de ${variationText}.`}
+                    >
                         {variationText}
                     </span>
-                )} */}
+                ) : null}
+                <span className="kpi-card-label">{label}</span>
+                <span className="kpi-card-value">{isEmpty ? "-" : formatted}</span>
             </Card.Body>
         </Card>
     );

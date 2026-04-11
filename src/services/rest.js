@@ -4,7 +4,6 @@ import productsMock from "../mocks/dashboard/dashboardProducts.mock.json";
 import clientsMock from "../mocks/dashboard/dashboardClients.mock.json";
 import suppliersMock from "../mocks/dashboard/dashboardSuppliers.mock.json";
 import quotationsMock from "../mocks/dashboard/dashboardQuotations.mock.json";
-import { applyDerivedClassifications } from "../dashboard/selectors/shared/classificationSelectors";
 import { normalizeStatusLabel, slugifyStatus } from "../dashboard/selectors/shared/dashboardStatus";
 
 const safeDate = (value) => {
@@ -217,21 +216,13 @@ const clientsRows = normalizeRows(clientsMock.tabelaClientes, {
   classXyzKey: "classificacaoXYZ"
 });
 
-const suppliersRows = applyDerivedClassifications(
-  normalizeRows(suppliersMock.tabelaFornecedores, {
-    dateKey: "data",
-    orderKey: "numeroPedido",
-    quotationKey: "numeroCotacao"
-  }).map((row) => ({
-    ...row,
-    fornecedor: row.supplier_name,
-    valorTotal: row.total_amount,
-    quantidade: row.quantity_requested
-  })),
-  {
-    entityKey: "fornecedor"
-  }
-).map(({ fornecedor, valorTotal, quantidade, ...row }) => row);
+const suppliersRows = normalizeRows(suppliersMock.tabelaFornecedores, {
+  dateKey: "data",
+  orderKey: "numeroPedido",
+  quotationKey: "numeroCotacao",
+  classAbcKey: "classificacaoABC",
+  classXyzKey: "classificacaoXYZ"
+});
 
 const quotationsRows = normalizeRows(quotationsMock.tabelaCotas, {
   dateKey: "data",

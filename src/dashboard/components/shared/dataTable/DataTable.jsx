@@ -1,8 +1,5 @@
-import React, { useMemo, useCallback, useState } from "react";
+import React, { useMemo, useCallback, useState, useDeferredValue } from "react";
 import { FiFileText, FiGrid, FiSearch } from "react-icons/fi";
-import { utils, writeFile } from "xlsx";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
 import "./DataTable.css";
 import { useFormatter } from "../../../hooks/useFormatter";
 import { useDataTableState } from "./dataTable.state";
@@ -69,6 +66,7 @@ const DataTable = ({
 }) => {
     const { autoFormat } = useFormatter();
     const [search, setSearch] = useState("");
+    const deferredSearch = useDeferredValue(search);
 
     const normalizedColumns = useMemo(
         () => columns.map((column) => ({
@@ -90,9 +88,9 @@ const DataTable = ({
     }, [handleSort]);
 
     const filteredRows = useMemo(() => {
-        if (!search) return sortedRows;
+        if (!deferredSearch) return sortedRows;
 
-        const term = search.toLowerCase();
+        const term = deferredSearch.toLowerCase();
 
         return sortedRows.filter((row) =>
             normalizedColumns.some((column) => {
@@ -105,7 +103,7 @@ const DataTable = ({
                 return String(displayValue ?? "").toLowerCase().includes(term);
             })
         );
-    }, [autoFormat, normalizedColumns, search, sortedRows]);
+    }, [autoFormat, deferredSearch, normalizedColumns, sortedRows]);
 
     const rowsForExportSource = useMemo(
         () => (Array.isArray(exportRows) && exportRows.length ? exportRows : filteredRows),
@@ -128,8 +126,9 @@ const DataTable = ({
         })
     ), [autoFormat, filteredRows, normalizedColumns]);
 
-    const exportDataset = useMemo(() => (
-        rowsForExportSource.map((row) => {
+    const buildExportDataset = useCallback(
+        (sourceRows) =>
+            sourceRows.map((row) => {
             const formattedRow = {};
 
             normalizedColumns.forEach((column) => {
@@ -141,16 +140,20 @@ const DataTable = ({
             });
 
             return formattedRow;
-        })
-    ), [autoFormat, normalizedColumns, rowsForExportSource]);
+            }),
+        [autoFormat, normalizedColumns]
+    );
 
     const exportBaseName = useMemo(
         () => `${sanitizeFilePart(exportFileName)}-${buildTimestamp()}`,
         [exportFileName]
     );
 
-    const handleExportSpreadsheet = useCallback(() => {
+    const handleExportSpreadsheet = useCallback(async () => {
+        const exportDataset = buildExportDataset(rowsForExportSource);
         if (!exportDataset.length) return;
+
+        const { utils, writeFile } = await import("xlsx");
 
         const header = normalizedColumns.map((column) => column.label);
         const worksheet = utils.json_to_sheet(exportDataset, { header });
@@ -158,10 +161,16 @@ const DataTable = ({
 
         utils.book_append_sheet(workbook, worksheet, "Dados");
         writeFile(workbook, `${exportBaseName}.xlsx`);
-    }, [exportBaseName, exportDataset, normalizedColumns]);
+    }, [buildExportDataset, exportBaseName, normalizedColumns, rowsForExportSource]);
 
-    const handleExportPdf = useCallback(() => {
+    const handleExportPdf = useCallback(async () => {
+        const exportDataset = buildExportDataset(rowsForExportSource);
         if (!exportDataset.length) return;
+
+        const [{ jsPDF }, { default: autoTable }] = await Promise.all([
+            import("jspdf"),
+            import("jspdf-autotable")
+        ]);
 
         const document = new jsPDF({
             orientation: normalizedColumns.length > 6 ? "landscape" : "portrait",
@@ -195,7 +204,7 @@ const DataTable = ({
         });
 
         document.save(`${exportBaseName}.pdf`);
-    }, [exportBaseName, exportDataset, exportTitle, normalizedColumns]);
+    }, [buildExportDataset, exportBaseName, exportTitle, normalizedColumns, rowsForExportSource]);
 
     return (
         <div className="datatable-wrapper">

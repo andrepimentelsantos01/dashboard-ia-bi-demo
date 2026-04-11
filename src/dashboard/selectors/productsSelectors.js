@@ -92,6 +92,11 @@ export const buildProductsDerivedData = (analytics = []) => {
     const historicoMeses = Object.keys(acc.historicoValores).sort();
     const historicoValores = historicoMeses.map(month => acc.historicoValores[month]);
     const historicoQuantidade = historicoMeses.map(month => acc.historicoQuantidade[month]);
+    const historicoTicketMedio = historicoMeses.map((month) => {
+        const valor = acc.historicoValores[month] || 0;
+        const quantidade = acc.historicoQuantidade[month] || 0;
+        return quantidade > 0 ? valor / quantidade : 0;
+    });
 
     const produtosRanking = mapToMetricArray(acc.produtos, "valor", "desc");
     const rankingClientes = mapToMetricArray(acc.clientes, "valor", "asc");
@@ -139,7 +144,7 @@ export const buildProductsDerivedData = (analytics = []) => {
                     style: "currency",
                     currency: "BRL"
                 }),
-                variation: null
+                variation: getKpiVariation(historicoTicketMedio)
             },
             percentualCancelados: analytics.length ? `${((cancelados / analytics.length) * 100).toFixed(1)}%` : "0%",
             percentualAtraso: analytics.length ? `${((atrasados / analytics.length) * 100).toFixed(1)}%` : "0%"

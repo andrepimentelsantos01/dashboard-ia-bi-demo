@@ -7,7 +7,14 @@ import ChartPie from "../../components/shared/charts/ChartPie";
 import ChartScatterAggregate from "../../components/shared/charts/ChartScatterAggregate";
 import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
 import ChartTreemap from "../../components/shared/charts/ChartTreemap/ChartTreemap";
+import ClassificationCurvesButtons from "../../components/shared/classificationControls/ClassificationCurvesButtons";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
+import {
+    CURVE_BUTTONS_CONTEXT,
+    HEATMAP_CONTEXT,
+    SCATTER_CONTEXT,
+    STACKED_BAR_CONTEXT
+} from "../../components/shared/chartContext";
 import { useProductsState } from "./products.state";
 import "./Products.css";
 
@@ -72,6 +79,19 @@ const Products = () => {
     const charts = useMemo(
         () => [
             {
+                title: "",
+                height: 92,
+                fullWidth: true,
+                compactLayout: true,
+                caption: CURVE_BUTTONS_CONTEXT,
+                component: (
+                    <ClassificationCurvesButtons
+                        filters={filters}
+                        setFilters={setFilters}
+                    />
+                )
+            },
+            {
                 title: "Distribuicao de Categoria Por Valor",
                 height: 250,
                 component: (
@@ -93,47 +113,9 @@ const Products = () => {
                 )
             },
             {
-                title: "Curva ABC de Produtos",
-                height: 250,
-                component: (
-                    <ChartTreemap
-                        dataOverride={data.curvaABCTreemap}
-                        onCrossFilter={handleCrossFilter}
-                        hideValues
-                        classificationMode="abc"
-                        abcXyzLegend="products"
-                    />
-                )
-            },
-            {
-                title: "Curva XYZ de Produtos",
-                height: 250,
-                component: (
-                    <ChartTreemap
-                        dataOverride={data.curvaXYZTreemap}
-                        onCrossFilter={handleCrossFilter}
-                        hideValues
-                        classificationMode="xyz"
-                        abcXyzLegend="products"
-                    />
-                )
-            },
-            {
-                title: "Matriz ABC-XYZ de Produtos",
-                height: 250,
-                component: (
-                    <ChartTreemap
-                        dataOverride={data.matrizAbcXyzTreemap}
-                        onCrossFilter={handleCrossFilter}
-                        hideValues
-                        classificationMode="abcxyz"
-                        abcXyzLegend="products"
-                    />
-                )
-            },
-            {
                 title: "Evolucao Logistica por Status",
                 height: 280,
+                caption: STACKED_BAR_CONTEXT,
                 component: (
                     <ChartStackedBar
                         backendData={tabela}
@@ -145,6 +127,7 @@ const Products = () => {
             {
                 title: "Mapa de Calor Categoria x Mes",
                 height: 280,
+                caption: HEATMAP_CONTEXT,
                 component: (
                     <ChartHeatmap
                         backendData={tabela}
@@ -155,6 +138,7 @@ const Products = () => {
             {
                 title: "Dispersao de Preco x Volume",
                 height: 300,
+                caption: SCATTER_CONTEXT,
                 component: (
                     <ChartScatterAggregate
                         backendData={tabela}
@@ -198,7 +182,7 @@ const Products = () => {
                 )
             }
         ],
-        [data, handleCrossFilter, sortedGlosa, tabela]
+        [data, filters, handleCrossFilter, setFilters, sortedGlosa, tabela]
     );
 
     const handleCloseDateModal = useCallback(() => {

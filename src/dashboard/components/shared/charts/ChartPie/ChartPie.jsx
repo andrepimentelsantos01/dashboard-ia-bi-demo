@@ -7,17 +7,29 @@ import { useChartPieState } from "./chartPie.state";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 import { useChartThemeTokens } from "../chartTheme";
 
-const stringToHue = (str) => {
+const PIE_COLOR_PALETTE = [
+    "#4f86c6",
+    "#2a9d8f",
+    "#f4a261",
+    "#7b6fd6",
+    "#2bb3c0",
+    "#e76f51",
+    "#78d5dd",
+    "#d97b2b",
+    "#8db6f2",
+    "#1f8a70"
+];
+
+const stringToIndex = (str) => {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
-    return Math.abs(hash % 50) + 180;
+    return Math.abs(hash % PIE_COLOR_PALETTE.length);
 };
 
 const getCorporateColorByName = (name) => {
-    const hue = stringToHue(name || "");
-    return `hsl(${hue}, 46%, 52%)`;
+    return PIE_COLOR_PALETTE[stringToIndex(name || "")];
 };
 
 const formatCurrency = (value) =>

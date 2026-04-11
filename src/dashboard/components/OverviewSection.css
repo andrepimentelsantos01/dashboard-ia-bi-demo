@@ -1,3 +1,11 @@
+.overview-compact-row {
+    --bs-gutter-x: 18px;
+    --bs-gutter-y: 0;
+    margin-right: 0;
+    margin-left: 0;
+    margin-bottom: 8px;
+}
+
 .overview-grid-row {
     --bs-gutter-x: 18px;
     --bs-gutter-y: 18px;
@@ -37,16 +45,107 @@
     text-align: center;
 }
 
+.overview-chart-help {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 8;
+}
+
+.overview-chart-help-button {
+    width: 24px;
+    height: 24px;
+    border: 1px solid rgba(20, 79, 75, 0.14);
+    border-radius: 50%;
+    background: rgba(255,255,255,0.75);
+    color: #2e3642;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.25);
+    transition: background 0.2s ease, border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.overview-chart-help-button:hover,
+.overview-chart-help-button:focus-visible {
+    background: rgba(255,255,255,0.9);
+    border: 1px solid rgba(0,0,0,0.2);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    outline: none;
+}
+
+.overview-chart-help-tooltip {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 10px);
+    width: min(320px, calc(100vw - 48px));
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(26, 35, 44, 0.96);
+    color: #f4fbfa;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    text-align: left;
+    box-shadow: 0 20px 36px rgba(6, 16, 23, 0.22);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+    pointer-events: none;
+}
+
+.overview-chart-help-tooltip::before {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    right: 9px;
+    width: 12px;
+    height: 12px;
+    background: rgba(26, 35, 44, 0.96);
+    transform: rotate(45deg);
+}
+
+.overview-chart-help:hover .overview-chart-help-tooltip,
+.overview-chart-help:focus-within .overview-chart-help-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
 .overview-chart-container {
     width: 100%;
     min-height: 320px;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .overview-curva-wrapper .overview-chart-container.curva-container {
-    height: 150px;
+    height: auto;
+    min-height: auto;
+    display: block;
+    margin-bottom: 0;
+}
+
+.overview-curva-wrapper--compact .overview-card-title {
+    min-height: auto;
+    margin-bottom: 8px;
+}
+
+.overview-curva-wrapper--compact .overview-chart-container.curva-container {
+    height: auto;
+    min-height: auto;
+    display: block;
+    align-items: initial;
+}
+
+.overview-chart-container--compact {
+    min-height: auto;
     margin-bottom: 0;
 }
 
@@ -83,11 +182,27 @@ html[data-theme="dark"] .overview-card-title {
     color: #dff5f1;
 }
 
+html[data-theme="dark"] .overview-chart-help-button {
+    background: rgba(10, 28, 27, 0.82);
+    border-color: rgba(111, 213, 200, 0.18);
+    color: #dff5f1;
+}
+
+html[data-theme="dark"] .overview-chart-help-tooltip,
+html[data-theme="dark"] .overview-chart-help-tooltip::before {
+    background: rgba(6, 15, 19, 0.97);
+}
+
 html[data-theme="dark"] .overview-title-black50 {
     color: rgba(223, 245, 241, 0.64);
 }
 
 @media (max-width: 991px) {
+    .overview-compact-row {
+        --bs-gutter-x: 16px;
+        margin-bottom: 6px;
+    }
+
     .overview-grid-row {
         --bs-gutter-x: 16px;
         --bs-gutter-y: 16px;
@@ -99,6 +214,11 @@ html[data-theme="dark"] .overview-title-black50 {
 }
 
 @media (max-width: 767px) {
+    .overview-compact-row {
+        --bs-gutter-x: 14px;
+        margin-bottom: 4px;
+    }
+
     .overview-grid-row {
         --bs-gutter-x: 14px;
         --bs-gutter-y: 14px;
@@ -111,10 +231,25 @@ html[data-theme="dark"] .overview-title-black50 {
     .overview-card-title {
         min-height: auto;
         font-size: 0.95rem;
-        margin-bottom: 10px;
+        margin-bottom: 0;
     }
 
     .overview-chart-container {
         min-height: 260px;
+    }
+
+    .overview-curva-wrapper--compact .overview-chart-container.curva-container {
+        min-height: auto;
+    }
+
+    .overview-chart-help {
+        right: 8px;
+        bottom: 8px;
+    }
+
+    .overview-chart-help-tooltip {
+        right: 0;
+        left: auto;
+        width: min(280px, calc(100vw - 36px));
     }
 }

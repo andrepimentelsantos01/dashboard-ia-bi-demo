@@ -9,6 +9,13 @@ import ChartPie from "../../components/shared/charts/ChartPie";
 import ChartScatterAggregate from "../../components/shared/charts/ChartScatterAggregate";
 import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
 import ChartTreemap from "../../components/shared/charts/ChartTreemap";
+import ClassificationCurvesButtons from "../../components/shared/classificationControls/ClassificationCurvesButtons";
+import {
+    CURVE_BUTTONS_CONTEXT,
+    HEATMAP_CONTEXT,
+    SCATTER_CONTEXT,
+    STACKED_BAR_CONTEXT
+} from "../../components/shared/chartContext";
 import { useClientsState } from "./clients.state";
 import "./Clients.css";
 
@@ -53,6 +60,19 @@ const Clients = () => {
     const charts = useMemo(
         () => [
             {
+                title: "",
+                height: 92,
+                fullWidth: true,
+                compactLayout: true,
+                caption: CURVE_BUTTONS_CONTEXT,
+                component: (
+                    <ClassificationCurvesButtons
+                        filters={filters}
+                        setFilters={setFilters}
+                    />
+                )
+            },
+            {
                 title: "Ranking de Cliente Por Valor",
                 height: 260,
                 component: (
@@ -64,45 +84,6 @@ const Clients = () => {
                         height={250}
                         onCrossFilter={handleCrossFilter}
                         filterType="cliente"
-                    />
-                )
-            },
-            {
-                title: "Curva ABC de Clientes",
-                height: 250,
-                component: (
-                    <ChartTreemap
-                        dataOverride={overview.curvaABCTreemap}
-                        onCrossFilter={handleCrossFilter}
-                        hideValues
-                        classificationMode="abc"
-                        abcXyzLegend="clients"
-                    />
-                )
-            },
-            {
-                title: "Curva XYZ de Clientes",
-                height: 250,
-                component: (
-                    <ChartTreemap
-                        dataOverride={overview.curvaXYZTreemap}
-                        onCrossFilter={handleCrossFilter}
-                        hideValues
-                        classificationMode="xyz"
-                        abcXyzLegend="clients"
-                    />
-                )
-            },
-            {
-                title: "Matriz ABC-XYZ de Clientes",
-                height: 250,
-                component: (
-                    <ChartTreemap
-                        dataOverride={overview.matrizAbcXyzTreemap}
-                        onCrossFilter={handleCrossFilter}
-                        hideValues
-                        classificationMode="abcxyz"
-                        abcXyzLegend="clients"
                     />
                 )
             },
@@ -149,6 +130,7 @@ const Clients = () => {
             {
                 title: "Evolucao Logistica por Status",
                 height: 280,
+                caption: STACKED_BAR_CONTEXT,
                 component: (
                     <ChartStackedBar
                         backendData={tabela}
@@ -160,6 +142,7 @@ const Clients = () => {
             {
                 title: "Mapa de Calor Categoria x Mes",
                 height: 280,
+                caption: HEATMAP_CONTEXT,
                 component: (
                     <ChartHeatmap
                         backendData={tabela}
@@ -170,6 +153,7 @@ const Clients = () => {
             {
                 title: "Dispersao de Preco x Volume",
                 height: 300,
+                caption: SCATTER_CONTEXT,
                 component: (
                     <ChartScatterAggregate
                         backendData={tabela}
@@ -231,15 +215,14 @@ const Clients = () => {
         ],
         [
             categoriasPizza,
+            filters,
             fornecedoresRanking,
             handleCrossFilter,
             historicoMeses,
             historicoValores,
-            overview.curvaABCTreemap,
-            overview.curvaXYZTreemap,
-            overview.matrizAbcXyzTreemap,
             produtosRanking,
             rankingClientes,
+            setFilters,
             tabela,
             ticketMedioMensal
         ]

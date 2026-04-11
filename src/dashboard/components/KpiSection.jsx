@@ -3,6 +3,29 @@ import React, { useMemo } from "react";
 import KpiCard from "./shared/kpiCard";
 import "./KpiSection.css";
 
+const normalizeKpiValue = (entry) => {
+    if (!entry || typeof entry !== "object") {
+        return {
+            value: entry,
+            variation: undefined
+        };
+    }
+
+    const rawValue = "value" in entry ? entry.value : entry;
+
+    if (rawValue && typeof rawValue === "object" && "value" in rawValue) {
+        return {
+            value: rawValue.value,
+            variation: rawValue.variation ?? entry.variation
+        };
+    }
+
+    return {
+        value: rawValue,
+        variation: entry.variation
+    };
+};
+
 const KpiSection = ({ kpis }) => {
     const defaultKeys = ["valorTotalMovimentado", "valorEntregue", "volumeTotal", "quantidadeClientes"];
 
@@ -50,14 +73,15 @@ const KpiSection = ({ kpis }) => {
 
         return Object.entries(kpis)
             .filter(([label]) => !blackList.includes(label))
-            .map(([label, v]) => ({
-                label,
-                value: {
-                    value: v?.value ?? v,
-                    variation: v?.variation
-                },
-                color: "#19b59f"
-            }));
+            .map(([label, v]) => {
+                const normalizedValue = normalizeKpiValue(v);
+
+                return {
+                    label,
+                    value: normalizedValue,
+                    color: "#19b59f"
+                };
+            });
     }, [kpis, isDefault]);
 
     return (

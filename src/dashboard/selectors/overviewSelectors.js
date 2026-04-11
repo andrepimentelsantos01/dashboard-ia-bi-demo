@@ -5,7 +5,7 @@ import {
 } from "./shared/dashboardSelectors";
 
 export const normalizeOverviewAnalytics = (rows = []) =>
-    rows.map(row => {
+    rows.map((row) => {
         const quantity = Number(row.quantity_requested) || 0;
         const total = Number(row.total_amount) || 0;
         const status = row.logistics_status || row.item_status;
@@ -22,8 +22,9 @@ export const normalizeOverviewAnalytics = (rows = []) =>
     });
 
 export const normalizeOverviewTable = (rows = []) =>
-    rows.map(row => {
-        const quantidade = Number(row.quantity_requested) || 0;
+    rows.map((row) => {
+        const quantity = Number(row.quantity_requested) || 0;
+        const quantidade = quantity;
         const valorTotal = Number(row.total_amount) || 0;
         const status = row.logistics_status || row.item_status;
 
@@ -54,14 +55,16 @@ export const buildOverviewDerivedData = (analytics = []) => {
         unitPrice: {}
     };
 
-    analytics.forEach(row => {
-        const value = Number(row.sum_total_amount) || 0;
+    analytics.forEach((row) => {
+        const value = Number(row.sum_total_amount ?? row.valorTotal ?? row.total ?? 0) || 0;
+        const quantity = Number(row.sum_quantity ?? row.quantidade ?? row.quantity ?? 0) || 0;
         const monthKey = row.year_months;
 
         if (monthKey) {
             if (!acc.historico[monthKey]) {
                 acc.historico[monthKey] = { time_bucket: monthKey, metric_value: 0 };
             }
+
             acc.historico[monthKey].metric_value += value;
         }
 
@@ -90,20 +93,24 @@ export const buildOverviewDerivedData = (analytics = []) => {
         acc.fornecedores[fornecedor].valor += value;
 
         const status = row.logistics_status || row.item_status || "Sem status";
-        if (!acc.status[status]) acc.status[status] = { name: status, value: 0 };
+        if (!acc.status[status]) {
+            acc.status[status] = { name: status, value: 0 };
+        }
         acc.status[status].value += 1;
 
         const uf = row.client_state || "NA";
-        if (!acc.estados[uf]) acc.estados[uf] = { uf, valorTotal: 0, quantidade: 0 };
+        if (!acc.estados[uf]) {
+            acc.estados[uf] = { uf, valorTotal: 0, quantidade: 0 };
+        }
         acc.estados[uf].valorTotal += value;
-        acc.estados[uf].quantidade += Number(row.sum_quantity) || 0;
+        acc.estados[uf].quantidade += quantity;
 
         if (monthKey) {
             if (!acc.unitPrice[monthKey]) {
                 acc.unitPrice[monthKey] = { time_bucket: monthKey, total: 0, qty: 0 };
             }
-            acc.unitPrice[monthKey].total += Number(row.valorTotal) || 0;
-            acc.unitPrice[monthKey].qty += Number(row.quantidade) || 0;
+            acc.unitPrice[monthKey].total += Number(row.valorTotal ?? row.sum_total_amount ?? 0) || 0;
+            acc.unitPrice[monthKey].qty += Number(row.quantidade ?? row.sum_quantity ?? 0) || 0;
         }
     });
 
@@ -112,15 +119,15 @@ export const buildOverviewDerivedData = (analytics = []) => {
     );
 
     return {
-        historicoMeses: historicoFinanceiro.map(row => row.time_bucket),
-        historicoValores: historicoFinanceiro.map(row => row.metric_value),
+        historicoMeses: historicoFinanceiro.map((row) => row.time_bucket),
+        historicoValores: historicoFinanceiro.map((row) => row.metric_value),
         categoriasPizza: Object.values(acc.categorias),
         produtosRanking: Object.values(acc.produtos),
         rankingClientes: Object.values(acc.clientes),
         fornecedoresEntrega: Object.values(acc.fornecedores),
         deliveryStatus: Object.values(acc.status),
         clientsByState: Object.values(acc.estados),
-        unitPriceEvolution: Object.values(acc.unitPrice).map(row => ({
+        unitPriceEvolution: Object.values(acc.unitPrice).map((row) => ({
             time_bucket: row.time_bucket,
             metric_value: row.qty ? row.total / row.qty : 0
         }))
@@ -130,12 +137,12 @@ export const buildOverviewDerivedData = (analytics = []) => {
 export const buildOverviewAvailableFilters = (analytics = [], tableRows = []) => ({
     availableClients: buildOptionsFromRows(analytics, "client_id", "client_name"),
     availableSuppliers: buildOptionsFromRows(analytics, "supplier_id", "supplier_name"),
-    availableCategorias: [...new Set(analytics.map(row => row.product_class_material_name).filter(Boolean))],
+    availableCategorias: [...new Set(analytics.map((row) => row.product_class_material_name).filter(Boolean))],
     availableProdutos: buildOptionsFromRows(analytics, "product_id", "product_name"),
     availableOrders: buildOrderOptions(tableRows)
 });
 
-export const adaptOverviewKpis = (kpis = {}) => ({
+export const adaptOverviewKpis = (kpis = {}, overviewData = {}) => ({
     valorTotalMovimentado: formatCurrency(kpis.total_amount_moved),
     valorEntregue: formatCurrency(kpis.total_amount_delivered),
     volumeTotal: kpis.total_volume_products,

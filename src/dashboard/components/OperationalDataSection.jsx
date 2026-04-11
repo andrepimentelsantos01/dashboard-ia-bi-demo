@@ -30,7 +30,11 @@ const COLUMN_LABELS = {
     partial_delivery_flag: "Entrega Parcial",
     sum_total_amount: "Valor Total",
     sum_quantity: "Quantidade",
-    count_items: "Itens"
+    count_items: "Itens",
+    classificacaoABC: "Curva ABC",
+    classificacaoXYZ: "Curva XYZ",
+    abc_classification: "Curva ABC",
+    xyz_classification: "Curva XYZ"
 };
 
 const normalizeOperationalStatus = (row) =>
@@ -224,7 +228,7 @@ const OperationalDataSection = ({ tabela }) => {
                 title="Tabela Consolidada"
                 open={open}
                 setOpen={() => setOpen(false)}
-                content={
+                content={open ? (
                     <DataTable
                         columns={columns}
                         rows={normalizedTable}
@@ -232,7 +236,7 @@ const OperationalDataSection = ({ tabela }) => {
                         exportFileName="tabela-operacional"
                         exportTitle="Tabela Consolidada"
                     />
-                }
+                ) : null}
             />
         </div>
     );

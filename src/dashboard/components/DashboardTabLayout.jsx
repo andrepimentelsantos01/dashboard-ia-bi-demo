@@ -7,6 +7,7 @@ import OperationalDataSection from "./OperationalDataSection";
 import OverviewSection from "./OverviewSection";
 import SectionWrapper from "./SectionWrapper";
 import DashboardDateFilterModal from "./DashboardDateFilterModal";
+import DashboardErrorBoundary from "./shared/DashboardErrorBoundary";
 import { useThemeMode } from "../../hooks/useThemeMode";
 
 const DashboardTabLayout = ({
@@ -82,23 +83,29 @@ const DashboardTabLayout = ({
             </SectionWrapper>
 
             <SectionWrapper title={kpiTitle} className={contentSectionClassName}>
-                <KpiSection
-                    kpis={kpis}
-                    alertas={alertas}
-                    onCrossFilter={onCrossFilter}
-                    resetToken={resetToken}
-                />
+                <DashboardErrorBoundary>
+                    <KpiSection
+                        kpis={kpis}
+                        alertas={alertas}
+                        onCrossFilter={onCrossFilter}
+                        resetToken={resetToken}
+                    />
+                </DashboardErrorBoundary>
             </SectionWrapper>
 
             <SectionWrapper title={overviewTitle} className={contentSectionClassName}>
-                <OverviewSection
-                    charts={charts}
-                    key={overviewResetKey ? resetToken : undefined}
-                />
+                <DashboardErrorBoundary>
+                    <OverviewSection
+                        charts={charts}
+                        key={overviewResetKey ? resetToken : undefined}
+                    />
+                </DashboardErrorBoundary>
             </SectionWrapper>
 
             <SectionWrapper title={tableTitle} className={contentSectionClassName}>
-                <OperationalDataSection tabela={tabela} />
+                <DashboardErrorBoundary>
+                    <OperationalDataSection tabela={tabela} />
+                </DashboardErrorBoundary>
             </SectionWrapper>
 
             {showFloatingClear ? (

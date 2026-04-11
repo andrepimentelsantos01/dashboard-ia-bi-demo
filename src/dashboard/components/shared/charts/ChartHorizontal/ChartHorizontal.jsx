@@ -6,13 +6,14 @@ import "./ChartHorizontal.css";
 import { useChartHorizontalState } from "./chartHorizontal.state";
 
 const chartStyle = { width: "100%", height: "100%" };
+const chartOpts = { renderer: "canvas" };
 
 const ChartInstance = React.memo(({ option, onEvents }) => (
-    <ReactECharts option={option} style={chartStyle} onEvents={onEvents} />
+    <ReactECharts option={option} style={chartStyle} onEvents={onEvents} lazyUpdate opts={chartOpts} />
 ));
 
 const ChartInstanceStatic = React.memo(({ option }) => (
-    <ReactECharts option={option} style={chartStyle} />
+    <ReactECharts option={option} style={chartStyle} lazyUpdate opts={chartOpts} />
 ));
 
 const ChartHorizontal = ({
