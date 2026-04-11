@@ -68,10 +68,10 @@ html[data-theme="dark"] {
 .bi-scope .floating-clear-button {
     border-radius: 999px !important;
     transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        opacity 0.2s ease,
-        background 0.2s ease !important;
+            transform 0.2s ease,
+            box-shadow 0.2s ease,
+            opacity 0.2s ease,
+            background 0.2s ease !important;
 }
 
 .bi-scope .section-wrapper-actions .btn:hover,
@@ -204,6 +204,19 @@ html[data-theme="dark"] {
 
 .bi-scope .overview-chart-container {
     min-height: 330px;
+}
+
+.bi-scope .overview-curva-wrapper {
+    position: relative;
+    z-index: 25;
+}
+
+.bi-scope .overview-chart-help {
+    z-index: 26 !important;
+}
+
+.bi-scope .overview-chart-help-tooltip {
+    z-index: 27 !important;
 }
 
 .bi-scope .operational-table-container {

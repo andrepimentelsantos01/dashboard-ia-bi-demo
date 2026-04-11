@@ -9,29 +9,29 @@ echarts.registerMap("brazil-morph", brasilMap);
 const UF_TO_NAME = {
     AC: "Acre",
     AL: "Alagoas",
-    AP: "Amap\u00e1",
+    AP: "Amapá",
     AM: "Amazonas",
     BA: "Bahia",
-    CE: "Cear\u00e1",
+    CE: "Ceará",
     DF: "Distrito Federal",
-    ES: "Esp\u00edrito Santo",
-    GO: "Goi\u00e1s",
-    MA: "Maranh\u00e3o",
+    ES: "Espírito Santo",
+    GO: "Goiás",
+    MA: "Maranhão",
     MT: "Mato Grosso",
     MS: "Mato Grosso do Sul",
     MG: "Minas Gerais",
-    PA: "Par\u00e1",
-    PB: "Para\u00edba",
-    PR: "Paran\u00e1",
+    PA: "Pará",
+    PB: "Paraíba",
+    PR: "Paraná",
     PE: "Pernambuco",
-    PI: "Piau\u00ed",
+    PI: "Piauí",
     RJ: "Rio de Janeiro",
     RN: "Rio Grande do Norte",
     RS: "Rio Grande do Sul",
-    RO: "Rond\u00f4nia",
+    RO: "Rondônia",
     RR: "Roraima",
     SC: "Santa Catarina",
-    SP: "S\u00e3o Paulo",
+    SP: "São Paulo",
     SE: "Sergipe",
     TO: "Tocantins"
 };
@@ -41,8 +41,8 @@ const NAME_TO_UF = Object.fromEntries(
 );
 
 const generateCorporateScale = (count) => {
-    const baseHue = 190;
-    const hueSpread = 22;
+    const baseHue = 172;
+    const hueSpread = 10;
     const saturation = 46;
     const lightnessStart = 90;
     const lightnessEnd = 34;
@@ -277,7 +277,8 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
 
         const labels = sortedData.map((item) => item.name);
         const values = sortedData.map((item) => item.value);
-        const zoomStart = labels.length <= 8 ? 0 : ((labels.length - 8) / labels.length) * 100;
+        const barColors = [...visualMapColors].reverse();
+        const zoomEnd = labels.length <= 8 ? 100 : (8 / labels.length) * 100;
 
         return {
             animation: false,
@@ -327,8 +328,8 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
                     fillerColor: themeTokens.sliderFill,
                     handleColor: "#17877e",
                     handleSize: "100%",
-                    start: zoomStart,
-                    end: 100
+                    start: 0,
+                    end: zoomEnd
                 },
                 {
                     type: "inside",
@@ -336,8 +337,8 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
                     zoomOnMouseWheel: false,
                     moveOnMouseWheel: true,
                     moveOnMouseMove: true,
-                    start: zoomStart,
-                    end: 100
+                    start: 0,
+                    end: zoomEnd
                 }
             ],
             series: [
@@ -347,7 +348,7 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
                     data: values.map((value, index) => ({
                         value,
                         itemStyle: {
-                            color: visualMapColors[Math.min(index, visualMapColors.length - 1)]
+                            color: barColors[Math.min(index, barColors.length - 1)]
                         }
                     })),
                     barWidth: 22,

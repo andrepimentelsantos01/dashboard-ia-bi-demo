@@ -58,7 +58,8 @@ const ChartMapMorph = ({ backendData, onCrossFilter }) => {
                     option={option}
                     style={chartStyle}
                     onEvents={events}
-                    lazyUpdate
+                    notMerge
+                    lazyUpdate={false}
                     opts={chartOpts}
                 />
             </div>
@@ -73,7 +74,8 @@ const ChartMapMorph = ({ backendData, onCrossFilter }) => {
                             option={option}
                             style={chartStyle}
                             onEvents={events}
-                            lazyUpdate
+                            notMerge
+                            lazyUpdate={false}
                             opts={chartOpts}
                         />
                     ) : null

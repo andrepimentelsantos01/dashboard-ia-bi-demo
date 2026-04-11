@@ -14,7 +14,9 @@ const ChartScatterAggregate = ({ backendData, onCrossFilter }) => {
         setOpen,
         option,
         handleClick,
-        handleRefresh
+        handleRefresh,
+        handleToggleView,
+        viewMode
     } = useChartScatterAggregateState({
         backendData,
         onCrossFilter
@@ -24,6 +26,10 @@ const ChartScatterAggregate = ({ backendData, onCrossFilter }) => {
         handleRefresh();
     }, [handleRefresh]);
 
+    const toggleView = useCallback(() => {
+        handleToggleView();
+    }, [handleToggleView]);
+
     const openModal = useCallback(() => setOpen(true), [setOpen]);
     const closeModal = useCallback(() => setOpen(false), [setOpen]);
     const events = useMemo(() => ({ click: handleClick }), [handleClick]);
@@ -31,6 +37,15 @@ const ChartScatterAggregate = ({ backendData, onCrossFilter }) => {
     return (
         <>
             <div className="chart-scatter-aggregate-container">
+                <button
+                    onClick={toggleView}
+                    className="chart-scatter-aggregate-toggle-btn"
+                    title={viewMode === "scatter" ? "Alternar para ranking" : "Alternar para dispersao"}
+                    aria-label={viewMode === "scatter" ? "Alternar para ranking" : "Alternar para dispersao"}
+                >
+                    <span className="chart-scatter-aggregate-toggle-glyph">&#8646;</span>
+                </button>
+
                 <button onClick={refreshChart} className="chart-scatter-aggregate-refresh-btn">
                     <FiRefreshCcw className="chart-scatter-aggregate-icon" />
                 </button>
@@ -43,7 +58,8 @@ const ChartScatterAggregate = ({ backendData, onCrossFilter }) => {
                     option={option}
                     style={chartStyle}
                     onEvents={events}
-                    lazyUpdate
+                    lazyUpdate={false}
+                    notMerge={false}
                     opts={chartOpts}
                 />
             </div>
@@ -58,7 +74,8 @@ const ChartScatterAggregate = ({ backendData, onCrossFilter }) => {
                             option={option}
                             style={chartStyle}
                             onEvents={events}
-                            lazyUpdate
+                            lazyUpdate={false}
+                            notMerge={false}
                             opts={chartOpts}
                         />
                     ) : null
