@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useDeferredValue, useTransition } from "react";
 import { biOverview } from "/src/services/rest";
 import { useAuth } from "/src/core/auth";
 import {
@@ -23,6 +23,8 @@ export const initialFilters = createDashboardFilters();
 
 export const useOverviewState = () => {
     const { key, passport } = useAuth();
+    const [, startFiltersTransition] = useTransition();
+    const [, startDataTransition] = useTransition();
 
     const [filters, setFilters] = useState(initialFilters);
     const [rawResponse, setRawResponse] = useState({
@@ -42,9 +44,11 @@ export const useOverviewState = () => {
         showFloatingClear
     } = useDashboardTabUi();
 
+    const deferredFilters = useDeferredValue(filters);
+
     const apiFilters = useMemo(
-        () => buildDashboardApiFilters(filters, { includeOrders: true }),
-        [filters]
+        () => buildDashboardApiFilters(deferredFilters, { includeOrders: true }),
+        [deferredFilters]
     );
 
     useEffect(() => {
@@ -53,7 +57,11 @@ export const useOverviewState = () => {
         const load = async () => {
             const response = await biOverview(apiFilters, { key, passport });
 
-            if (active) setRawResponse(response);
+            if (active) {
+                startDataTransition(() => {
+                    setRawResponse(response);
+                });
+            }
         };
 
         load();
@@ -83,15 +91,27 @@ export const useOverviewState = () => {
         [analytics, tabela]
     );
 
-    const handleFieldChange = useCallback(createHandleFieldChange(setFilters), []);
-    const clearFilters = useCallback(
-        createClearFilters(setFilters, initialFilters, bumpResetToken),
-        [bumpResetToken]
-    );
-    const handleCrossFilter = useCallback(
-        createCrossFilterHandler(setFilters, clearFilters, createCrossFilterMap({ includeOrders: true })),
-        [clearFilters]
-    );
+    const handleFieldChange = useCallback((name, value) => {
+        startFiltersTransition(() => {
+            createHandleFieldChange(setFilters)(name, value);
+        });
+    }, [startFiltersTransition]);
+
+    const clearFilters = useCallback(() => {
+        startFiltersTransition(() => {
+            createClearFilters(setFilters, initialFilters, bumpResetToken)();
+        });
+    }, [bumpResetToken, startFiltersTransition]);
+
+    const handleCrossFilter = useCallback((payload) => {
+        startFiltersTransition(() => {
+            createCrossFilterHandler(
+                setFilters,
+                createClearFilters(setFilters, initialFilters, bumpResetToken),
+                createCrossFilterMap({ includeOrders: true })
+            )(payload);
+        });
+    }, [bumpResetToken, startFiltersTransition]);
 
     const availableOptions = useMemo(
         () => buildAvailableOptions(availableFilters),

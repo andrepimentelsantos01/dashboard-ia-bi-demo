@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useDeferredValue } from "react";
 import * as echarts from "echarts";
 import brasilMap from "/src/mocks/dashboard/brasil.geo.json";
 import usStatesMap from "./geoJson/us-states.json";
@@ -142,6 +142,7 @@ export const useChartMapMorphState = ({
     const [viewMode, setViewMode] = useState("map");
     const themeTokens = useChartThemeTokens();
     const geographyConfig = GEO_CONFIG[geography] || GEO_CONFIG.brazil;
+    const deferredBackendData = useDeferredValue(backendData);
 
     const handleRefresh = useCallback(() => {
         setSelectedRegion(null);
@@ -156,7 +157,7 @@ export const useChartMapMorphState = ({
     const aggregated = useMemo(() => {
         const byRegion = {};
 
-        for (const row of backendData || []) {
+        for (const row of deferredBackendData || []) {
             const region = geographyConfig.resolveRegion(row);
             if (!region?.chartName) continue;
 
@@ -196,7 +197,7 @@ export const useChartMapMorphState = ({
         }
 
         return byRegion;
-    }, [backendData, geographyConfig]);
+    }, [deferredBackendData, geographyConfig]);
 
     const mapData = useMemo(
         () =>
@@ -427,3 +428,5 @@ export const useChartMapMorphState = ({
         viewMode
     };
 };
+
+

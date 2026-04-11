@@ -108,7 +108,6 @@ const Overview = () => {
             {
                 title: "Mapa de Receita por Estado",
                 height: 320,
-                fullWidth: true,
                 component: (
                     <ChartMapMorph
                         backendData={tabela}

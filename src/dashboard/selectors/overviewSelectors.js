@@ -1,7 +1,7 @@
 import {
     buildOptionsFromRows,
     buildOrderOptions
-} from "./shared/dashboardSelectors";
+} from "./shared/dashboardSelectors.js";
 
 export const normalizeOverviewAnalytics = (rows = []) =>
     rows.map((row) => {
