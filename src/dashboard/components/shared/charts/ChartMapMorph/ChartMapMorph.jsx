@@ -12,6 +12,7 @@ const ChartMapMorph = ({
     backendData,
     onCrossFilter,
     geography = "brazil",
+    metric = "totalSales",
     currencyCode = "BRL",
     locale = "pt-BR"
 }) => {
@@ -27,6 +28,7 @@ const ChartMapMorph = ({
         backendData,
         onCrossFilter,
         geography,
+        metric,
         currencyCode,
         locale
     });

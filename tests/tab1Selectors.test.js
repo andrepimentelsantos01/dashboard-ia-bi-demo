@@ -1,14 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-    normalizeOverviewAnalytics,
-    normalizeOverviewTable,
-    buildOverviewDerivedData,
-    adaptOverviewKpis
-} from "../src/dashboard/selectors/overviewSelectors.js";
+  normalizeTab1Analytics,
+  normalizeTab1Table,
+  buildTab1DerivedData,
+  adaptTab1Kpis
+} from "../src/dashboard/selectors/tab1Selectors.js";
 
-test("normalizeOverviewAnalytics normaliza totais, quantidades e dimensoes Adidas", () => {
-    const [row] = normalizeOverviewAnalytics([{
+test("normalizeTab1Analytics normaliza totais, quantidades e dimensoes Adidas", () => {
+  const [row] = normalizeTab1Analytics([{
         quantity_requested: 12,
         total_amount: 240,
         logistics_status: "Online",
@@ -27,8 +27,8 @@ test("normalizeOverviewAnalytics normaliza totais, quantidades e dimensoes Adida
     assert.equal(row.salesMethod, "Online");
 });
 
-test("buildOverviewDerivedData agrega receita e volume por mes, regiao e rankings", () => {
-    const derived = buildOverviewDerivedData([
+test("buildTab1DerivedData agrega receita e volume por mes, regiao e rankings", () => {
+  const derived = buildTab1DerivedData([
         {
             year_months: "2021-01",
             valorTotal: 100,
@@ -73,8 +73,8 @@ test("buildOverviewDerivedData agrega receita e volume por mes, regiao e ranking
     assert.equal(derived.salesMethodTreemap.find((item) => item.name === "Online")?.value, 2);
 });
 
-test("normalizeOverviewTable e adaptOverviewKpis preservam shape esperado", () => {
-    const [tableRow] = normalizeOverviewTable([{
+test("normalizeTab1Table e adaptTab1Kpis preservam shape esperado", () => {
+  const [tableRow] = normalizeTab1Table([{
         order_date: "2021-01-05T00:00:00.000Z",
         quantity_requested: 8,
         total_amount: 120,
@@ -94,6 +94,17 @@ test("normalizeOverviewTable e adaptOverviewKpis preservam shape esperado", () =
     assert.equal(tableRow.sales_method, "In-store");
     assert.equal(tableRow.operating_margin_percent, 20);
 
-    const kpis = adaptOverviewKpis({ receita: 10 }, {});
-    assert.deepEqual(kpis, { receita: 10 });
+  const kpis = adaptTab1Kpis({
+        "Receita Total": 10,
+        "Lucro Operacional": 4,
+        "Margem Operacional Media": 0.4,
+        "Unidades Vendidas": 2
+    });
+
+    assert.deepEqual(kpis, {
+        "Total Sales": 10,
+        "Operating Profit": 4,
+        "Average Operating Margin": 0.4,
+        "Units Sold": 2
+    });
 });

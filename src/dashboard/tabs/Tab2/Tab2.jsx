@@ -1,25 +1,21 @@
 import React, { useMemo } from "react";
-import ChartBarVertical from "../../components/shared/charts/ChartBarVertical/ChartBarVertical";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal/ChartHorizontal";
 import ChartLine from "../../components/shared/charts/ChartLine/ChartLine";
-import ChartPie from "../../components/shared/charts/ChartPie";
-import ChartScatterAggregate from "../../components/shared/charts/ChartScatterAggregate";
 import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
 import ChartTreemap from "../../components/shared/charts/ChartTreemap/ChartTreemap";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
 import {
     HEATMAP_CONTEXT,
-    SCATTER_CONTEXT,
     STACKED_BAR_CONTEXT
 } from "../../components/shared/chartContext";
-import { useProductsState } from "./products.state";
-import "./Products.css";
+import { useTab2State } from "./tab2.state";
+import "./Tab2.css";
 
 const AMAZON_CURRENCY = "USD";
 const AMAZON_LOCALE = "en-US";
 
-const Products = () => {
+const Tab2 = () => {
     const {
         filters,
         data,
@@ -36,9 +32,9 @@ const Products = () => {
         availableProdutos,
         availablePayments,
         availableStatus
-    } = useProductsState();
+    } = useTab2State();
 
-    const { amazon, operacionais, kpis, alertas } = data;
+    const { tab2, operacionais, kpis, alertas } = data;
     const tabela = operacionais.tabela || [];
 
     const filterInputs = useMemo(
@@ -70,89 +66,10 @@ const Products = () => {
                 title: "Receita Mensal",
                 height: 260,
                 component: (
-                    <ChartBarVertical
-                        labels={amazon.historicoMeses}
-                        values={amazon.historicoValores}
+                    <ChartLine
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
-                        currencyCode={AMAZON_CURRENCY}
-                        locale={AMAZON_LOCALE}
-                    />
-                )
-            },
-            {
-                title: "Pedidos por Mes",
-                height: 260,
-                component: (
-                    <ChartBarVertical
-                        labels={amazon.historicoMeses}
-                        values={amazon.historicoPedidos}
-                        backendData={tabela}
-                        onCrossFilter={handleCrossFilter}
-                        valueFormat="number"
-                        currencyCode={AMAZON_CURRENCY}
-                        locale={AMAZON_LOCALE}
-                    />
-                )
-            },
-            {
-                title: "Mix de Categorias por Receita",
-                height: 260,
-                component: (
-                    <ChartPie
-                        data={amazon.categoriasPizza}
-                        backendData={tabela}
-                        onCrossFilter={handleCrossFilter}
-                    />
-                )
-            },
-            {
-                title: "Mix por Status do Pedido",
-                height: 260,
-                component: (
-                    <ChartTreemap
-                        dataOverride={amazon.statusTreemap}
-                        onCrossFilter={handleCrossFilter}
-                    />
-                )
-            },
-            {
-                title: "Receita por Categoria",
-                height: 260,
-                component: (
-                    <ChartHorizontal
-                        data={amazon.categoriasRanking}
-                        backendData={tabela}
-                        order="ASC"
-                        onCrossFilter={handleCrossFilter}
-                        currencyCode={AMAZON_CURRENCY}
-                        locale={AMAZON_LOCALE}
-                    />
-                )
-            },
-            {
-                title: "Receita por Metodo de Pagamento",
-                height: 260,
-                component: (
-                    <ChartHorizontal
-                        data={amazon.paymentRanking}
-                        backendData={tabela}
-                        order="ASC"
-                        onCrossFilter={handleCrossFilter}
-                        currencyCode={AMAZON_CURRENCY}
-                        locale={AMAZON_LOCALE}
-                    />
-                )
-            },
-            {
-                title: "Receita por Localidade",
-                height: 260,
-                component: (
-                    <ChartHorizontal
-                        data={amazon.locationsRanking}
-                        backendData={tabela}
-                        order="ASC"
-                        onCrossFilter={handleCrossFilter}
+                        metric="amount"
                         currencyCode={AMAZON_CURRENCY}
                         locale={AMAZON_LOCALE}
                     />
@@ -173,16 +90,40 @@ const Products = () => {
                 )
             },
             {
-                title: "Volume por Status ao Longo do Tempo",
-                height: 280,
-                caption: STACKED_BAR_CONTEXT,
+                title: "Receita por Categoria",
+                height: 260,
                 component: (
-                    <ChartStackedBar
+                    <ChartHorizontal
+                        data={tab2.categoriasRanking}
                         backendData={tabela}
+                        order="ASC"
                         onCrossFilter={handleCrossFilter}
-                        metric="quantity"
                         currencyCode={AMAZON_CURRENCY}
                         locale={AMAZON_LOCALE}
+                    />
+                )
+            },
+            {
+                title: "Receita por Metodo de Pagamento",
+                height: 260,
+                component: (
+                    <ChartHorizontal
+                        data={tab2.paymentRanking}
+                        backendData={tabela}
+                        order="ASC"
+                        onCrossFilter={handleCrossFilter}
+                        currencyCode={AMAZON_CURRENCY}
+                        locale={AMAZON_LOCALE}
+                    />
+                )
+            },
+            {
+                title: "Mix por Status do Pedido",
+                height: 260,
+                component: (
+                    <ChartTreemap
+                        dataOverride={tab2.statusTreemap}
+                        onCrossFilter={handleCrossFilter}
                     />
                 )
             },
@@ -191,7 +132,7 @@ const Products = () => {
                 height: 260,
                 component: (
                     <ChartHorizontal
-                        data={amazon.produtosRanking}
+                        data={tab2.produtosRanking}
                         backendData={tabela}
                         order="ASC"
                         onCrossFilter={handleCrossFilter}
@@ -201,15 +142,14 @@ const Products = () => {
                 )
             },
             {
-                title: "Ranking de Produtos por Volume",
+                title: "Receita por Localidade",
                 height: 260,
                 component: (
                     <ChartHorizontal
-                        data={amazon.produtosRankingVolume}
+                        data={tab2.locationsRanking}
                         backendData={tabela}
                         order="ASC"
                         onCrossFilter={handleCrossFilter}
-                        valueFormat="volume"
                         currencyCode={AMAZON_CURRENCY}
                         locale={AMAZON_LOCALE}
                     />
@@ -220,7 +160,7 @@ const Products = () => {
                 height: 260,
                 component: (
                     <ChartHorizontal
-                        data={amazon.categoriasRankingVolume}
+                        data={tab2.categoriasRankingVolume}
                         backendData={tabela}
                         order="ASC"
                         onCrossFilter={handleCrossFilter}
@@ -243,20 +183,7 @@ const Products = () => {
                 )
             },
             {
-                title: "Dispersao Preco x Volume",
-                height: 300,
-                caption: SCATTER_CONTEXT,
-                component: (
-                    <ChartScatterAggregate
-                        backendData={tabela}
-                        onCrossFilter={handleCrossFilter}
-                        currencyCode={AMAZON_CURRENCY}
-                        locale={AMAZON_LOCALE}
-                    />
-                )
-            },
-            {
-                title: "Mapa de Calor Categoria x Mes",
+                title: "Mapa de Valor Categoria x Mes",
                 height: 280,
                 caption: HEATMAP_CONTEXT,
                 component: (
@@ -269,7 +196,7 @@ const Products = () => {
                 )
             }
         ],
-        [amazon, handleCrossFilter, tabela]
+        [handleCrossFilter, tab2, tabela]
     );
 
     return (
@@ -303,4 +230,4 @@ const Products = () => {
     );
 };
 
-export default React.memo(Products);
+export default React.memo(Tab2);

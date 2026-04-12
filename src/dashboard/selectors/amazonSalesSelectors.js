@@ -25,7 +25,16 @@ const formatUsdCurrency = (value) =>
 const formatNumber = (value) =>
     Math.round(Number(value || 0)).toLocaleString("en-US");
 
-export const normalizeAmazonSalesAnalytics = (rows = []) =>
+const toStatusToken = (value) =>
+    String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "");
+
+export const normalizeTab2Analytics = (rows = []) =>
     rows.map((row) => {
         const quantidade = Number(row.quantity_requested) || 0;
         const valorTotal = Number(row.total_amount) || 0;
@@ -52,7 +61,7 @@ export const normalizeAmazonSalesAnalytics = (rows = []) =>
         };
     });
 
-export const normalizeAmazonSalesTable = (rows = []) =>
+export const normalizeTab2Table = (rows = []) =>
     rows.map((row) => {
         const quantidade = Number(row.quantity_requested) || 0;
         const valorTotal = Number(row.total_amount) || 0;
@@ -84,7 +93,7 @@ export const normalizeAmazonSalesTable = (rows = []) =>
         };
     });
 
-export const buildAmazonSalesDerivedData = (analytics = []) => {
+export const buildTab2DerivedData = (analytics = []) => {
     const acc = {
         salesByMonth: {},
         ordersByMonth: {},
@@ -102,7 +111,6 @@ export const buildAmazonSalesDerivedData = (analytics = []) => {
     };
 
     let totalSales = 0;
-    let totalUnits = 0;
     let totalOrders = 0;
     let completedOrders = 0;
     const customers = new Set();
@@ -174,11 +182,10 @@ export const buildAmazonSalesDerivedData = (analytics = []) => {
         acc.statusTreemap[status].clientes.add(location);
 
         totalSales += sales;
-        totalUnits += quantity;
         totalOrders += 1;
         customers.add(customerName);
 
-        if (status === "Concluido" || status === "Concluído") {
+        if (["completed", "concluido", "delivered", "entregue"].includes(toStatusToken(status))) {
             completedOrders += 1;
         }
     });
@@ -241,9 +248,9 @@ export const buildAmazonSalesDerivedData = (analytics = []) => {
                 value: formatUsdCurrency(totalOrders ? totalSales / totalOrders : 0),
                 variation: getKpiVariation(ticketHistory)
             },
-            "Unidades Vendidas": {
-                value: formatNumber(totalUnits),
-                variation: getKpiVariation(unitsHistory)
+            "% Pedidos Concluidos": {
+                value: totalOrders ? `${((completedOrders / totalOrders) * 100).toFixed(1)}%` : "0%",
+                variation: undefined
             }
         },
         alertas: {
@@ -253,7 +260,7 @@ export const buildAmazonSalesDerivedData = (analytics = []) => {
     };
 };
 
-export const buildAmazonSalesAvailableFilters = (rows = []) => ({
+export const buildTab2AvailableFilters = (rows = []) => ({
     availableCustomers: buildOptionsFromRows(rows, "client_id", "client_name"),
     availableLocations: [...new Set(rows.map((row) => row.customer_location).filter(Boolean))].map((name) => ({
         id: name,

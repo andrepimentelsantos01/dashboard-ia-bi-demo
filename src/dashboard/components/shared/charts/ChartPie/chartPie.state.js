@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 
-export const useChartPieState = ({ data, backendData, onVisualFilter, onCrossFilter, filterType }) => {
+export const useChartPieState = ({ data, backendData, onVisualFilter, onCrossFilter, filterType, categoryField = "categoria" }) => {
     const dispatch = onCrossFilter || onVisualFilter;
     const typeToUse = filterType || "categoria";
 
@@ -22,13 +22,13 @@ export const useChartPieState = ({ data, backendData, onVisualFilter, onCrossFil
     const metadataByCategory = useMemo(() => {
         const out = {};
         for (const r of backendData || []) {
-            const c = r.categoria;
+            const c = r[categoryField];
             if (!c) continue;
             if (!out[c]) out[c] = [];
             out[c].push(r);
         }
         return out;
-    }, [backendData]);
+    }, [backendData, categoryField]);
 
     const filteredData = useMemo(() => {
         if (!selectedName) return cleanedData;

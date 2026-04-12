@@ -1,13 +1,16 @@
 import {
     buildOptionsFromRows,
-    buildOrderOptions
+    buildOrderOptions,
+    sortMetricEntries
 } from "./shared/dashboardSelectors.js";
 
-export const normalizeOverviewAnalytics = (rows = []) =>
+export const normalizeTab1Analytics = (rows = []) =>
     rows.map((row) => {
         const quantity = Number(row.quantity_requested) || 0;
         const total = Number(row.total_amount) || 0;
         const status = row.logistics_status || row.item_status;
+        const operatingProfit = Number(row.operating_profit) || 0;
+        const operatingMargin = Number(row.operating_margin) || 0;
 
         return {
             ...row,
@@ -18,13 +21,13 @@ export const normalizeOverviewAnalytics = (rows = []) =>
             quantity,
             total,
             region: row.region || row.product_class_material_name,
-            operatingProfit: Number(row.operating_profit) || 0,
-            operatingMargin: Number(row.operating_margin) || 0,
+            operatingProfit,
+            operatingMargin,
             salesMethod: row.sales_method || status
         };
     });
 
-export const normalizeOverviewTable = (rows = []) =>
+export const normalizeTab1Table = (rows = []) =>
     rows.map((row) => {
         const quantity = Number(row.quantity_requested) || 0;
         const quantidade = quantity;
@@ -46,16 +49,19 @@ export const normalizeOverviewTable = (rows = []) =>
             currency_code: row.currency_code || "BRL",
             region: row.region || row.product_class_material_name,
             sales_method: row.sales_method || status,
+            operatingProfit: Number(row.operating_profit) || 0,
             operating_profit: Number(row.operating_profit) || 0,
             operating_margin_percent: Number(row.operating_margin || 0) * 100
         };
     });
 
-export const buildOverviewDerivedData = (analytics = []) => {
+export const buildTab1DerivedData = (analytics = []) => {
     const acc = {
         historico: {},
         historicoQuantidade: {},
+        historicoOperatingProfit: {},
         regioes: {},
+        regioesOperatingProfit: {},
         regioesQuantidade: {},
         produtos: {},
         produtosQuantidade: {},
@@ -64,12 +70,14 @@ export const buildOverviewDerivedData = (analytics = []) => {
         fornecedores: {},
         fornecedoresQuantidade: {},
         status: {},
+        salesMethodMix: {},
         unitPrice: {}
     };
 
     analytics.forEach((row) => {
         const value = Number(row.sum_total_amount ?? row.valorTotal ?? row.total ?? 0) || 0;
         const quantity = Number(row.sum_quantity ?? row.quantidade ?? row.quantity ?? 0) || 0;
+        const operatingProfit = Number(row.operatingProfit ?? row.operating_profit ?? 0) || 0;
         const monthKey = row.year_months;
 
         if (monthKey) {
@@ -84,6 +92,12 @@ export const buildOverviewDerivedData = (analytics = []) => {
             }
 
             acc.historicoQuantidade[monthKey].metric_value += quantity;
+
+            if (!acc.historicoOperatingProfit[monthKey]) {
+                acc.historicoOperatingProfit[monthKey] = { time_bucket: monthKey, metric_value: 0 };
+            }
+
+            acc.historicoOperatingProfit[monthKey].metric_value += operatingProfit;
         }
 
         const regiao = row.region || row.product_class_material_name || "Sem regi\u00e3o";
@@ -91,6 +105,11 @@ export const buildOverviewDerivedData = (analytics = []) => {
             acc.regioes[regiao] = { name: regiao, value: 0, type: "categoria" };
         }
         acc.regioes[regiao].value += value;
+
+        if (!acc.regioesOperatingProfit[regiao]) {
+            acc.regioesOperatingProfit[regiao] = { name: regiao, value: 0, type: "categoria" };
+        }
+        acc.regioesOperatingProfit[regiao].value += operatingProfit;
 
         if (!acc.regioesQuantidade[regiao]) {
             acc.regioesQuantidade[regiao] = { name: regiao, valor: 0, type: "categoria" };
@@ -155,6 +174,15 @@ export const buildOverviewDerivedData = (analytics = []) => {
         acc.status[status].produtoValor[produto] = (acc.status[status].produtoValor[produto] || 0) + value;
         acc.status[status].clientes.add(cliente);
 
+        if (!acc.salesMethodMix[status]) {
+            acc.salesMethodMix[status] = {
+                name: status,
+                value: 0,
+                type: "status"
+            };
+        }
+        acc.salesMethodMix[status].value += value;
+
         if (monthKey) {
             if (!acc.unitPrice[monthKey]) {
                 acc.unitPrice[monthKey] = { time_bucket: monthKey, total: 0, qty: 0 };
@@ -167,22 +195,28 @@ export const buildOverviewDerivedData = (analytics = []) => {
     const historicoFinanceiro = Object.values(acc.historico).sort((a, b) =>
         String(a.time_bucket).localeCompare(String(b.time_bucket))
     );
+    const historicoOperatingProfit = Object.values(acc.historicoOperatingProfit).sort((a, b) =>
+        String(a.time_bucket).localeCompare(String(b.time_bucket))
+    );
 
     return {
         historicoMeses: historicoFinanceiro.map((row) => row.time_bucket),
         historicoValores: historicoFinanceiro.map((row) => row.metric_value),
+        historicoOperatingProfit: historicoOperatingProfit.map((row) => row.metric_value),
         historicoQuantidades: Object.values(acc.historicoQuantidade)
             .sort((a, b) => String(a.time_bucket).localeCompare(String(b.time_bucket)))
             .map((row) => row.metric_value),
         categoriasPizza: Object.values(acc.regioes),
-        rankingRegioes: Object.values(acc.regioes),
+        rankingRegioes: sortMetricEntries(Object.values(acc.regioes), "value"),
+        rankingRegioesOperatingProfit: sortMetricEntries(Object.values(acc.regioesOperatingProfit), "value"),
         rankingRegioesQuantidade: Object.values(acc.regioesQuantidade),
-        produtosRanking: Object.values(acc.produtos),
+        produtosRanking: sortMetricEntries(Object.values(acc.produtos), "valor"),
         produtosRankingQuantidade: Object.values(acc.produtosQuantidade),
         rankingClientes: Object.values(acc.clientes),
         rankingClientesQuantidade: Object.values(acc.clientesQuantidade),
-        fornecedoresEntrega: Object.values(acc.fornecedores),
+        fornecedoresEntrega: sortMetricEntries(Object.values(acc.fornecedores), "valor"),
         fornecedoresEntregaQuantidade: Object.values(acc.fornecedoresQuantidade),
+        salesMethodMix: sortMetricEntries(Object.values(acc.salesMethodMix), "value"),
         salesMethodTreemap: Object.values(acc.status).map((row) => ({
             name: row.name,
             statusKey: row.statusKey,
@@ -210,10 +244,10 @@ export const buildOverviewDerivedData = (analytics = []) => {
     };
 };
 
-export const buildOverviewAvailableFilters = (analytics = [], tableRows = []) => ({
+export const buildTab1AvailableFilters = (analytics = [], tableRows = []) => ({
     availableClients: buildOptionsFromRows(analytics, "client_id", "client_name"),
     availableSuppliers: buildOptionsFromRows(analytics, "supplier_id", "supplier_name"),
-    availableCategorias: [...new Set(analytics.map((row) => row.product_class_material_name).filter(Boolean))],
+    availableCategorias: [...new Set(analytics.map((row) => row.region || row.product_class_material_name).filter(Boolean))],
     availableProdutos: buildOptionsFromRows(analytics, "product_id", "product_name"),
     availableOrders: buildOrderOptions(tableRows),
     availableStatus: [...new Set(analytics.map((row) => row.salesMethod || row.status).filter(Boolean))].map((name) => ({
@@ -222,6 +256,12 @@ export const buildOverviewAvailableFilters = (analytics = [], tableRows = []) =>
     }))
 });
 
-export const adaptOverviewKpis = (kpis = {}, overviewData = {}) => ({
-    ...kpis
-});
+export const adaptTab1Kpis = (kpis = {}) =>
+    Object.fromEntries(
+        Object.entries({
+            "Total Sales": kpis["Receita Total"],
+            "Operating Profit": kpis["Lucro Operacional"],
+            "Average Operating Margin": kpis["Margem Operacional Media"],
+            "Units Sold": kpis["Unidades Vendidas"]
+        }).filter(([, value]) => value !== undefined)
+    );

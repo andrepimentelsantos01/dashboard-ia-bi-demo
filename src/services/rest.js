@@ -290,7 +290,7 @@ const buildLogisticsCarrierId = (carrier) => `carrier-${normalizeToken(carrier, 
 const buildLogisticsRouteId = (route) => `route-${normalizeToken(route, "unknown")}`;
 const buildLogisticsDestinationId = (destination) => `destination-${normalizeToken(destination, "unknown")}`;
 
-const adidasOverviewRows = adidasSalesRows
+const tab1Rows = adidasSalesRows
   .map((row, index) => {
     const retailer = row.Retailer?.trim();
     const retailerId = row["Retailer ID"];
@@ -367,7 +367,7 @@ const adidasOverviewRows = adidasSalesRows
   })
   .filter(Boolean);
 
-const amazonProductsRows = parseCsvRows(amazonSalesCsvRaw)
+const tab2Rows = parseCsvRows(amazonSalesCsvRaw)
   .map((row, index) => {
     const orderDate = parseDayFirstDate(row.Date);
     const customerName = row["Customer Name"]?.trim();
@@ -423,7 +423,7 @@ const amazonProductsRows = parseCsvRows(amazonSalesCsvRaw)
   })
   .filter(Boolean);
 
-const restaurantClientsRows = parseCsvRows(restaurantSalesCsvRaw)
+const tab3Rows = parseCsvRows(restaurantSalesCsvRaw)
   .map((row, index) => {
     const orderDate = parseRestaurantDate(row.date);
     const productName = row.item_name?.trim();
@@ -480,7 +480,7 @@ const restaurantClientsRows = parseCsvRows(restaurantSalesCsvRaw)
   })
   .filter(Boolean);
 
-const logisticsSuppliersRows = parseCsvRows(logisticsShipmentsCsvRaw)
+const tab4Rows = parseCsvRows(logisticsShipmentsCsvRaw)
   .map((row, index) => {
     const shipmentDate = safeDate(row.Shipment_Date);
     const deliveryDate = safeDate(row.Delivery_Date);
@@ -565,7 +565,7 @@ const logisticsSuppliersRows = parseCsvRows(logisticsShipmentsCsvRaw)
   })
   .filter(Boolean);
 
-const buildAdidasOverviewResponse = (rows) => {
+const buildTab1Response = (rows) => {
   const totalSales = rows.reduce((sum, row) => sum + Number(row.sum_total_amount || 0), 0);
   const totalProfit = rows.reduce((sum, row) => sum + Number(row.operating_profit || 0), 0);
   const totalUnits = rows.reduce((sum, row) => sum + Number(row.sum_quantity || 0), 0);
@@ -606,7 +606,7 @@ const buildAdidasOverviewResponse = (rows) => {
   };
 };
 
-const buildAmazonProductsResponse = (rows) => {
+const buildTab2Response = (rows) => {
   const totalSales = rows.reduce((sum, row) => sum + Number(row.sum_total_amount || 0), 0);
   const totalUnits = rows.reduce((sum, row) => sum + Number(row.sum_quantity || 0), 0);
   const totalOrders = rows.length;
@@ -651,7 +651,7 @@ const buildAmazonProductsResponse = (rows) => {
   };
 };
 
-const buildRestaurantClientsResponse = (rows) => {
+const buildTab3Response = (rows) => {
   const totalSales = rows.reduce((sum, row) => sum + Number(row.sum_total_amount || 0), 0);
   const totalUnits = rows.reduce((sum, row) => sum + Number(row.sum_quantity || 0), 0);
   const totalOrders = rows.length;
@@ -696,7 +696,7 @@ const buildRestaurantClientsResponse = (rows) => {
   };
 };
 
-const buildLogisticsSuppliersResponse = (rows) => {
+const buildTab4Response = (rows) => {
   const totalCost = rows.reduce((sum, row) => sum + Number(row.sum_total_amount || 0), 0);
   const totalShipments = rows.length;
   const totalWeight = rows.reduce((sum, row) => sum + Number(row.weight_kg || row.sum_quantity || 0), 0);
@@ -744,22 +744,22 @@ const delay = async () => {
   await new Promise((resolve) => setTimeout(resolve, 120));
 };
 
-export const biOverview = async (filters = {}) => {
+export const biTab1 = async (filters = {}) => {
   await delay();
-  return buildAdidasOverviewResponse(applyCommonFilters(adidasOverviewRows, filters));
+  return buildTab1Response(applyCommonFilters(tab1Rows, filters));
 };
 
-export const biProducts = async (filters = {}) => {
+export const biTab2 = async (filters = {}) => {
   await delay();
-  return buildAmazonProductsResponse(applyCommonFilters(amazonProductsRows, filters));
+  return buildTab2Response(applyCommonFilters(tab2Rows, filters));
 };
 
-export const biClients = async (filters = {}) => {
+export const biTab3 = async (filters = {}) => {
   await delay();
-  return buildRestaurantClientsResponse(applyCommonFilters(restaurantClientsRows, filters));
+  return buildTab3Response(applyCommonFilters(tab3Rows, filters));
 };
 
-export const biSuppliers = async (filters = {}) => {
+export const biTab4 = async (filters = {}) => {
   await delay();
-  return buildLogisticsSuppliersResponse(applyCommonFilters(logisticsSuppliersRows, filters));
+  return buildTab4Response(applyCommonFilters(tab4Rows, filters));
 };

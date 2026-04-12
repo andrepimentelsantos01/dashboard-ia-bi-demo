@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useDeferredValue, useTransition } from "react";
-import { biClients } from "/src/services/rest";
+import { biTab4 } from "/src/services/rest";
 import { useAuth } from "/src/core/auth";
 import {
     buildDashboardApiFilters,
@@ -11,19 +11,19 @@ import {
 } from "../../hooks/dashboardTabState.helpers";
 import { useDashboardTabUi } from "../../hooks/useDashboardTabUi";
 import {
-    buildRestaurantSalesAvailableFilters,
-    buildRestaurantSalesDerivedData,
-    normalizeRestaurantSalesAnalytics,
-    normalizeRestaurantSalesTable
-} from "../../selectors/restaurantSalesSelectors";
+    buildTab4AvailableFilters,
+    buildTab4DerivedData,
+    normalizeTab4Analytics,
+    normalizeTab4Table
+} from "../../selectors/logisticsPerformanceSelectors";
 
 export const initialFilters = createDashboardFilters({
-    shifts: [],
-    attendants: [],
-    transactionTypes: []
+    carriers: [],
+    warehouses: [],
+    destinations: []
 });
 
-export const useClientsState = () => {
+export const useTab4State = () => {
     const { key, passport } = useAuth();
     const [, startFiltersTransition] = useTransition();
     const [, startDataTransition] = useTransition();
@@ -55,9 +55,9 @@ export const useClientsState = () => {
         () => buildDashboardApiFilters(deferredFilters, {
             includeOrders: true,
             extra: {
-                time_of_sale: (currentFilters) => toSingleOrArraySelection(currentFilters.shifts, "name"),
-                received_by: (currentFilters) => toSingleOrArraySelection(currentFilters.attendants, "name"),
-                transaction_type: (currentFilters) => toSingleOrArraySelection(currentFilters.transactionTypes, "name")
+                carrier: (currentFilters) => toSingleOrArraySelection(currentFilters.carriers, "name"),
+                origin_warehouse: (currentFilters) => toSingleOrArraySelection(currentFilters.warehouses, "name"),
+                destination: (currentFilters) => toSingleOrArraySelection(currentFilters.destinations, "name")
             }
         }),
         [deferredFilters]
@@ -74,7 +74,7 @@ export const useClientsState = () => {
             }));
 
             try {
-                const response = await biClients(apiFilters, { key, passport });
+                const response = await biTab4(apiFilters, { key, passport });
 
                 if (active) {
                     startDataTransition(() => {
@@ -105,22 +105,22 @@ export const useClientsState = () => {
     }, [apiFilters, hasCachedData, key, passport, requestState.reloadToken, startDataTransition]);
 
     const analytics = useMemo(
-        () => normalizeRestaurantSalesAnalytics(rawResponse.fact || []),
+        () => normalizeTab4Analytics(rawResponse.fact || []),
         [rawResponse.fact]
     );
 
     const tabela = useMemo(
-        () => normalizeRestaurantSalesTable(rawResponse.table || []),
+        () => normalizeTab4Table(rawResponse.table || []),
         [rawResponse.table]
     );
 
-    const restaurantData = useMemo(
-        () => buildRestaurantSalesDerivedData(analytics),
+    const tab4Data = useMemo(
+        () => buildTab4DerivedData(analytics),
         [analytics]
     );
 
     const availableFilters = useMemo(
-        () => buildRestaurantSalesAvailableFilters(rawResponse.fact || []),
+        () => buildTab4AvailableFilters(rawResponse.fact || []),
         [rawResponse.fact]
     );
 
@@ -143,16 +143,25 @@ export const useClientsState = () => {
                 createClearFilters(setFilters, initialFilters, bumpResetToken),
                 (nextPayload) => {
                     if (nextPayload.type === "merge") {
-                        return nextPayload.filters || {};
+                        const nextFilters = { ...(nextPayload.filters || {}) };
+
+                        if (nextFilters.categorias?.length) {
+                            nextFilters.warehouses = nextFilters.categorias.map((item) => ({
+                                id: item?.id ?? item?.name ?? item,
+                                name: item?.name ?? item
+                            }));
+                        }
+
+                        return nextFilters;
                     }
 
                     const option = { id: nextPayload.id ?? nextPayload.value, name: nextPayload.value };
                     const handlers = {
-                        cliente: () => ({ shifts: [option] }),
-                        fornecedor: () => ({ attendants: [option] }),
-                        categoria: () => ({ categorias: [{ name: nextPayload.value }] }),
+                        fornecedor: () => ({ carriers: [option] }),
+                        cliente: () => ({ destinations: [option] }),
+                        categoria: () => ({ warehouses: [option] }),
                         produto: () => ({ produtos: [option] }),
-                        status: () => ({ transactionTypes: [option], status: [nextPayload.value] }),
+                        status: () => ({ status: [nextPayload.value] }),
                         mes: () => ({ mes: nextPayload.value })
                     };
 
@@ -175,9 +184,9 @@ export const useClientsState = () => {
         filters,
         setFilters,
         data: {
-            kpis: restaurantData.kpis,
-            alertas: restaurantData.alertas,
-            restaurant: restaurantData,
+            kpis: tab4Data.kpis,
+            alertas: tab4Data.alertas,
+            tab4: tab4Data,
             operacionais: { tabela }
         },
         resetToken,

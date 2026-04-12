@@ -1,27 +1,29 @@
 import { useState, useEffect, useCallback, useMemo, useDeferredValue, useTransition } from "react";
-import { biOverview } from "/src/services/rest";
+import { biTab3 } from "/src/services/rest";
 import { useAuth } from "/src/core/auth";
 import {
-    buildAvailableOptions,
     buildDashboardApiFilters,
     createClearFilters,
-    createCrossFilterHandler,
-    createCrossFilterMap,
     createDashboardFilters,
-    createHandleFieldChange
+    createHandleFieldChange,
+    createMappedCrossFilterHandler,
+    toSingleOrArraySelection
 } from "../../hooks/dashboardTabState.helpers";
 import { useDashboardTabUi } from "../../hooks/useDashboardTabUi";
 import {
-    adaptOverviewKpis,
-    buildOverviewAvailableFilters,
-    buildOverviewDerivedData,
-    normalizeOverviewAnalytics,
-    normalizeOverviewTable
-} from "../../selectors/overviewSelectors";
+    buildTab3AvailableFilters,
+    buildTab3DerivedData,
+    normalizeTab3Analytics,
+    normalizeTab3Table
+} from "../../selectors/restaurantSalesSelectors";
 
-export const initialFilters = createDashboardFilters();
+export const initialFilters = createDashboardFilters({
+    shifts: [],
+    attendants: [],
+    transactionTypes: []
+});
 
-export const useOverviewState = () => {
+export const useTab3State = () => {
     const { key, passport } = useAuth();
     const [, startFiltersTransition] = useTransition();
     const [, startDataTransition] = useTransition();
@@ -30,7 +32,8 @@ export const useOverviewState = () => {
     const [rawResponse, setRawResponse] = useState({
         kpis: {},
         fact: [],
-        table: []
+        table: [],
+        alertas: {}
     });
     const [requestState, setRequestState] = useState({
         status: "loading",
@@ -41,10 +44,6 @@ export const useOverviewState = () => {
     const {
         resetToken,
         bumpResetToken,
-        openDateModal,
-        setOpenDateModal,
-        tempDateRange,
-        setTempDateRange,
         clearButtonRef,
         showFloatingClear
     } = useDashboardTabUi();
@@ -53,7 +52,14 @@ export const useOverviewState = () => {
     const hasCachedData = Boolean(rawResponse.fact?.length);
 
     const apiFilters = useMemo(
-        () => buildDashboardApiFilters(deferredFilters, { includeOrders: true }),
+        () => buildDashboardApiFilters(deferredFilters, {
+            includeOrders: true,
+            extra: {
+                time_of_sale: (currentFilters) => toSingleOrArraySelection(currentFilters.shifts, "name"),
+                received_by: (currentFilters) => toSingleOrArraySelection(currentFilters.attendants, "name"),
+                transaction_type: (currentFilters) => toSingleOrArraySelection(currentFilters.transactionTypes, "name")
+            }
+        }),
         [deferredFilters]
     );
 
@@ -68,7 +74,7 @@ export const useOverviewState = () => {
             }));
 
             try {
-                const response = await biOverview(apiFilters, { key, passport });
+                const response = await biTab3(apiFilters, { key, passport });
 
                 if (active) {
                     startDataTransition(() => {
@@ -96,26 +102,26 @@ export const useOverviewState = () => {
         return () => {
             active = false;
         };
-    }, [apiFilters, hasCachedData, key, passport, requestState.reloadToken]);
+    }, [apiFilters, hasCachedData, key, passport, requestState.reloadToken, startDataTransition]);
 
     const analytics = useMemo(
-        () => normalizeOverviewAnalytics(rawResponse.fact || []),
+        () => normalizeTab3Analytics(rawResponse.fact || []),
         [rawResponse.fact]
     );
 
     const tabela = useMemo(
-        () => normalizeOverviewTable(rawResponse.table || []),
+        () => normalizeTab3Table(rawResponse.table || []),
         [rawResponse.table]
     );
 
-    const overviewData = useMemo(
-        () => buildOverviewDerivedData(analytics),
+    const tab3Data = useMemo(
+        () => buildTab3DerivedData(analytics),
         [analytics]
     );
 
     const availableFilters = useMemo(
-        () => buildOverviewAvailableFilters(analytics, tabela),
-        [analytics, tabela]
+        () => buildTab3AvailableFilters(rawResponse.fact || []),
+        [rawResponse.fact]
     );
 
     const handleFieldChange = useCallback((name, value) => {
@@ -132,18 +138,29 @@ export const useOverviewState = () => {
 
     const handleCrossFilter = useCallback((payload) => {
         startFiltersTransition(() => {
-            createCrossFilterHandler(
+            createMappedCrossFilterHandler(
                 setFilters,
                 createClearFilters(setFilters, initialFilters, bumpResetToken),
-                createCrossFilterMap({ includeOrders: true })
+                (nextPayload) => {
+                    if (nextPayload.type === "merge") {
+                        return nextPayload.filters || {};
+                    }
+
+                    const option = { id: nextPayload.id ?? nextPayload.value, name: nextPayload.value };
+                    const handlers = {
+                        cliente: () => ({ shifts: [option] }),
+                        fornecedor: () => ({ attendants: [option] }),
+                        categoria: () => ({ categorias: [{ name: nextPayload.value }] }),
+                        produto: () => ({ produtos: [option] }),
+                        status: () => ({ transactionTypes: [option], status: [nextPayload.value] }),
+                        mes: () => ({ mes: nextPayload.value })
+                    };
+
+                    return handlers[nextPayload.type]?.();
+                }
             )(payload);
         });
     }, [bumpResetToken, startFiltersTransition]);
-
-    const availableOptions = useMemo(
-        () => buildAvailableOptions(availableFilters),
-        [availableFilters]
-    );
 
     const retry = useCallback(() => {
         setRequestState((current) => ({
@@ -158,18 +175,12 @@ export const useOverviewState = () => {
         filters,
         setFilters,
         data: {
-            kpis: adaptOverviewKpis(rawResponse.kpis),
-            overview: overviewData,
-            operacionais: {
-                tabela
-            },
-            alertas: rawResponse.alertas
+            kpis: tab3Data.kpis,
+            alertas: tab3Data.alertas,
+            tab3: tab3Data,
+            operacionais: { tabela }
         },
         resetToken,
-        openDateModal,
-        setOpenDateModal,
-        tempDateRange,
-        setTempDateRange,
         showFloatingClear,
         clearButtonRef,
         handleFieldChange,
@@ -182,7 +193,6 @@ export const useOverviewState = () => {
             hasData: Boolean(tabela.length || analytics.length),
             onRetry: retry
         },
-        availableOptions,
         ...availableFilters
     };
 };

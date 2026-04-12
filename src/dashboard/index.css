@@ -89,26 +89,49 @@ html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-primary:acti
 }
 
 html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-outline-primary {
-    color: #6e4f3a;
-    border-color: rgba(185, 137, 90, 0.72);
-    background: rgba(255, 251, 247, 0.96);
+    color: #2a211b;
+    border-color: rgba(200, 169, 107, 0.74);
+    background: #f6f1ea;
 }
 
 html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-outline-primary:hover,
 html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-outline-primary:focus {
-    color: #5b3f2e;
-    border-color: #b9895a;
-    background: rgba(185, 137, 90, 0.1);
+    color: #2a211b;
+    border-color: #c8a96b;
+    background: rgba(200, 169, 107, 0.16);
 }
 
 html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-primary,
 html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-primary:hover,
 html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-primary:focus,
 html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-primary:active {
-    color: #fffaf5;
-    border-color: #8f6647;
-    background: linear-gradient(135deg, #8f6647 0%, #d7b28d 100%);
-    box-shadow: 0 12px 24px rgba(92, 63, 42, 0.18);
+    color: #f8f6f2;
+    border-color: #c8a96b;
+    background: linear-gradient(135deg, #1a1410 0%, #241b16 64%, #5a2e2e 100%);
+    box-shadow: 0 12px 24px rgba(42, 33, 27, 0.22);
+}
+
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-outline-primary {
+    color: #111111;
+    border-color: rgba(217, 4, 41, 0.62);
+    background: #ffffff;
+}
+
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-outline-primary:hover,
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-outline-primary:focus {
+    color: #111111;
+    border-color: #d90429;
+    background: #fdebed;
+}
+
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-primary,
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-primary:hover,
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-primary:focus,
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-primary:active {
+    color: #ffffff;
+    border-color: #d90429;
+    background: linear-gradient(135deg, #0b0b0c 0%, #16181d 68%, #d90429 100%);
+    box-shadow: 0 12px 24px rgba(11, 11, 12, 0.24);
 }
 
 html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-outline-primary:hover,
@@ -228,25 +251,47 @@ html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amaz
 }
 
 html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-outline-primary {
-    color: #f1d1b0;
-    border-color: rgba(239, 200, 159, 0.4);
-    background: rgba(41, 31, 24, 0.92);
+    color: #f8f6f2;
+    border-color: rgba(200, 169, 107, 0.46);
+    background: rgba(36, 27, 22, 0.94);
 }
 
 html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-outline-primary:hover,
 html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-outline-primary:focus {
-    color: #fff3e5;
-    border-color: rgba(239, 200, 159, 0.62);
-    background: rgba(62, 48, 38, 0.96);
+    color: #ffffff;
+    border-color: rgba(200, 169, 107, 0.72);
+    background: rgba(90, 46, 46, 0.72);
 }
 
 html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-primary,
 html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-primary:hover,
 html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-primary:focus,
 html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-primary:active {
-    color: #fffaf5;
-    border-color: rgba(239, 200, 159, 0.62);
-    background: linear-gradient(135deg, #5a4030 0%, #d7b28d 100%);
+    color: #f8f6f2;
+    border-color: rgba(200, 169, 107, 0.74);
+    background: linear-gradient(135deg, #1a1410 0%, #241b16 66%, #c8a96b 100%);
+}
+
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-outline-primary {
+    color: #ffffff;
+    border-color: rgba(217, 4, 41, 0.48);
+    background: rgba(11, 11, 12, 0.94);
+}
+
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-outline-primary:hover,
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-outline-primary:focus {
+    color: #ffffff;
+    border-color: rgba(217, 4, 41, 0.74);
+    background: rgba(22, 24, 29, 0.98);
+}
+
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-primary,
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-primary:hover,
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-primary:focus,
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-primary:active {
+    color: #ffffff;
+    border-color: rgba(217, 4, 41, 0.8);
+    background: linear-gradient(135deg, #0b0b0c 0%, #16181d 72%, #d90429 100%);
 }
 
 html[data-theme="dark"] .skeleton-block {

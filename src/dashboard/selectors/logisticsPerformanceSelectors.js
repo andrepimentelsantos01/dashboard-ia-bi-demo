@@ -28,7 +28,7 @@ const formatNumber = (value) =>
 const topLabel = (record = {}) =>
     Object.entries(record).sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
 
-export const normalizeLogisticsPerformanceAnalytics = (rows = []) =>
+export const normalizeTab4Analytics = (rows = []) =>
     rows.map((row) => {
         const quantidade = Number(row.quantity_requested) || 0;
         const valorTotal = Number(row.total_amount) || 0;
@@ -57,7 +57,7 @@ export const normalizeLogisticsPerformanceAnalytics = (rows = []) =>
         };
     });
 
-export const normalizeLogisticsPerformanceTable = (rows = []) =>
+export const normalizeTab4Table = (rows = []) =>
     rows.map((row) => {
         const quantidade = Number(row.quantity_requested) || 0;
         const valorTotal = Number(row.total_amount) || 0;
@@ -98,7 +98,7 @@ export const normalizeLogisticsPerformanceTable = (rows = []) =>
         };
     });
 
-export const buildLogisticsPerformanceDerivedData = (analytics = []) => {
+export const buildTab4DerivedData = (analytics = []) => {
     const acc = {
         costByMonth: {},
         shipmentsByMonth: {},
@@ -290,7 +290,7 @@ export const buildLogisticsPerformanceDerivedData = (analytics = []) => {
     };
 };
 
-export const buildLogisticsPerformanceAvailableFilters = (rows = []) => ({
+export const buildTab4AvailableFilters = (rows = []) => ({
     availableCarriers: [...new Set(rows.map((row) => row.carrier || row.supplier_name).filter(Boolean))].map((name) => ({
         id: name,
         name

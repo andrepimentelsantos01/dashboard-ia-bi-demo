@@ -15,9 +15,33 @@ const formatShort = (value, currencyCode, locale) =>
         locale
     });
 
+const formatLineValue = (value, metric, currencyCode, locale) => {
+    if (metric === "quantity") {
+        return Math.round(Number(value || 0)).toLocaleString(locale);
+    }
+
+    return formatShort(value, currencyCode, locale);
+};
+
+const formatLineAxisValue = (value, metric, currencyCode, locale) => {
+    if (metric === "quantity") {
+        return Math.round(Number(value || 0)).toLocaleString(locale);
+    }
+
+    return formatCompactCurrencyValue(value, { currencyCode, locale });
+};
+
+const getMetricLabel = (metric) => {
+    if (metric === "amount") return "Receita";
+    if (metric === "quantity") return "Volume";
+
+    return "Valor Medio";
+};
+
 export const useChartLineState = ({
     backendData,
     onCrossFilter,
+    metric = "averageUnitPrice",
     currencyCode = "BRL",
     locale = "pt-BR"
 }) => {
@@ -25,7 +49,7 @@ export const useChartLineState = ({
     const [selectedMonth, setSelectedMonth] = useState(null);
     const [chartKey, setChartKey] = useState(0);
     const themeTokens = useChartThemeTokens();
-    const lineColor = themeTokens.chartPrimary;
+    const lineColor = themeTokens.chartGradientStart;
     const lineFill = themeTokens.chartAreaFill;
 
     const handleRefresh = useCallback(() => {
@@ -123,12 +147,14 @@ export const useChartLineState = ({
 
     const months = useMemo(() => Object.keys(aggregated.grouped).sort().reverse(), [aggregated]);
 
-    const averages = useMemo(
+    const values = useMemo(
         () => months.map((month) => {
             const item = aggregated.grouped[month];
-            return !item || !item.qty ? 0 : item.total / item.qty;
+            if (!item) return 0;
+            if (metric === "quantity") return item.qty;
+            return metric === "amount" ? item.total : item.qty ? item.total / item.qty : 0;
         }),
-        [aggregated, months]
+        [aggregated, metric, months]
     );
 
     const handleClickPoint = useCallback((point) => {
@@ -157,10 +183,11 @@ export const useChartLineState = ({
                 const value = point.data;
                 const item = aggregated.byMonth[month];
                 if (!item) return "";
+                const metricLabel = getMetricLabel(metric);
 
                 return `
                     <b>${month}</b><br/>
-                    Valor Médio: <b>${formatShort(value)}</b><br/><br/>
+                    ${metricLabel}: <b>${formatLineValue(value, metric, currencyCode, locale)}</b><br/><br/>
                     <b>Volume Movimentado:</b> ${item.volume}<br/><br/>
                     <b>Categoria Líder (Valor):</b> ${item.categoriaLeaderValor}<br/>
                     <b>Categoria Líder (Quantidade):</b> ${item.categoriaLeaderQtd}<br/><br/>
@@ -193,7 +220,7 @@ export const useChartLineState = ({
                 axisLabel: {
                     color: themeTokens.textSecondary,
                     fontSize: 10,
-                    formatter: (value) => formatCompactCurrencyValue(value, { currencyCode, locale })
+                    formatter: (value) => formatLineAxisValue(value, metric, currencyCode, locale)
                 },
                 splitLine: {
                     lineStyle: { color: themeTokens.splitLine, type: "dashed" }
@@ -226,10 +253,14 @@ export const useChartLineState = ({
             series: [
                 {
                     type: "line",
-                    data: averages,
+                    data: values,
                     smooth: true,
                     lineStyle: { width: 3, color: lineColor },
-                    itemStyle: { color: lineColor },
+                    itemStyle: {
+                        color: themeTokens.chartGradientEnd,
+                        borderColor: lineColor,
+                        borderWidth: 2
+                    },
                     symbolSize: 6,
                     animationDuration: 600,
                     areaStyle: { opacity: 1, color: lineFill },
@@ -238,12 +269,12 @@ export const useChartLineState = ({
                         position: "top",
                         fontSize: 10,
                         color: themeTokens.chartLabelStrong,
-                        formatter: (point) => formatShort(point.value, currencyCode, locale)
+                        formatter: (point) => formatLineValue(point.value, metric, currencyCode, locale)
                     }
                 }
             ]
         };
-    }, [aggregated, averages, currencyCode, lineColor, lineFill, locale, months, themeTokens]);
+    }, [aggregated, currencyCode, lineColor, lineFill, locale, metric, months, themeTokens, values]);
 
     return {
         open,
@@ -252,7 +283,7 @@ export const useChartLineState = ({
         handleClickPoint,
         aggregated,
         months,
-        averages,
+        averages: values,
         handleRefresh,
         chartKey,
         setChartKey

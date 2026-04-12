@@ -130,10 +130,19 @@ const formatMetricFull = (value, currencyCode, locale) =>
 
 const toNumeric = (value) => (typeof value === "number" ? value : Number(value || 0));
 
+const resolveMetricValue = (row, metric) => {
+    if (metric === "operatingProfit") {
+        return toNumeric(row.operatingProfit ?? row.operating_profit ?? row.valorTotal ?? row.total_amount ?? row.sum_total_amount);
+    }
+
+    return toNumeric(row.valorTotal ?? row.total_amount ?? row.sum_total_amount);
+};
+
 export const useChartMapMorphState = ({
     backendData,
     onCrossFilter,
     geography = "brazil",
+    metric = "totalSales",
     currencyCode = "BRL",
     locale = "pt-BR"
 }) => {
@@ -177,7 +186,7 @@ export const useChartMapMorphState = ({
             }
 
             const bucket = byRegion[region.chartName];
-            const value = toNumeric(row.valorTotal ?? row.total_amount ?? row.sum_total_amount);
+            const value = resolveMetricValue(row, metric);
             const quantity = toNumeric(row.quantidade ?? row.sum_quantity ?? row.quantity_requested);
 
             bucket.total += value;
@@ -197,7 +206,7 @@ export const useChartMapMorphState = ({
         }
 
         return byRegion;
-    }, [deferredBackendData, geographyConfig]);
+    }, [deferredBackendData, geographyConfig, metric]);
 
     const mapData = useMemo(
         () =>
@@ -428,5 +437,4 @@ export const useChartMapMorphState = ({
         viewMode
     };
 };
-
 

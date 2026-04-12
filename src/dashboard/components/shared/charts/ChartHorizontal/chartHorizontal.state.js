@@ -256,10 +256,10 @@ export const useChartHorizontalState = ({
                             y: 0,
                             x2: 0,
                             y2: 0,
-                            colorStops: [
-                                { offset: 0, color: resolvedColor },
-                                { offset: 1, color: `${resolvedColor}80` }
-                            ]
+                                colorStops: [
+                                    { offset: 0, color: themeTokens.chartGradientStart },
+                                    { offset: 1, color: `${themeTokens.chartGradientEnd}80` }
+                                ]
                         }
                     },
                     emphasis: {
@@ -272,8 +272,8 @@ export const useChartHorizontalState = ({
                                 x2: 0,
                                 y2: 0,
                                 colorStops: [
-                                    { offset: 0, color: resolvedColor },
-                                    { offset: 1, color: `${resolvedColor}66` }
+                                    { offset: 0, color: themeTokens.chartGradientStart },
+                                    { offset: 1, color: `${themeTokens.chartGradientEnd}66` }
                                 ]
                             }
                         }

@@ -10,6 +10,7 @@ const chartOpts = { renderer: "canvas" };
 const ChartLine = ({
     backendData,
     onCrossFilter,
+    metric = "averageUnitPrice",
     currencyCode = "BRL",
     locale = "pt-BR"
 }) => {
@@ -24,6 +25,7 @@ const ChartLine = ({
     } = useChartLineState({
         backendData,
         onCrossFilter,
+        metric,
         currencyCode,
         locale
     });

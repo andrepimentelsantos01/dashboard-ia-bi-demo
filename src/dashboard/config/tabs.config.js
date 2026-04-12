@@ -1,37 +1,44 @@
-const loadOverviewTab = () => import("../tabs/Overview");
-const loadProductsTab = () => import("../tabs/Products/Products");
-const loadClientsTab = () => import("../tabs/Clients/Clients");
-const loadSuppliersTab = () => import("../tabs/Suppliers");
+const loadTab1 = () => import("../tabs/Tab1");
+const loadTab2 = () => import("../tabs/Tab2");
+const loadTab3 = () => import("../tabs/Tab3");
+const loadTab4 = () => import("../tabs/Tab4");
+
+export const DASHBOARD_TAB_IDS = Object.freeze({
+    TAB1: "Tab1",
+    TAB2: "Tab2",
+    TAB3: "Tab3",
+    TAB4: "Tab4"
+});
 
 export const DASHBOARD_TABS = [
     {
-        key: "overview",
+        id: DASHBOARD_TAB_IDS.TAB1,
         label: "Adidas Sales Dataset",
         schema: "adidas",
-        preload: loadOverviewTab,
-        loadComponent: loadOverviewTab
+        preload: loadTab1,
+        loadComponent: loadTab1
     },
     {
-        key: "products",
+        id: DASHBOARD_TAB_IDS.TAB2,
         label: "Amazon Sales Dataset",
         schema: "amazon",
-        preload: loadProductsTab,
-        loadComponent: loadProductsTab
+        preload: loadTab2,
+        loadComponent: loadTab2
     },
     {
-        key: "clients",
+        id: DASHBOARD_TAB_IDS.TAB3,
         label: "Restaurant Sales Dataset",
         schema: "restaurant",
-        preload: loadClientsTab,
-        loadComponent: loadClientsTab
+        preload: loadTab3,
+        loadComponent: loadTab3
     },
     {
-        key: "suppliers",
+        id: DASHBOARD_TAB_IDS.TAB4,
         label: "Logistics Performance Dataset",
-        schema: "default",
-        preload: loadSuppliersTab,
-        loadComponent: loadSuppliersTab
+        schema: "logistics",
+        preload: loadTab4,
+        loadComponent: loadTab4
     }
 ];
 
-export const DASHBOARD_DEFAULT_TAB = DASHBOARD_TABS[0]?.key ?? "overview";
+export const DASHBOARD_DEFAULT_TAB = DASHBOARD_TABS[0]?.id ?? DASHBOARD_TAB_IDS.TAB1;

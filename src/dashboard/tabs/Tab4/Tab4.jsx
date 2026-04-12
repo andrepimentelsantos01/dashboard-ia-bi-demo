@@ -1,18 +1,17 @@
 import React, { useMemo } from "react";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
-import ChartBarVertical from "../../components/shared/charts/ChartBarVertical";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal";
+import ChartLine from "../../components/shared/charts/ChartLine";
 import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
-import ChartTreemap from "../../components/shared/charts/ChartTreemap";
 import GaugeCount from "../../components/shared/charts/GaugeCount/GaugeCount";
 import {
     GAUGE_CONTEXT,
     HEATMAP_CONTEXT,
     STACKED_BAR_CONTEXT
 } from "../../components/shared/chartContext";
-import { useSuppliersState } from "./suppliers.state";
-import "./Suppliers.css";
+import { useTab4State } from "./tab4.state";
+import "./Tab4.css";
 
 const LOGISTICS_CURRENCY = "USD";
 const LOGISTICS_LOCALE = "en-US";
@@ -50,23 +49,23 @@ const LogisticsGaugePanel = React.memo(({ gauges }) => {
     ];
 
     return (
-        <div className="suppliers-gauge-grid">
+        <div className="tab4-gauge-grid">
             {cards.map((card) => (
-                <div key={card.key} className="suppliers-gauge-card">
+                <div key={card.key} className="tab4-gauge-card">
                     <GaugeCount
                         value={card.value}
                         invertColors={card.invertColors}
                         helpText={card.helpText}
                         helpLabel={card.label}
                     />
-                    <div className="suppliers-gauge-caption">{card.label}</div>
+                    <div className="tab4-gauge-caption">{card.label}</div>
                 </div>
             ))}
         </div>
     );
 });
 
-const Suppliers = () => {
+const Tab4 = () => {
     const {
         filters,
         data,
@@ -82,10 +81,35 @@ const Suppliers = () => {
         availableDestinations,
         availableStatus,
         availableRoutes
-    } = useSuppliersState();
+    } = useTab4State();
 
-    const { logistics, operacionais, kpis, alertas } = data;
+    const { tab4, operacionais, kpis, alertas } = data;
     const tabela = operacionais.tabela || [];
+
+    const shipmentTrendData = useMemo(
+        () => tabela.map((row) => ({
+            ...row,
+            valorTotal: 1,
+            quantidade: 1
+        })),
+        [tabela]
+    );
+
+    const exceptionTrendData = useMemo(
+        () => tabela.map((row) => {
+            const hasException =
+                Boolean(row.exception_flag) ||
+                Number(row.delay_days || 0) > 0 ||
+                row.item_status === "Atrasado";
+
+            return {
+                ...row,
+                valorTotal: hasException ? 1 : 0,
+                quantidade: hasException ? 1 : 0
+            };
+        }),
+        [tabela]
+    );
 
     const filterInputs = useMemo(
         () => [
@@ -104,18 +128,16 @@ const Suppliers = () => {
                 title: "SLA e Confiabilidade da Operacao",
                 height: 320,
                 fullWidth: true,
-                component: <LogisticsGaugePanel gauges={logistics.gauges || {}} />
+                component: <LogisticsGaugePanel gauges={tab4.gauges || {}} />
             },
             {
                 title: "Embarques Mensais",
                 height: 260,
                 component: (
-                    <ChartBarVertical
-                        labels={logistics.historicoMeses}
-                        values={logistics.historicoEmbarques}
-                        backendData={tabela}
+                    <ChartLine
+                        backendData={shipmentTrendData}
                         onCrossFilter={handleCrossFilter}
-                        valueFormat="number"
+                        metric="quantity"
                         currencyCode={LOGISTICS_CURRENCY}
                         locale={LOGISTICS_LOCALE}
                     />
@@ -125,34 +147,8 @@ const Suppliers = () => {
                 title: "Atrasos e Excecoes por Mes",
                 height: 260,
                 component: (
-                    <ChartBarVertical
-                        labels={logistics.historicoMeses}
-                        values={logistics.historicoAtrasos}
-                        backendData={tabela}
-                        onCrossFilter={handleCrossFilter}
-                        valueFormat="number"
-                        currencyCode={LOGISTICS_CURRENCY}
-                        locale={LOGISTICS_LOCALE}
-                    />
-                )
-            },
-            {
-                title: "Mix por Status da Entrega",
-                height: 260,
-                component: (
-                    <ChartTreemap
-                        dataOverride={logistics.statusTreemap}
-                        onCrossFilter={handleCrossFilter}
-                    />
-                )
-            },
-            {
-                title: "Embarques por Status ao Longo do Tempo",
-                height: 280,
-                caption: STACKED_BAR_CONTEXT,
-                component: (
-                    <ChartStackedBar
-                        backendData={tabela}
+                    <ChartLine
+                        backendData={exceptionTrendData}
                         onCrossFilter={handleCrossFilter}
                         metric="quantity"
                         currencyCode={LOGISTICS_CURRENCY}
@@ -165,7 +161,7 @@ const Suppliers = () => {
                 height: 260,
                 component: (
                     <ChartHorizontal
-                        data={logistics.carriersRanking}
+                        data={tab4.carriersRanking}
                         backendData={tabela}
                         order="ASC"
                         onCrossFilter={handleCrossFilter}
@@ -179,7 +175,7 @@ const Suppliers = () => {
                 height: 260,
                 component: (
                     <ChartHorizontal
-                        data={logistics.carriersSlaRanking}
+                        data={tab4.carriersSlaRanking}
                         backendData={tabela}
                         order="ASC"
                         onCrossFilter={handleCrossFilter}
@@ -190,11 +186,26 @@ const Suppliers = () => {
                 )
             },
             {
+                title: "Embarques por Status ao Longo do Tempo",
+                height: 300,
+                fullWidth: true,
+                caption: STACKED_BAR_CONTEXT,
+                component: (
+                    <ChartStackedBar
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                        metric="quantity"
+                        currencyCode={LOGISTICS_CURRENCY}
+                        locale={LOGISTICS_LOCALE}
+                    />
+                )
+            },
+            {
                 title: "Embarques por Origem",
                 height: 260,
                 component: (
                     <ChartHorizontal
-                        data={logistics.warehousesRanking}
+                        data={tab4.warehousesRanking}
                         backendData={tabela}
                         order="ASC"
                         onCrossFilter={handleCrossFilter}
@@ -209,7 +220,7 @@ const Suppliers = () => {
                 height: 260,
                 component: (
                     <ChartHorizontal
-                        data={logistics.destinationsRanking}
+                        data={tab4.destinationsRanking}
                         backendData={tabela}
                         order="ASC"
                         onCrossFilter={handleCrossFilter}
@@ -233,12 +244,12 @@ const Suppliers = () => {
                 )
             }
         ],
-        [handleCrossFilter, logistics, tabela]
+        [exceptionTrendData, handleCrossFilter, shipmentTrendData, tab4, tabela]
     );
 
     return (
         <DashboardTabLayout
-            scopeClassName="bi-scope"
+            scopeClassName="bi-scope logistics-scope"
             filters={filters}
             onFilterChange={handleFieldChange}
             clearFilters={clearFilters}
@@ -255,6 +266,7 @@ const Suppliers = () => {
             contentSectionClassName="section-gap"
             kpiTitle="KPIs de Logistics Performance"
             overviewTitle="Visao Geral de Logistics Performance"
+            tableTitle="Tabela Consolidada / Dados Operacionais"
             kpis={kpis}
             alertas={alertas}
             onCrossFilter={handleCrossFilter}
@@ -266,4 +278,4 @@ const Suppliers = () => {
     );
 };
 
-export default React.memo(Suppliers);
+export default React.memo(Tab4);

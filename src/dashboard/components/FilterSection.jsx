@@ -16,6 +16,7 @@ const FilterSection = ({
     numeroCotacao,
     status,
     filterInputs,
+    dateFilterPlacement = "end",
     hiddenFilterNames = []
 }) => {
     const scrollRef = useRef(null);
@@ -90,6 +91,22 @@ const FilterSection = ({
         };
     }, [updateScrollState, visibleFilterInputs.length]);
 
+    const dateFilter = useMemo(
+        () => (
+            <div className="filter-col" key="dateRange">
+                <div className="filter-section-card">
+                    <DateRangePicker
+                        label="Periodo"
+                        name="dateRange"
+                        value={filters.dateRange}
+                        onChange={({ target }) => onChange("dateRange", target.value)}
+                    />
+                </div>
+            </div>
+        ),
+        [filters.dateRange, onChange]
+    );
+
     const renderedInputs = useMemo(
         () =>
             visibleFilterInputs.map(({ label, name, data }) => (
@@ -110,6 +127,13 @@ const FilterSection = ({
         [visibleFilterInputs, filters, handleSelectChange]
     );
 
+    const orderedInputs = useMemo(
+        () => dateFilterPlacement === "start"
+            ? [dateFilter, ...renderedInputs]
+            : [...renderedInputs, dateFilter],
+        [dateFilter, dateFilterPlacement, renderedInputs]
+    );
+
     return (
         <div className="filter-section-carousel">
             {scrollState.canScrollLeft ? (
@@ -124,18 +148,8 @@ const FilterSection = ({
             ) : null}
 
             <div className="filter-section-row" ref={scrollRef}>
-                {renderedInputs}
+                {orderedInputs}
 
-                <div className="filter-col">
-                    <div className="filter-section-card">
-                        <DateRangePicker
-                            label="Período"
-                            name="dateRange"
-                            value={filters.dateRange}
-                            onChange={({ target }) => onChange("dateRange", target.value)}
-                        />
-                    </div>
-                </div>
             </div>
 
             {scrollState.canScrollRight ? (

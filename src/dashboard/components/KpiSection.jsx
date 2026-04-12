@@ -103,13 +103,7 @@ const KpiSection = ({ kpis = {}, isLoading, isRefreshing, error, onRetry }) => {
     }
 
     if (!hasCards) {
-        return (
-            <DashboardAsyncState
-                variant="empty"
-                title="Nenhum KPI disponivel"
-                description="Ajuste os filtros para visualizar indicadores deste conjunto de dados."
-            />
-        );
+        return null;
     }
 
     return (

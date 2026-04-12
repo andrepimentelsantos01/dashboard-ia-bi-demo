@@ -20,6 +20,7 @@ const DashboardTabLayout = ({
     showFloatingClear,
     filterOptions = {},
     filterInputs,
+    dateFilterPlacement = "end",
     hiddenFilterNames = [],
     filterSectionClassName = "filter-section-wrapper filter-body-override",
     contentSectionClassName,
@@ -109,6 +110,7 @@ const DashboardTabLayout = ({
                         onChange={onFilterChange}
                         onClear={clearFilters}
                         filterInputs={filterInputs}
+                        dateFilterPlacement={dateFilterPlacement}
                         hiddenFilterNames={hiddenFilterNames}
                         {...filterOptions}
                     />

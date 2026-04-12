@@ -3,7 +3,15 @@ import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 import { useChartThemeTokens } from "../chartTheme";
 import { formatCurrencyValue } from "../../../../utils/intlFormat";
 
-const buildHeatmapData = (rows = []) => {
+const resolveHeatmapValue = (row, metric) => {
+    if (metric === "operatingProfit") {
+        return Number(row.operatingProfit ?? row.operating_profit ?? row.valorTotal ?? row.total_amount ?? row.sum_total_amount ?? 0);
+    }
+
+    return Number(row.valorTotal ?? row.total_amount ?? row.sum_total_amount ?? 0);
+};
+
+const buildHeatmapData = (rows = [], metric = "totalSales") => {
     const monthsSet = new Set();
     const categoriesSet = new Set();
     const matrix = {};
@@ -11,7 +19,7 @@ const buildHeatmapData = (rows = []) => {
     rows.forEach((row) => {
         const month = row.year_months;
         const category = row.categoria || row.product_class_material_name || "Sem categoria";
-        const value = Number(row.valorTotal ?? row.total_amount ?? row.sum_total_amount ?? 0);
+        const value = resolveHeatmapValue(row, metric);
 
         if (!month || !category) return;
 
@@ -42,6 +50,7 @@ const buildHeatmapData = (rows = []) => {
 export const useChartHeatmapState = ({
     backendData,
     onCrossFilter,
+    metric = "totalSales",
     currencyCode = "BRL",
     locale = "pt-BR"
 }) => {
@@ -51,8 +60,8 @@ export const useChartHeatmapState = ({
     const themeTokens = useChartThemeTokens();
 
     const heatmapData = useMemo(
-        () => buildHeatmapData(backendData || []),
-        [backendData]
+        () => buildHeatmapData(backendData || [], metric),
+        [backendData, metric]
     );
 
     const handleRefresh = useCallback(() => {

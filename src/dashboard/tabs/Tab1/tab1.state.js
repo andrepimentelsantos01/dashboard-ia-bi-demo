@@ -1,29 +1,27 @@
 import { useState, useEffect, useCallback, useMemo, useDeferredValue, useTransition } from "react";
-import { biProducts } from "/src/services/rest";
+import { biTab1 } from "/src/services/rest";
 import { useAuth } from "/src/core/auth";
 import {
+    buildAvailableOptions,
     buildDashboardApiFilters,
     createClearFilters,
+    createCrossFilterHandler,
+    createCrossFilterMap,
     createDashboardFilters,
-    createHandleFieldChange,
-    createMappedCrossFilterHandler,
-    toSingleOrArraySelection
+    createHandleFieldChange
 } from "../../hooks/dashboardTabState.helpers";
 import { useDashboardTabUi } from "../../hooks/useDashboardTabUi";
 import {
-    buildAmazonSalesAvailableFilters,
-    buildAmazonSalesDerivedData,
-    normalizeAmazonSalesAnalytics,
-    normalizeAmazonSalesTable
-} from "../../selectors/amazonSalesSelectors";
+    adaptTab1Kpis,
+    buildTab1AvailableFilters,
+    buildTab1DerivedData,
+    normalizeTab1Analytics,
+    normalizeTab1Table
+} from "../../selectors/tab1Selectors";
 
-export const initialFilters = createDashboardFilters({
-    locations: [],
-    customers: [],
-    paymentMethods: []
-});
+export const initialFilters = createDashboardFilters();
 
-export const useProductsState = () => {
+export const useTab1State = () => {
     const { key, passport } = useAuth();
     const [, startFiltersTransition] = useTransition();
     const [, startDataTransition] = useTransition();
@@ -32,8 +30,7 @@ export const useProductsState = () => {
     const [rawResponse, setRawResponse] = useState({
         kpis: {},
         fact: [],
-        table: [],
-        alertas: {}
+        table: []
     });
     const [requestState, setRequestState] = useState({
         status: "loading",
@@ -44,6 +41,10 @@ export const useProductsState = () => {
     const {
         resetToken,
         bumpResetToken,
+        openDateModal,
+        setOpenDateModal,
+        tempDateRange,
+        setTempDateRange,
         clearButtonRef,
         showFloatingClear
     } = useDashboardTabUi();
@@ -52,14 +53,7 @@ export const useProductsState = () => {
     const hasCachedData = Boolean(rawResponse.fact?.length);
 
     const apiFilters = useMemo(
-        () => buildDashboardApiFilters(deferredFilters, {
-            includeOrders: true,
-            extra: {
-                customer_location: (currentFilters) => toSingleOrArraySelection(currentFilters.locations, "name"),
-                customer_name: (currentFilters) => toSingleOrArraySelection(currentFilters.customers, "name"),
-                payment_method: (currentFilters) => toSingleOrArraySelection(currentFilters.paymentMethods, "name")
-            }
-        }),
+        () => buildDashboardApiFilters(deferredFilters, { includeOrders: true }),
         [deferredFilters]
     );
 
@@ -74,7 +68,7 @@ export const useProductsState = () => {
             }));
 
             try {
-                const response = await biProducts(apiFilters, { key, passport });
+                const response = await biTab1(apiFilters, { key, passport });
 
                 if (active) {
                     startDataTransition(() => {
@@ -102,26 +96,26 @@ export const useProductsState = () => {
         return () => {
             active = false;
         };
-    }, [apiFilters, hasCachedData, key, passport, requestState.reloadToken, startDataTransition]);
+    }, [apiFilters, hasCachedData, key, passport, requestState.reloadToken]);
 
     const analytics = useMemo(
-        () => normalizeAmazonSalesAnalytics(rawResponse.fact || []),
+        () => normalizeTab1Analytics(rawResponse.fact || []),
         [rawResponse.fact]
     );
 
     const tabela = useMemo(
-        () => normalizeAmazonSalesTable(rawResponse.table || []),
+        () => normalizeTab1Table(rawResponse.table || []),
         [rawResponse.table]
     );
 
-    const amazonData = useMemo(
-        () => buildAmazonSalesDerivedData(analytics),
+    const tab1Data = useMemo(
+        () => buildTab1DerivedData(analytics),
         [analytics]
     );
 
     const availableFilters = useMemo(
-        () => buildAmazonSalesAvailableFilters(rawResponse.fact || []),
-        [rawResponse.fact]
+        () => buildTab1AvailableFilters(analytics, tabela),
+        [analytics, tabela]
     );
 
     const handleFieldChange = useCallback((name, value) => {
@@ -138,32 +132,18 @@ export const useProductsState = () => {
 
     const handleCrossFilter = useCallback((payload) => {
         startFiltersTransition(() => {
-            createMappedCrossFilterHandler(
+            createCrossFilterHandler(
                 setFilters,
                 createClearFilters(setFilters, initialFilters, bumpResetToken),
-                (nextPayload) => {
-                    if (nextPayload.type === "merge") {
-                        return nextPayload.filters || {};
-                    }
-
-                    const option = { id: nextPayload.id ?? nextPayload.value, name: nextPayload.value };
-                    const handlers = {
-                        cliente: () => ({ locations: [option] }),
-                        fornecedor: () => ({ paymentMethods: [option] }),
-                        categoria: () => ({ categorias: [{ name: nextPayload.value }] }),
-                        produto: () => ({ produtos: [option] }),
-                        status: () => ({ status: [nextPayload.value] }),
-                        mes: () => ({ mes: nextPayload.value }),
-                        customer: () => ({ customers: [option] }),
-                        location: () => ({ locations: [option] }),
-                        paymentMethod: () => ({ paymentMethods: [option] })
-                    };
-
-                    return handlers[nextPayload.type]?.();
-                }
+                createCrossFilterMap({ includeOrders: true })
             )(payload);
         });
     }, [bumpResetToken, startFiltersTransition]);
+
+    const availableOptions = useMemo(
+        () => buildAvailableOptions(availableFilters),
+        [availableFilters]
+    );
 
     const retry = useCallback(() => {
         setRequestState((current) => ({
@@ -178,12 +158,18 @@ export const useProductsState = () => {
         filters,
         setFilters,
         data: {
-            kpis: amazonData.kpis,
-            alertas: amazonData.alertas,
-            amazon: amazonData,
-            operacionais: { tabela }
+            kpis: adaptTab1Kpis(rawResponse.kpis),
+            tab1: tab1Data,
+            operacionais: {
+                tabela
+            },
+            alertas: rawResponse.alertas
         },
         resetToken,
+        openDateModal,
+        setOpenDateModal,
+        tempDateRange,
+        setTempDateRange,
         showFloatingClear,
         clearButtonRef,
         handleFieldChange,
@@ -196,6 +182,7 @@ export const useProductsState = () => {
             hasData: Boolean(tabela.length || analytics.length),
             onRetry: retry
         },
+        availableOptions,
         ...availableFilters
     };
 };

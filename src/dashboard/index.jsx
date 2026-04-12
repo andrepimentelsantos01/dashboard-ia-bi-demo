@@ -2,7 +2,7 @@ import React, { useState, useMemo, Suspense, useCallback, useEffect, startTransi
 import { ButtonGroup, Button } from "react-bootstrap";
 import DashboardErrorBoundary from "./components/shared/DashboardErrorBoundary";
 import { DashboardKpiSkeleton, DashboardOverviewSkeleton, DashboardTableSkeleton } from "./components/shared/DashboardAsyncState";
-import { DASHBOARD_DEFAULT_TAB, DASHBOARD_TABS } from "./config/tabs.config";
+import { DASHBOARD_DEFAULT_TAB, DASHBOARD_TABS, DASHBOARD_TAB_IDS } from "./config/tabs.config";
 import "./index.css";
 
 const Skeleton = React.memo(() => (
@@ -19,27 +19,27 @@ const TABS = DASHBOARD_TABS.map((tab) => ({
 }));
 
 const Dashboard = () => {
-    const [activeTab, setActiveTab] = useState(DASHBOARD_DEFAULT_TAB);
+    const [activeTabId, setActiveTabId] = useState(DASHBOARD_DEFAULT_TAB);
 
-    const tabMap = useMemo(
-        () => new Map(TABS.map((tab) => [tab.key, tab])),
+    const tabConfigById = useMemo(
+        () => new Map(TABS.map((tab) => [tab.id, tab])),
         []
     );
 
-    const handleTabChange = useCallback((key) => {
+    const handleTabChange = useCallback((tabId) => {
         startTransition(() => {
-            setActiveTab(key);
+            setActiveTabId(tabId);
         });
     }, []);
 
-    const preloadTab = useCallback((key) => {
-        tabMap.get(key)?.preload?.();
-    }, [tabMap]);
+    const preloadTab = useCallback((tabId) => {
+        tabConfigById.get(tabId)?.preload?.();
+    }, [tabConfigById]);
 
     useEffect(() => {
         const preloadNonActiveTabs = () => {
-            TABS.forEach(({ key, preload }) => {
-                if (key !== activeTab) preload?.();
+            TABS.forEach(({ id, preload }) => {
+                if (id !== activeTabId) preload?.();
             });
         };
 
@@ -52,11 +52,11 @@ const Dashboard = () => {
 
         const timeoutId = window.setTimeout(preloadNonActiveTabs, 600);
         return () => window.clearTimeout(timeoutId);
-    }, [activeTab]);
+    }, [activeTabId]);
 
     const currentTabConfig = useMemo(
-        () => tabMap.get(activeTab) ?? null,
-        [activeTab, tabMap]
+        () => tabConfigById.get(activeTabId) ?? null,
+        [activeTabId, tabConfigById]
     );
 
     useEffect(() => {
@@ -72,25 +72,29 @@ const Dashboard = () => {
 
     const tabButtons = useMemo(
         () =>
-            TABS.map(({ key, label, schema }) => (
+            TABS.map(({ id, label, schema }) => (
                 <Button
-                    key={key}
+                    key={id}
                     className={`dashboard-tab-btn ${schema !== "default" ? `dashboard-tab-btn--${schema}` : ""}`}
-                    variant={activeTab === key ? "primary" : "outline-primary"}
-                    onClick={() => handleTabChange(key)}
-                    onMouseEnter={() => preloadTab(key)}
-                    onFocus={() => preloadTab(key)}
+                    variant={activeTabId === id ? "primary" : "outline-primary"}
+                    onClick={() => handleTabChange(id)}
+                    onMouseEnter={() => preloadTab(id)}
+                    onFocus={() => preloadTab(id)}
                 >
                     {label}
                 </Button>
             )),
-        [activeTab, handleTabChange, preloadTab]
+        [activeTabId, handleTabChange, preloadTab]
     );
 
     const CurrentComponent = currentTabConfig?.component;
 
     return (
-        <div className={`dashboard-container ${activeTab === "overview" ? "dashboard-container--adidas-active" : ""}`}>
+        <div
+            className={`dashboard-container ${
+                activeTabId === DASHBOARD_TAB_IDS.TAB1 ? "dashboard-container--adidas-active" : ""
+            }`}
+        >
             <ButtonGroup className="dashboard-btn-group d-flex flex-wrap">
                 {tabButtons}
             </ButtonGroup>
@@ -103,7 +107,7 @@ const Dashboard = () => {
                 }
             >
                 <Suspense fallback={<Skeleton />}>
-                    {CurrentComponent ? <CurrentComponent key={activeTab} /> : null}
+                    {CurrentComponent ? <CurrentComponent key={activeTabId} /> : null}
                 </Suspense>
             </DashboardErrorBoundary>
         </div>

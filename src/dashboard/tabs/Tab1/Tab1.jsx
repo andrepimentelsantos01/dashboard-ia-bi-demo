@@ -1,25 +1,25 @@
-import React, { useMemo } from "react";
+﻿import React, { useMemo } from "react";
 import ChartBarVertical from "../../components/shared/charts/ChartBarVertical";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal";
 import ChartLine from "../../components/shared/charts/ChartLine";
 import ChartMapMorph from "../../components/shared/charts/ChartMapMorph";
+import ChartPie from "../../components/shared/charts/ChartPie";
 import ChartScatterAggregate from "../../components/shared/charts/ChartScatterAggregate";
 import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
-import ChartTreemap from "../../components/shared/charts/ChartTreemap";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
 import {
     HEATMAP_CONTEXT,
     SCATTER_CONTEXT,
     STACKED_BAR_CONTEXT
 } from "../../components/shared/chartContext";
-import { useOverviewState } from "./overview.state";
-import "./Overview.css";
+import { useTab1State } from "./tab1.state";
+import "./Tab1.css";
 
-const OVERVIEW_CURRENCY = "USD";
-const OVERVIEW_LOCALE = "en-US";
+const TAB1_CURRENCY = "USD";
+const TAB1_LOCALE = "en-US";
 
-const Overview = () => {
+const Tab1 = () => {
     const {
         filters,
         data,
@@ -35,36 +35,36 @@ const Overview = () => {
         availableCategorias,
         availableProdutos,
         availableStatus
-    } = useOverviewState();
+    } = useTab1State();
 
     const {
         fornecedoresEntrega,
-        fornecedoresEntregaQuantidade,
         historicoMeses,
-        historicoQuantidades,
+        historicoOperatingProfit,
         historicoValores,
         rankingRegioes,
-        rankingRegioesQuantidade,
-        rankingClientes,
-        rankingClientesQuantidade,
+        rankingRegioesOperatingProfit,
         produtosRanking,
-        produtosRankingQuantidade,
-        salesMethodTreemap
-    } = data.overview;
+        salesMethodMix
+    } = data.tab1;
 
     const { tabela } = data.operacionais;
 
+    const regionComparison = rankingRegioesOperatingProfit.length
+        ? rankingRegioesOperatingProfit
+        : rankingRegioes;
+
     const filterInputs = useMemo(
         () => [
-            { label: "Retailers", name: "suppliers", data: availableSuppliers },
-            { label: "Estados", name: "clients", data: availableClients },
             {
-                label: "Regiões",
+                label: "Region",
                 name: "categorias",
                 data: availableCategorias.map((name) => ({ id: name, name }))
             },
-            { label: "Produtos", name: "produtos", data: availableProdutos },
-            { label: "Canal de Venda", name: "status", data: availableStatus }
+            { label: "State", name: "clients", data: availableClients },
+            { label: "Retailer", name: "suppliers", data: availableSuppliers },
+            { label: "Product", name: "produtos", data: availableProdutos },
+            { label: "Sales Method", name: "status", data: availableStatus }
         ],
         [
             availableCategorias,
@@ -78,7 +78,7 @@ const Overview = () => {
     const charts = useMemo(
         () => [
             {
-                title: "Receita Mensal",
+                title: "Monthly Revenue",
                 height: 260,
                 component: (
                     <ChartBarVertical
@@ -86,74 +86,57 @@ const Overview = () => {
                         values={historicoValores}
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
+                        currencyCode={TAB1_CURRENCY}
+                        locale={TAB1_LOCALE}
                     />
                 )
             },
             {
-                title: "Volume Mensal",
+                title: "Monthly Operating Profit",
                 height: 260,
                 component: (
                     <ChartBarVertical
                         labels={historicoMeses}
-                        values={historicoQuantidades}
+                        values={historicoOperatingProfit}
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
-                        valueFormat="number"
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
+                        currencyCode={TAB1_CURRENCY}
+                        locale={TAB1_LOCALE}
                     />
                 )
             },
             {
-                title: "Mapa de Receita por Estado",
+                title: "State Sales Map",
                 height: 320,
                 component: (
                     <ChartMapMorph
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
                         geography="us"
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
+                        metric="totalSales"
+                        currencyCode={TAB1_CURRENCY}
+                        locale={TAB1_LOCALE}
                     />
                 )
             },
             {
-                title: "Receita por Regi\u00e3o",
+                title: "Region comparison",
                 height: 260,
                 component: (
                     <ChartBarVertical
-                        labels={rankingRegioes.map((item) => item.name)}
-                        values={rankingRegioes.map((item) => item.value)}
+                        labels={regionComparison.map((item) => item.name)}
+                        values={regionComparison.map((item) => item.value)}
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
                         filterType="categoria"
                         showTrendLine={false}
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
+                        currencyCode={TAB1_CURRENCY}
+                        locale={TAB1_LOCALE}
                     />
                 )
             },
             {
-                title: "Volume por Regi\u00e3o",
-                height: 260,
-                component: (
-                    <ChartBarVertical
-                        labels={rankingRegioesQuantidade.map((item) => item.name)}
-                        values={rankingRegioesQuantidade.map((item) => item.valor)}
-                        backendData={tabela}
-                        onCrossFilter={handleCrossFilter}
-                        filterType="categoria"
-                        showTrendLine={false}
-                        valueFormat="number"
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
-                    />
-                )
-            },
-            {
-                title: "Receita por Canal ao Longo do Tempo",
+                title: "Revenue by Sales Method over Time",
                 height: 280,
                 caption: STACKED_BAR_CONTEXT,
                 component: (
@@ -161,37 +144,26 @@ const Overview = () => {
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
                         metric="amount"
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
+                        currencyCode={TAB1_CURRENCY}
+                        locale={TAB1_LOCALE}
                     />
                 )
             },
             {
-                title: "Volume por Canal ao Longo do Tempo",
-                height: 280,
-                caption: STACKED_BAR_CONTEXT,
-                component: (
-                    <ChartStackedBar
-                        backendData={tabela}
-                        onCrossFilter={handleCrossFilter}
-                        metric="quantity"
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
-                    />
-                )
-            },
-            {
-                title: "Mix por Canal de Venda",
+                title: "Sales Method Mix",
                 height: 260,
                 component: (
-                    <ChartTreemap
-                        dataOverride={salesMethodTreemap}
+                    <ChartPie
+                        data={salesMethodMix}
+                        backendData={tabela}
                         onCrossFilter={handleCrossFilter}
+                        filterType="status"
+                        categoryField="status"
                     />
                 )
             },
             {
-                title: "Ranking de Produtos por Receita",
+                title: "Product Revenue Ranking",
                 height: 260,
                 component: (
                     <ChartHorizontal
@@ -200,29 +172,13 @@ const Overview = () => {
                         order="ASC"
                         height={250}
                         onCrossFilter={handleCrossFilter}
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
+                        currencyCode={TAB1_CURRENCY}
+                        locale={TAB1_LOCALE}
                     />
                 )
             },
             {
-                title: "Ranking de Produtos por Volume",
-                height: 260,
-                component: (
-                    <ChartHorizontal
-                        data={produtosRankingQuantidade}
-                        backendData={tabela}
-                        order="ASC"
-                        height={250}
-                        onCrossFilter={handleCrossFilter}
-                        valueFormat="volume"
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
-                    />
-                )
-            },
-            {
-                title: "Ranking de Retailers por Receita",
+                title: "Retailer Revenue Ranking",
                 height: 260,
                 component: (
                     <ChartHorizontal
@@ -231,80 +187,61 @@ const Overview = () => {
                         order="ASC"
                         height={250}
                         onCrossFilter={handleCrossFilter}
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
+                        currencyCode={TAB1_CURRENCY}
+                        locale={TAB1_LOCALE}
                     />
                 )
             },
             {
-                title: "Ranking de Retailers por Volume",
-                height: 260,
-                component: (
-                    <ChartHorizontal
-                        data={fornecedoresEntregaQuantidade}
-                        backendData={tabela}
-                        order="ASC"
-                        height={250}
-                        onCrossFilter={handleCrossFilter}
-                        valueFormat="volume"
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
-                    />
-                )
-            },
-            {
-                title: "Dispers\u00e3o Pre\u00e7o x Volume",
+                title: "Price vs Volume Scatter",
                 height: 300,
                 caption: SCATTER_CONTEXT,
                 component: (
                     <ChartScatterAggregate
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
+                        currencyCode={TAB1_CURRENCY}
+                        locale={TAB1_LOCALE}
                     />
                 )
             },
             {
-                title: "Mapa de Calor Regi\u00e3o x M\u00eas",
+                title: "Region x Month Heatmap",
                 height: 280,
                 caption: HEATMAP_CONTEXT,
                 component: (
                     <ChartHeatmap
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
+                        metric="operatingProfit"
+                        currencyCode={TAB1_CURRENCY}
+                        locale={TAB1_LOCALE}
                     />
                 )
             },
             {
-                title: "Evolu\u00e7\u00e3o do Pre\u00e7o M\u00e9dio por Unidade",
+                title: "Average Price per Unit over Time",
                 height: 260,
+                fullWidth: true,
                 component: (
                     <ChartLine
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
+                        currencyCode={TAB1_CURRENCY}
+                        locale={TAB1_LOCALE}
                     />
                 )
             }
         ],
         [
             fornecedoresEntrega,
-            fornecedoresEntregaQuantidade,
             handleCrossFilter,
             historicoMeses,
-            historicoQuantidades,
+            historicoOperatingProfit,
             historicoValores,
             produtosRanking,
-            produtosRankingQuantidade,
-            rankingRegioes,
-            rankingRegioesQuantidade,
-            rankingClientes,
-            rankingClientesQuantidade,
-            salesMethodTreemap,
+            regionComparison,
+            salesMethodMix,
             tabela
         ]
     );
@@ -317,6 +254,7 @@ const Overview = () => {
             clearFilters={clearFilters}
             clearButtonRef={clearButtonRef}
             showFloatingClear={showFloatingClear}
+            dateFilterPlacement="start"
             filterInputs={filterInputs}
             filterOptions={{
                 fornecedores: availableSuppliers,
@@ -337,4 +275,4 @@ const Overview = () => {
     );
 };
 
-export default React.memo(Overview);
+export default React.memo(Tab1);

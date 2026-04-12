@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import {
-    normalizeOverviewAnalytics,
-    normalizeOverviewTable,
-    buildOverviewDerivedData,
-    adaptOverviewKpis
-} from "../src/dashboard/selectors/overviewSelectors.js";
+  normalizeTab1Analytics,
+  normalizeTab1Table,
+  buildTab1DerivedData,
+  adaptTab1Kpis
+} from "../src/dashboard/selectors/tab1Selectors.js";
 import {
     createDashboardFilters,
     buildDashboardApiFilters,
@@ -13,7 +13,7 @@ import {
 
 const tests = [
     () => {
-        const [row] = normalizeOverviewAnalytics([{
+  const [row] = normalizeTab1Analytics([{
             quantity_requested: 12,
             total_amount: 240,
             logistics_status: "Online",
@@ -32,7 +32,7 @@ const tests = [
         assert.equal(row.salesMethod, "Online");
     },
     () => {
-        const derived = buildOverviewDerivedData([
+  const derived = buildTab1DerivedData([
             {
                 year_months: "2021-01",
                 valorTotal: 100,
@@ -77,7 +77,7 @@ const tests = [
         assert.equal(derived.salesMethodTreemap.find((item) => item.name === "Online")?.value, 2);
     },
     () => {
-        const [tableRow] = normalizeOverviewTable([{
+  const [tableRow] = normalizeTab1Table([{
             order_date: "2021-01-05T00:00:00.000Z",
             quantity_requested: 8,
             total_amount: 120,
@@ -96,7 +96,20 @@ const tests = [
         assert.equal(tableRow.fornecedor, "Retail C");
         assert.equal(tableRow.sales_method, "In-store");
         assert.equal(tableRow.operating_margin_percent, 20);
-        assert.deepEqual(adaptOverviewKpis({ receita: 10 }, {}), { receita: 10 });
+        assert.deepEqual(
+            adaptTab1Kpis({
+                "Receita Total": 10,
+                "Lucro Operacional": 4,
+                "Margem Operacional Media": 0.4,
+                "Unidades Vendidas": 2
+            }),
+            {
+                "Total Sales": 10,
+                "Operating Profit": 4,
+                "Average Operating Margin": 0.4,
+                "Units Sold": 2
+            }
+        );
     },
     () => {
         const filters = createDashboardFilters({ uf: "CA", mes: "2021-01" });

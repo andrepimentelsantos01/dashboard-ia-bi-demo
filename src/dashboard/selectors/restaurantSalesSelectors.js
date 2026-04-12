@@ -25,7 +25,7 @@ const formatCurrency = (value) =>
 const formatNumber = (value) =>
     Math.round(Number(value || 0)).toLocaleString("pt-BR");
 
-export const normalizeRestaurantSalesAnalytics = (rows = []) =>
+export const normalizeTab3Analytics = (rows = []) =>
     rows.map((row) => {
         const quantidade = Number(row.quantity_requested) || 0;
         const valorTotal = Number(row.total_amount) || 0;
@@ -48,7 +48,7 @@ export const normalizeRestaurantSalesAnalytics = (rows = []) =>
         };
     });
 
-export const normalizeRestaurantSalesTable = (rows = []) =>
+export const normalizeTab3Table = (rows = []) =>
     rows.map((row) => {
         const quantidade = Number(row.quantity_requested) || 0;
         const valorTotal = Number(row.total_amount) || 0;
@@ -80,7 +80,7 @@ export const normalizeRestaurantSalesTable = (rows = []) =>
         };
     });
 
-export const buildRestaurantSalesDerivedData = (analytics = []) => {
+export const buildTab3DerivedData = (analytics = []) => {
     const acc = {
         salesByMonth: {},
         ordersByMonth: {},
@@ -249,7 +249,7 @@ export const buildRestaurantSalesDerivedData = (analytics = []) => {
     };
 };
 
-export const buildRestaurantSalesAvailableFilters = (rows = []) => ({
+export const buildTab3AvailableFilters = (rows = []) => ({
     availableShifts: [...new Set(rows.map((row) => row.time_of_sale).filter(Boolean))].map((name) => ({
         id: name,
         name

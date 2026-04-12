@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useDeferredValue, useTransition } from "react";
-import { biSuppliers } from "/src/services/rest";
+import { biTab2 } from "/src/services/rest";
 import { useAuth } from "/src/core/auth";
 import {
     buildDashboardApiFilters,
@@ -11,19 +11,19 @@ import {
 } from "../../hooks/dashboardTabState.helpers";
 import { useDashboardTabUi } from "../../hooks/useDashboardTabUi";
 import {
-    buildLogisticsPerformanceAvailableFilters,
-    buildLogisticsPerformanceDerivedData,
-    normalizeLogisticsPerformanceAnalytics,
-    normalizeLogisticsPerformanceTable
-} from "../../selectors/logisticsPerformanceSelectors";
+    buildTab2AvailableFilters,
+    buildTab2DerivedData,
+    normalizeTab2Analytics,
+    normalizeTab2Table
+} from "../../selectors/amazonSalesSelectors";
 
 export const initialFilters = createDashboardFilters({
-    carriers: [],
-    warehouses: [],
-    destinations: []
+    locations: [],
+    customers: [],
+    paymentMethods: []
 });
 
-export const useSuppliersState = () => {
+export const useTab2State = () => {
     const { key, passport } = useAuth();
     const [, startFiltersTransition] = useTransition();
     const [, startDataTransition] = useTransition();
@@ -55,9 +55,9 @@ export const useSuppliersState = () => {
         () => buildDashboardApiFilters(deferredFilters, {
             includeOrders: true,
             extra: {
-                carrier: (currentFilters) => toSingleOrArraySelection(currentFilters.carriers, "name"),
-                origin_warehouse: (currentFilters) => toSingleOrArraySelection(currentFilters.warehouses, "name"),
-                destination: (currentFilters) => toSingleOrArraySelection(currentFilters.destinations, "name")
+                customer_location: (currentFilters) => toSingleOrArraySelection(currentFilters.locations, "name"),
+                customer_name: (currentFilters) => toSingleOrArraySelection(currentFilters.customers, "name"),
+                payment_method: (currentFilters) => toSingleOrArraySelection(currentFilters.paymentMethods, "name")
             }
         }),
         [deferredFilters]
@@ -74,7 +74,7 @@ export const useSuppliersState = () => {
             }));
 
             try {
-                const response = await biSuppliers(apiFilters, { key, passport });
+                const response = await biTab2(apiFilters, { key, passport });
 
                 if (active) {
                     startDataTransition(() => {
@@ -105,22 +105,22 @@ export const useSuppliersState = () => {
     }, [apiFilters, hasCachedData, key, passport, requestState.reloadToken, startDataTransition]);
 
     const analytics = useMemo(
-        () => normalizeLogisticsPerformanceAnalytics(rawResponse.fact || []),
+        () => normalizeTab2Analytics(rawResponse.fact || []),
         [rawResponse.fact]
     );
 
     const tabela = useMemo(
-        () => normalizeLogisticsPerformanceTable(rawResponse.table || []),
+        () => normalizeTab2Table(rawResponse.table || []),
         [rawResponse.table]
     );
 
-    const logisticsData = useMemo(
-        () => buildLogisticsPerformanceDerivedData(analytics),
+    const tab2Data = useMemo(
+        () => buildTab2DerivedData(analytics),
         [analytics]
     );
 
     const availableFilters = useMemo(
-        () => buildLogisticsPerformanceAvailableFilters(rawResponse.fact || []),
+        () => buildTab2AvailableFilters(rawResponse.fact || []),
         [rawResponse.fact]
     );
 
@@ -143,26 +143,20 @@ export const useSuppliersState = () => {
                 createClearFilters(setFilters, initialFilters, bumpResetToken),
                 (nextPayload) => {
                     if (nextPayload.type === "merge") {
-                        const nextFilters = { ...(nextPayload.filters || {}) };
-
-                        if (nextFilters.categorias?.length) {
-                            nextFilters.warehouses = nextFilters.categorias.map((item) => ({
-                                id: item?.id ?? item?.name ?? item,
-                                name: item?.name ?? item
-                            }));
-                        }
-
-                        return nextFilters;
+                        return nextPayload.filters || {};
                     }
 
                     const option = { id: nextPayload.id ?? nextPayload.value, name: nextPayload.value };
                     const handlers = {
-                        fornecedor: () => ({ carriers: [option] }),
-                        cliente: () => ({ destinations: [option] }),
-                        categoria: () => ({ warehouses: [option] }),
+                        cliente: () => ({ locations: [option] }),
+                        fornecedor: () => ({ paymentMethods: [option] }),
+                        categoria: () => ({ categorias: [{ name: nextPayload.value }] }),
                         produto: () => ({ produtos: [option] }),
                         status: () => ({ status: [nextPayload.value] }),
-                        mes: () => ({ mes: nextPayload.value })
+                        mes: () => ({ mes: nextPayload.value }),
+                        customer: () => ({ customers: [option] }),
+                        location: () => ({ locations: [option] }),
+                        paymentMethod: () => ({ paymentMethods: [option] })
                     };
 
                     return handlers[nextPayload.type]?.();
@@ -184,9 +178,9 @@ export const useSuppliersState = () => {
         filters,
         setFilters,
         data: {
-            kpis: logisticsData.kpis,
-            alertas: logisticsData.alertas,
-            logistics: logisticsData,
+            kpis: tab2Data.kpis,
+            alertas: tab2Data.alertas,
+            tab2: tab2Data,
             operacionais: { tabela }
         },
         resetToken,

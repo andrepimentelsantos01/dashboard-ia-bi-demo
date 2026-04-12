@@ -138,13 +138,13 @@ html[data-dashboard-schema="amazon"][data-theme="dark"] {
 }
 
 html[data-dashboard-schema="restaurant"][data-theme="light"] {
-  --app-text: #4a3426;
-  --app-bg-radial: rgba(181, 137, 90, 0.14);
-  --app-bg-base-start: #fbf6f1;
-  --app-bg-base-end: #f4ece4;
-  --app-hero-start: #6e4f3a;
-  --app-hero-end: #b9895a;
-  --app-hero-shadow: rgba(92, 63, 42, 0.18);
+  --app-text: #2a211b;
+  --app-bg-radial: rgba(63, 32, 32, 0.13);
+  --app-bg-base-start: #f8f2ec;
+  --app-bg-base-end: #ece1d5;
+  --app-hero-start: #160f0b;
+  --app-hero-end: #3f2020;
+  --app-hero-shadow: rgba(42, 33, 27, 0.22);
   --app-hero-text-soft: rgba(255, 247, 238, 0.88);
   --app-hero-accent: #f7d8b4;
   --app-theme-btn-bg: rgba(255, 255, 255, 0.16);
@@ -162,11 +162,11 @@ html[data-dashboard-schema="restaurant"][data-theme="light"] {
 
 html[data-dashboard-schema="restaurant"][data-theme="dark"] {
   --app-text: #f6eee7;
-  --app-bg-radial: rgba(208, 165, 119, 0.12);
-  --app-bg-base-start: #1e1611;
-  --app-bg-base-end: #2a211a;
-  --app-hero-start: #4a3426;
-  --app-hero-end: #8f6647;
+  --app-bg-radial: rgba(200, 169, 107, 0.12);
+  --app-bg-base-start: #160f0b;
+  --app-bg-base-end: #211711;
+  --app-hero-start: #160f0b;
+  --app-hero-end: #3f2020;
   --app-hero-shadow: rgba(0, 0, 0, 0.34);
   --app-hero-text-soft: rgba(248, 238, 228, 0.84);
   --app-hero-accent: #efc89f;
@@ -181,6 +181,52 @@ html[data-dashboard-schema="restaurant"][data-theme="dark"] {
   --action-btn-shadow: 0 12px 22px rgba(0, 0, 0, 0.28);
   --action-btn-shadow-hover: 0 16px 28px rgba(0, 0, 0, 0.34);
   --action-btn-icon: #f1d1b0;
+}
+
+html[data-dashboard-schema="logistics"][data-theme="light"] {
+  --app-text: #111111;
+  --app-bg-radial: rgba(217, 4, 41, 0.1);
+  --app-bg-base-start: #fff8f9;
+  --app-bg-base-end: #f4f5f7;
+  --app-hero-start: #0b0b0c;
+  --app-hero-end: #d90429;
+  --app-hero-shadow: rgba(11, 11, 12, 0.24);
+  --app-hero-text-soft: rgba(255, 255, 255, 0.84);
+  --app-hero-accent: #ffb3c0;
+  --app-theme-btn-bg: rgba(255, 255, 255, 0.14);
+  --app-theme-btn-bg-hover: rgba(255, 255, 255, 0.22);
+  --app-theme-btn-border: rgba(255, 255, 255, 0.24);
+  --app-theme-btn-text: #ffffff;
+  --action-btn-bg: rgba(255, 255, 255, 0.98);
+  --action-btn-bg-hover: rgba(253, 235, 237, 0.98);
+  --action-btn-border: rgba(217, 4, 41, 0.16);
+  --action-btn-border-hover: rgba(217, 4, 41, 0.34);
+  --action-btn-shadow: 0 10px 20px rgba(11, 11, 12, 0.1);
+  --action-btn-shadow-hover: 0 14px 24px rgba(11, 11, 12, 0.14);
+  --action-btn-icon: #d90429;
+}
+
+html[data-dashboard-schema="logistics"][data-theme="dark"] {
+  --app-text: #ffffff;
+  --app-bg-radial: rgba(217, 4, 41, 0.14);
+  --app-bg-base-start: #0b0b0c;
+  --app-bg-base-end: #16181d;
+  --app-hero-start: #0b0b0c;
+  --app-hero-end: #d90429;
+  --app-hero-shadow: rgba(0, 0, 0, 0.42);
+  --app-hero-text-soft: rgba(255, 255, 255, 0.82);
+  --app-hero-accent: #ffb3c0;
+  --app-theme-btn-bg: rgba(255, 255, 255, 0.08);
+  --app-theme-btn-bg-hover: rgba(255, 255, 255, 0.14);
+  --app-theme-btn-border: rgba(255, 255, 255, 0.18);
+  --app-theme-btn-text: #ffffff;
+  --action-btn-bg: rgba(22, 24, 29, 0.94);
+  --action-btn-bg-hover: rgba(36, 17, 22, 0.98);
+  --action-btn-border: rgba(217, 4, 41, 0.24);
+  --action-btn-border-hover: rgba(255, 53, 87, 0.38);
+  --action-btn-shadow: 0 12px 22px rgba(0, 0, 0, 0.3);
+  --action-btn-shadow-hover: 0 16px 28px rgba(0, 0, 0, 0.36);
+  --action-btn-icon: #ff6b84;
 }
 
 :root {

@@ -166,15 +166,15 @@ export const buildTooltip = ({ aggregated, valueFormat, currencyCode, locale }) 
         axisPointer: { type: "shadow" }
     });
 
-const gradient = (color, opacity = "80") => ({
+const gradient = (startColor, endColor, opacity = "80") => ({
     type: "linear",
     x: 0,
     y: 0,
     x2: 0,
     y2: 1,
     colorStops: [
-        { offset: 0, color },
-        { offset: 1, color: `${color}${opacity}` }
+        { offset: 0, color: startColor },
+        { offset: 1, color: `${endColor}${opacity}` }
     ]
 });
 
@@ -213,12 +213,12 @@ export const buildBarVerticalOptions = ({
         },
         itemStyle: {
             borderRadius: [6, 6, 0, 0],
-            color: gradient(color, "80")
+            color: gradient(themeTokens.chartGradientStart, themeTokens.chartGradientEnd, "80")
         },
         emphasis: {
             itemStyle: {
                 borderRadius: [6, 6, 0, 0],
-                color: gradient(color, "66")
+                color: gradient(themeTokens.chartGradientStart, themeTokens.chartGradientEnd, "66")
             }
         },
         animationDuration: 600
@@ -228,9 +228,14 @@ export const buildBarVerticalOptions = ({
         type: "line",
         data: values,
         smooth: true,
-        lineStyle: { width: 2, color },
+        lineStyle: { width: 2, color: themeTokens.chartGradientStart },
         symbol: "circle",
-        symbolSize: 6
+        symbolSize: 6,
+        itemStyle: {
+            color: themeTokens.chartGradientEnd,
+            borderColor: themeTokens.chartGradientStart,
+            borderWidth: 2
+        }
     };
 
     return {
