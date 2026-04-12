@@ -19,10 +19,12 @@ const ChartInstanceStatic = React.memo(({ option }) => (
 const ChartHorizontal = ({
                              data,
                              backendData,
-                             color = "#17877e",
+                             color,
                              order = "ASC",
                              onCrossFilter,
-                             valueFormat
+                             valueFormat,
+                             currencyCode = "BRL",
+                             locale = "pt-BR"
                          }) => {
     const {
         open,
@@ -38,7 +40,9 @@ const ChartHorizontal = ({
         color,
         order,
         onCrossFilter,
-        valueFormat
+        valueFormat,
+        currencyCode,
+        locale
     });
 
     const [refreshToken, setRefreshToken] = useState(0);

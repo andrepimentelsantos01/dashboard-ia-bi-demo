@@ -11,6 +11,15 @@ export const createDashboardFilters = (overrides = {}) => ({
     ...overrides
 });
 
+export const toSingleOrArraySelection = (items = [], fallbackKey = "name") => {
+    const values = items
+        .map((item) => item?.id ?? item?.[fallbackKey] ?? item?.name ?? item)
+        .filter((value) => value !== undefined && value !== null && value !== "");
+
+    if (!values.length) return undefined;
+    return values.length === 1 ? values[0] : values;
+};
+
 export const buildDashboardApiFilters = (filters, config = {}) => {
     const {
         statusKey = "item_status",
@@ -22,30 +31,17 @@ export const buildDashboardApiFilters = (filters, config = {}) => {
     } = config;
 
     const nextFilters = {};
-    const extractIds = (items = [], fallbackKey) =>
-        items
-            .map(item => item?.id ?? item?.[fallbackKey] ?? item?.name ?? item)
-            .filter(value => value !== undefined && value !== null && value !== "");
-    const pickSingleOrArray = (items, fallbackKey) => {
-        const values = extractIds(items, fallbackKey);
-
-        if (!values.length) return undefined;
-        if (values.length === 1) return values[0];
-
-        return values;
-    };
-
-    if (filters.clients?.length) nextFilters.client_id = pickSingleOrArray(filters.clients, "client_id");
-    if (filters.suppliers?.length) nextFilters.supplier_id = pickSingleOrArray(filters.suppliers, "supplier_id");
-    if (filters.produtos?.length) nextFilters.product_id = pickSingleOrArray(filters.produtos, "product_id");
+    if (filters.clients?.length) nextFilters.client_id = toSingleOrArraySelection(filters.clients, "client_id");
+    if (filters.suppliers?.length) nextFilters.supplier_id = toSingleOrArraySelection(filters.suppliers, "supplier_id");
+    if (filters.produtos?.length) nextFilters.product_id = toSingleOrArraySelection(filters.produtos, "product_id");
     if (filters.categorias?.length) {
         nextFilters.product_class_material_name = filters.categorias.map(item => item.name);
     }
-    if (filters.status?.length) nextFilters[statusKey] = filters.status.length === 1 ? filters.status[0] : filters.status;
+    if (filters.status?.length) nextFilters[statusKey] = toSingleOrArraySelection(filters.status, "name");
     if (filters.uf) nextFilters.client_state = filters.uf;
 
     if (includeOrders && filters.orders?.length) {
-        nextFilters.purchase_order_id = pickSingleOrArray(filters.orders, "purchase_order_id");
+        nextFilters.purchase_order_id = toSingleOrArraySelection(filters.orders, "purchase_order_id");
     }
 
     if (filters.dateRange) {
@@ -91,6 +87,20 @@ export const createCrossFilterHandler = (setFilters, clearFilters, handlers) => 
     if (!handler) return;
 
     setFilters(previous => ({ ...previous, ...handler(payload) }));
+};
+
+export const createMappedCrossFilterHandler = (setFilters, clearFilters, resolver) => (payload) => {
+    if (!payload) return;
+
+    if (payload.type === "reset") {
+        clearFilters();
+        return;
+    }
+
+    const nextFilters = resolver(payload);
+    if (!nextFilters) return;
+
+    setFilters(previous => ({ ...previous, ...nextFilters }));
 };
 
 export const createCrossFilterMap = (options = {}) => {

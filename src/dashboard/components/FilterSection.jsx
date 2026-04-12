@@ -14,6 +14,9 @@ const FilterSection = ({
     produtos,
     orders,
     numeroCotacao,
+    status,
+    filterInputs,
+    dateFilterPlacement = "end",
     hiddenFilterNames = []
 }) => {
     const scrollRef = useRef(null);
@@ -22,18 +25,19 @@ const FilterSection = ({
         canScrollRight: false
     });
 
-    const filterInputs = useFilterSectionOptions(
+    const defaultFilterInputs = useFilterSectionOptions(
         fornecedores,
         clientes,
         categorias,
         produtos,
         orders,
-        numeroCotacao
+        numeroCotacao,
+        status
     );
 
     const visibleFilterInputs = useMemo(
-        () => filterInputs.filter(({ name }) => !hiddenFilterNames.includes(name)),
-        [filterInputs, hiddenFilterNames]
+        () => (filterInputs || defaultFilterInputs).filter(({ name }) => !hiddenFilterNames.includes(name)),
+        [defaultFilterInputs, filterInputs, hiddenFilterNames]
     );
 
     const handleSelectChange = useCallback(
@@ -87,6 +91,22 @@ const FilterSection = ({
         };
     }, [updateScrollState, visibleFilterInputs.length]);
 
+    const dateFilter = useMemo(
+        () => (
+            <div className="filter-col" key="dateRange">
+                <div className="filter-section-card">
+                    <DateRangePicker
+                        label="Periodo"
+                        name="dateRange"
+                        value={filters.dateRange}
+                        onChange={({ target }) => onChange("dateRange", target.value)}
+                    />
+                </div>
+            </div>
+        ),
+        [filters.dateRange, onChange]
+    );
+
     const renderedInputs = useMemo(
         () =>
             visibleFilterInputs.map(({ label, name, data }) => (
@@ -107,6 +127,13 @@ const FilterSection = ({
         [visibleFilterInputs, filters, handleSelectChange]
     );
 
+    const orderedInputs = useMemo(
+        () => dateFilterPlacement === "start"
+            ? [dateFilter, ...renderedInputs]
+            : [...renderedInputs, dateFilter],
+        [dateFilter, dateFilterPlacement, renderedInputs]
+    );
+
     return (
         <div className="filter-section-carousel">
             {scrollState.canScrollLeft ? (
@@ -114,25 +141,15 @@ const FilterSection = ({
                     type="button"
                     className="filter-scroll-button filter-scroll-button--left"
                     onClick={() => handleHorizontalScroll(-1)}
-                    aria-label="Scroll filters left"
+                    aria-label="Rolar filtros para a esquerda"
                 >
                     <FiChevronLeft />
                 </button>
             ) : null}
 
             <div className="filter-section-row" ref={scrollRef}>
-                {renderedInputs}
+                {orderedInputs}
 
-                <div className="filter-col">
-                    <div className="filter-section-card">
-                        <DateRangePicker
-                            label="Período"
-                            name="dateRange"
-                            value={filters.dateRange}
-                            onChange={({ target }) => onChange("dateRange", target.value)}
-                        />
-                    </div>
-                </div>
             </div>
 
             {scrollState.canScrollRight ? (
@@ -140,7 +157,7 @@ const FilterSection = ({
                     type="button"
                     className="filter-scroll-button filter-scroll-button--right"
                     onClick={() => handleHorizontalScroll(1)}
-                    aria-label="Scroll filters right"
+                    aria-label="Rolar filtros para a direita"
                 >
                     <FiChevronRight />
                 </button>

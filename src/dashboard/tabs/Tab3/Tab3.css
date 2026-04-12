@@ -1,0 +1,212 @@
+@import "../shared/dashboardTabTheme.css";
+
+.restaurant-scope {
+    --restaurant-background-deep: #160f0b;
+    --restaurant-surface: #211711;
+    --restaurant-surface-soft: #f6f1ea;
+    --restaurant-accent-gold: #c8a96b;
+    --restaurant-accent-gold-hover: #b8924f;
+    --restaurant-wine: #3f2020;
+    --restaurant-text-dark: #2a211b;
+    --restaurant-text-light: #f8f6f2;
+    --restaurant-border: #d8cbb8;
+    --bi-surface: rgba(246, 241, 234, 0.92);
+    --bi-surface-strong: rgba(255, 252, 247, 0.98);
+    --bi-surface-soft: linear-gradient(180deg, rgba(246, 241, 234, 0.98) 0%, rgba(255, 252, 247, 0.99) 100%);
+    --bi-border: rgba(216, 203, 184, 0.78);
+    --bi-border-strong: rgba(200, 169, 107, 0.34);
+    --bi-shadow-soft: 0 18px 40px rgba(42, 33, 27, 0.1);
+    --bi-shadow-card: 0 16px 34px rgba(42, 33, 27, 0.12);
+    --bi-shadow-float: 0 22px 42px rgba(42, 33, 27, 0.18);
+    --bi-text: var(--restaurant-text-dark);
+    --bi-text-soft: #6b584b;
+    --bi-brand: var(--restaurant-wine);
+    --bi-brand-strong: #3f2020;
+    --bi-accent: var(--restaurant-accent-gold);
+    --bi-accent-soft: rgba(200, 169, 107, 0.16);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="light"] {
+    --restaurant-background-deep: #160f0b;
+    --restaurant-surface: #211711;
+    --restaurant-surface-soft: #f6f1ea;
+    --restaurant-accent-gold: #c8a96b;
+    --restaurant-accent-gold-hover: #b8924f;
+    --restaurant-wine: #3f2020;
+    --restaurant-text-dark: #2a211b;
+    --restaurant-text-light: #f8f6f2;
+    --restaurant-border: #d8cbb8;
+    --bi-surface: rgba(246, 241, 234, 0.92);
+    --bi-surface-strong: rgba(255, 252, 247, 0.98);
+    --bi-surface-soft: linear-gradient(180deg, rgba(246, 241, 234, 0.98) 0%, rgba(255, 252, 247, 0.99) 100%);
+    --bi-border: rgba(216, 203, 184, 0.78);
+    --bi-border-strong: rgba(200, 169, 107, 0.34);
+    --bi-shadow-soft: 0 18px 40px rgba(42, 33, 27, 0.1);
+    --bi-shadow-card: 0 16px 34px rgba(42, 33, 27, 0.12);
+    --bi-shadow-float: 0 22px 42px rgba(42, 33, 27, 0.18);
+    --bi-text: var(--restaurant-text-dark);
+    --bi-text-soft: #6b584b;
+    --bi-brand: var(--restaurant-wine);
+    --bi-brand-strong: #160f0b;
+    --bi-accent: var(--restaurant-accent-gold);
+    --bi-accent-soft: rgba(200, 169, 107, 0.16);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] {
+    --restaurant-background-deep: #160f0b;
+    --restaurant-surface: #211711;
+    --restaurant-accent-gold: #c8a96b;
+    --restaurant-text-light: #f8f6f2;
+    --bi-surface: rgba(33, 23, 17, 0.92);
+    --bi-surface-strong: rgba(33, 23, 17, 0.98);
+    --bi-surface-soft: linear-gradient(180deg, rgba(33, 23, 17, 0.98) 0%, rgba(22, 15, 11, 0.99) 100%);
+    --bi-border: rgba(216, 203, 184, 0.14);
+    --bi-border-strong: rgba(200, 169, 107, 0.28);
+    --bi-shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.34);
+    --bi-shadow-card: 0 16px 34px rgba(0, 0, 0, 0.38);
+    --bi-shadow-float: 0 24px 44px rgba(0, 0, 0, 0.42);
+    --bi-text: var(--restaurant-text-light);
+    --bi-text-soft: #d8cbb8;
+    --bi-brand: var(--restaurant-accent-gold);
+    --bi-brand-strong: #f2dfb4;
+    --bi-accent: var(--restaurant-accent-gold);
+    --bi-accent-soft: rgba(200, 169, 107, 0.2);
+}
+
+html[data-theme="dark"] .restaurant-scope {
+    --bi-surface: rgba(36, 27, 22, 0.92);
+    --bi-surface-strong: rgba(36, 27, 22, 0.98);
+    --bi-surface-soft: linear-gradient(180deg, rgba(36, 27, 22, 0.98) 0%, rgba(26, 20, 16, 0.99) 100%);
+    --bi-border: rgba(216, 203, 184, 0.14);
+    --bi-border-strong: rgba(200, 169, 107, 0.28);
+    --bi-shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.34);
+    --bi-shadow-card: 0 16px 34px rgba(0, 0, 0, 0.38);
+    --bi-shadow-float: 0 24px 44px rgba(0, 0, 0, 0.42);
+    --bi-text: var(--restaurant-text-light);
+    --bi-text-soft: #d8cbb8;
+    --bi-brand: var(--restaurant-accent-gold);
+    --bi-brand-strong: #f2dfb4;
+    --bi-accent: var(--restaurant-accent-gold);
+    --bi-accent-soft: rgba(200, 169, 107, 0.2);
+}
+
+.restaurant-scope .section-wrapper-card {
+    border-color: var(--bi-border);
+}
+
+.restaurant-scope .section-wrapper-header,
+.restaurant-scope .filter-section-wrapper .section-wrapper-header {
+    background: linear-gradient(135deg, var(--restaurant-background-deep) 0%, var(--restaurant-surface) 74%, var(--restaurant-wine) 100%);
+    border-bottom-color: rgba(200, 169, 107, 0.28);
+}
+
+.restaurant-scope .section-wrapper-title,
+.restaurant-scope .section-wrapper-collapse-button {
+    color: var(--restaurant-text-light);
+}
+
+.restaurant-scope .section-wrapper-title {
+    border-left-color: var(--restaurant-accent-gold);
+}
+
+.restaurant-scope .filter-section-card,
+.restaurant-scope .selectedItems,
+.restaurant-scope .dropdown-button--Default,
+.restaurant-scope .date-picker,
+.restaurant-scope .datatable-search-shell {
+    border-color: var(--restaurant-border) !important;
+    background: linear-gradient(180deg, rgba(255, 252, 247, 0.98) 0%, rgba(246, 241, 234, 0.98) 100%) !important;
+}
+
+.restaurant-scope .selectedItems:focus-within,
+.restaurant-scope .dropdown-button:focus-visible,
+.restaurant-scope .date-picker:focus,
+.restaurant-scope .datatable-search-shell:focus-within {
+    border-color: var(--restaurant-accent-gold) !important;
+    box-shadow: 0 0 0 3px rgba(200, 169, 107, 0.18) !important;
+}
+
+.restaurant-scope .selectedItemBadge,
+.restaurant-scope .datatable-status,
+.restaurant-scope .kpi-card-variation {
+    background: rgba(200, 169, 107, 0.18) !important;
+    color: var(--restaurant-text-light);
+}
+
+.restaurant-scope .overview-card,
+.restaurant-scope .operational-table-container,
+.restaurant-scope .datatable-wrapper {
+    border-color: rgba(216, 203, 184, 0.78);
+    background: linear-gradient(180deg, rgba(255, 252, 247, 0.99) 0%, rgba(246, 241, 234, 0.98) 100%);
+    box-shadow: var(--bi-shadow-card);
+}
+
+.restaurant-scope .kpi-card {
+    border-color: rgba(200, 169, 107, 0.26) !important;
+    background: linear-gradient(135deg, var(--restaurant-background-deep) 0%, var(--restaurant-surface) 70%, var(--restaurant-wine) 100%) !important;
+    box-shadow: 0 16px 34px rgba(42, 33, 27, 0.18), inset 0 1px 0 rgba(200, 169, 107, 0.12) !important;
+}
+
+.restaurant-scope .kpi-card:hover {
+    box-shadow: 0 20px 42px rgba(42, 33, 27, 0.22), inset 0 1px 0 rgba(200, 169, 107, 0.18) !important;
+}
+
+.restaurant-scope .kpi-card-label {
+    color: rgba(248, 246, 242, 0.78) !important;
+}
+
+.restaurant-scope .kpi-card-value {
+    color: var(--restaurant-text-light) !important;
+}
+
+.restaurant-scope .overview-card-title,
+.restaurant-scope .datatable-search-input,
+.restaurant-scope .datatable-cell {
+    color: var(--restaurant-text-dark);
+}
+
+.restaurant-scope .datatable-header-row {
+    background: linear-gradient(90deg, var(--restaurant-background-deep), var(--restaurant-surface), var(--restaurant-wine));
+}
+
+.restaurant-scope .floating-clear-button,
+.restaurant-scope .date-filter-buttons .btn-primary,
+.restaurant-scope .apply-button--Default {
+    background: linear-gradient(135deg, var(--restaurant-wine) 0%, var(--restaurant-background-deep) 100%) !important;
+    border-color: rgba(200, 169, 107, 0.38) !important;
+    color: var(--restaurant-text-light) !important;
+}
+
+.restaurant-scope .floating-clear-button:hover,
+.restaurant-scope .apply-button--Default:hover {
+    background: linear-gradient(135deg, #4b2424 0%, var(--restaurant-background-deep) 100%) !important;
+}
+
+.restaurant-scope .floating-theme-button,
+.restaurant-scope .filter-scroll-button,
+.restaurant-scope .operational-zoom-button,
+.restaurant-scope .operational-view-more-button,
+.restaurant-scope .datatable-export-button {
+    border-color: rgba(200, 169, 107, 0.42) !important;
+    color: var(--restaurant-wine) !important;
+}
+
+html[data-theme="dark"] .restaurant-scope .filter-section-card,
+html[data-theme="dark"] .restaurant-scope .selectedItems,
+html[data-theme="dark"] .restaurant-scope .dropdown-button--Default,
+html[data-theme="dark"] .restaurant-scope .date-picker,
+html[data-theme="dark"] .restaurant-scope .overview-card,
+html[data-theme="dark"] .restaurant-scope .operational-table-container,
+html[data-theme="dark"] .restaurant-scope .datatable-wrapper,
+html[data-theme="dark"] .restaurant-scope .datatable-toolbar,
+html[data-theme="dark"] .restaurant-scope .datatable-search-shell {
+    border-color: rgba(216, 203, 184, 0.16) !important;
+    background: linear-gradient(180deg, rgba(36, 27, 22, 0.98) 0%, rgba(26, 20, 16, 0.98) 100%) !important;
+}
+
+html[data-theme="dark"] .restaurant-scope .overview-card-title,
+html[data-theme="dark"] .restaurant-scope .datatable-search-input,
+html[data-theme="dark"] .restaurant-scope .datatable-cell,
+html[data-theme="dark"] .restaurant-scope .selectedItems {
+    color: var(--restaurant-text-light) !important;
+}

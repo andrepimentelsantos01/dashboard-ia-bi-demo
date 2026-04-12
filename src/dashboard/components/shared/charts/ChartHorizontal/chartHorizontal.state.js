@@ -1,12 +1,7 @@
 import { useMemo, useState, useCallback } from "react";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 import { useChartThemeTokens } from "../chartTheme";
-
-const formatCurrencyFull = (value) =>
-    (typeof value === "number" ? value : Number(value || 0)).toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-    });
+import { formatCompactCurrencyValue, formatCurrencyValue } from "../../../../utils/intlFormat";
 
 const formatPercent = (value) =>
     `${(typeof value === "number" ? value : Number(value || 0)).toFixed(1)}%`;
@@ -19,15 +14,18 @@ const naturalAsc = new Intl.Collator(undefined, {
 export const useChartHorizontalState = ({
                                             data,
                                             backendData,
-                                            color = "#17877e",
+                                            color,
                                             order = "ASC",
                                             onCrossFilter,
-                                            valueFormat
+                                            valueFormat,
+                                            currencyCode = "BRL",
+                                            locale = "pt-BR"
                                         }) => {
     const [open, setOpen] = useState(false);
     const [selectedName, setSelectedName] = useState(null);
     const [orderState, setOrder] = useState(order);
     const themeTokens = useChartThemeTokens();
+    const resolvedColor = color || themeTokens.chartPrimary;
 
     const handleRefresh = useCallback(() => {
         setOrder(order);
@@ -144,8 +142,8 @@ export const useChartHorizontalState = ({
     const formatValue = useCallback((value) => {
         if (valueFormat === "volume") return Math.round(value);
         if (valueFormat === "percent") return formatPercent(value);
-        return formatCurrencyFull(value);
-    }, [valueFormat]);
+        return formatCurrencyValue(value, { currencyCode, locale });
+    }, [currencyCode, locale, valueFormat]);
 
     const option = useMemo(() => {
         const totalItems = labels.length;
@@ -181,8 +179,8 @@ export const useChartHorizontalState = ({
                     orient: "vertical",
                     width: 14,
                     right: 7,
-                    fillerColor: `${color}22`,
-                    handleColor: color,
+                    fillerColor: themeTokens.sliderFill,
+                    handleColor: resolvedColor,
                     handleSize: "100%",
                     start: zoomStart,
                     end: 100
@@ -215,10 +213,15 @@ export const useChartHorizontalState = ({
                     interval: "auto",
                     hideOverlap: true,
                     formatter: (value) => {
-                        const parsed = Number(value || 0);
-                        if (parsed >= 1_000_000) return `R$ ${(parsed / 1_000_000).toFixed(1)} mi`;
-                        if (parsed >= 1_000) return `R$ ${(parsed / 1_000).toFixed(0)} mil`;
-                        return `R$ ${parsed.toFixed(0)}`;
+                        if (valueFormat === "volume") {
+                            return Math.round(Number(value || 0)).toLocaleString("pt-BR");
+                        }
+
+                        if (valueFormat === "percent") {
+                            return `${Number(value || 0).toFixed(0)}%`;
+                        }
+
+                        return formatCompactCurrencyValue(value, { currencyCode, locale });
                     }
                 }
             },
@@ -253,10 +256,10 @@ export const useChartHorizontalState = ({
                             y: 0,
                             x2: 0,
                             y2: 0,
-                            colorStops: [
-                                { offset: 0, color },
-                                { offset: 1, color: `${color}80` }
-                            ]
+                                colorStops: [
+                                    { offset: 0, color: themeTokens.chartGradientStart },
+                                    { offset: 1, color: `${themeTokens.chartGradientEnd}80` }
+                                ]
                         }
                     },
                     emphasis: {
@@ -269,8 +272,8 @@ export const useChartHorizontalState = ({
                                 x2: 0,
                                 y2: 0,
                                 colorStops: [
-                                    { offset: 0, color },
-                                    { offset: 1, color: `${color}66` }
+                                    { offset: 0, color: themeTokens.chartGradientStart },
+                                    { offset: 1, color: `${themeTokens.chartGradientEnd}66` }
                                 ]
                             }
                         }
@@ -279,7 +282,7 @@ export const useChartHorizontalState = ({
                 }
             ]
         };
-    }, [aggregated, color, formatValue, labels, themeTokens, values]);
+    }, [aggregated, currencyCode, formatValue, labels, locale, resolvedColor, themeTokens, values]);
 
     return {
         open,

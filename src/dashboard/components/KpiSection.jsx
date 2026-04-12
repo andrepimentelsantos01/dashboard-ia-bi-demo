@@ -1,6 +1,7 @@
 import { Row } from "react-bootstrap";
 import React, { useMemo } from "react";
 import KpiCard from "./shared/kpiCard";
+import DashboardAsyncState, { DashboardKpiSkeleton, DashboardSectionLoadingOverlay } from "./shared/DashboardAsyncState";
 import "./KpiSection.css";
 
 const normalizeKpiValue = (entry) => {
@@ -26,7 +27,17 @@ const normalizeKpiValue = (entry) => {
     };
 };
 
-const KpiSection = ({ kpis }) => {
+const KPI_LABELS_PT_BR = {
+    "Total Sales": "Receita Total",
+    "Operating Profit": "Lucro Operacional",
+    "Average Operating Margin": "Margem Operacional Media",
+    "Units Sold": "Unidades Vendidas",
+    "Delivery Success Rate": "Taxa de Sucesso na Entrega"
+};
+
+const translateKpiLabel = (label) => KPI_LABELS_PT_BR[label] || label;
+
+const KpiSection = ({ kpis = {}, isLoading, isRefreshing, error, onRetry }) => {
     const defaultKeys = ["valorTotalMovimentado", "valorEntregue", "volumeTotal", "quantidadeClientes"];
 
     const isDefault = defaultKeys.every(key => key in kpis);
@@ -78,19 +89,43 @@ const KpiSection = ({ kpis }) => {
 
                 return {
                     label,
+                    displayLabel: translateKpiLabel(label),
                     value: normalizedValue,
                     color: "#19b59f"
                 };
             });
     }, [kpis, isDefault]);
 
+    const hasCards = kpiCards.length > 0;
+
+    if (isLoading) {
+        return <DashboardKpiSkeleton />;
+    }
+
+    if (error && !hasCards) {
+        return (
+            <DashboardAsyncState
+                variant="error"
+                title="Nao foi possivel carregar os KPIs"
+                description="O dashboard nao conseguiu montar os indicadores deste recorte. Tente novamente."
+                onAction={onRetry}
+            />
+        );
+    }
+
+    if (!hasCards) {
+        return null;
+    }
+
     return (
-        <div className="kpi-section-wrapper">
+        <div className={`kpi-section-wrapper ${isRefreshing ? "dashboard-section-loading" : ""}`}>
+            {isRefreshing ? <DashboardSectionLoadingOverlay label="Atualizando indicadores..." /> : null}
             <Row className="kpi-grid-row">
-                {kpiCards.map(({ label, value, color }) => (
+                {kpiCards.map(({ label, displayLabel, value, color }) => (
                     <KpiCard
                         key={label}
                         label={label}
+                        displayLabel={displayLabel || label}
                         value={value.value}
                         variation={value.variation}
                         color={color}

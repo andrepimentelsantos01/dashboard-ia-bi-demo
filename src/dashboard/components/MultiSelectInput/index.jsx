@@ -22,10 +22,12 @@ const MultiSelectInput = ({
     const triggerRef = useRef(null);
     const menuRef = useRef(null);
     const selectedItemsRef = useRef([]);
+    const appliedItemsRef = useRef([]);
 
     const syncSelectedItems = useCallback((nextValue = [], nextData = []) => {
         if (!Array.isArray(nextValue) || nextValue.length === 0) {
             selectedItemsRef.current = [];
+            appliedItemsRef.current = [];
             setSelectedItems([]);
             return;
         }
@@ -36,10 +38,13 @@ const MultiSelectInput = ({
         });
 
         selectedItemsRef.current = mappedItems;
+        appliedItemsRef.current = mappedItems;
         setSelectedItems(mappedItems);
     }, []);
 
     const commitSelection = useCallback(() => {
+        appliedItemsRef.current = selectedItemsRef.current;
+
         onChange({
             target: {
                 name,
@@ -47,6 +52,12 @@ const MultiSelectInput = ({
             }
         });
     }, [name, onChange]);
+
+    const closeWithoutApplying = useCallback(() => {
+        selectedItemsRef.current = appliedItemsRef.current;
+        setSelectedItems(appliedItemsRef.current);
+        setIsOpen(false);
+    }, []);
 
     useEffect(() => {
         syncSelectedItems(value, data);
@@ -80,11 +91,8 @@ const MultiSelectInput = ({
             const clickedTrigger = dropdownRef.current?.contains(event.target);
             const clickedMenu = menuRef.current?.contains(event.target);
 
-            if (!clickedTrigger && !clickedMenu) {
-                if (isOpen) {
-                    commitSelection();
-                }
-                setIsOpen(false);
+            if (isOpen && !clickedTrigger && !clickedMenu) {
+                closeWithoutApplying();
             }
         };
 
@@ -92,7 +100,7 @@ const MultiSelectInput = ({
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [commitSelection, isOpen]);
+    }, [closeWithoutApplying, isOpen]);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -145,6 +153,11 @@ const MultiSelectInput = ({
         });
     }, [mergedData]);
 
+    const handleApply = useCallback(() => {
+        commitSelection();
+        setIsOpen(false);
+    }, [commitSelection]);
+
     const isSelected = (item) => selectedItems.some((selected) => selected.id === item.id);
 
     const visibleItems = selectedItems.slice(0, 3);
@@ -187,48 +200,82 @@ const MultiSelectInput = ({
 
     const renderDropdownItems = () => (
         <>
-            <div style={{ padding: "8px" }}>
+            <div className="multi-select-dropdown-search">
                 <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Buscar..."
-                    style={{ width: "100%", padding: "6px" }}
+                    aria-label={`Buscar em ${label}`}
                 />
             </div>
 
-            <div className="dropdownItem" onClick={handleSelectAll}>
-                {selectedItems.length === data.length ? "Desmarcar todos" : "Selecionar todos"}
+            <div
+                className="dropdownItem dropdownItem--select-all"
+                onClick={handleSelectAll}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        handleSelectAll();
+                    }
+                }}
+            >
+                {selectedItems.length === mergedData.length ? "Desmarcar todos" : "Selecionar todos"}
             </div>
 
-            {filteredData.map((item) => (
-                <div
-                    key={item.id}
-                    className={`dropdownItem ${isSelected(item) ? "selected" : ""}`}
-                    onClick={() => handleSelect(item)}
+            <div className="multi-select-dropdown-list">
+                {filteredData.map((item) => (
+                    <div
+                        key={item.id}
+                        className={`dropdownItem ${isSelected(item) ? "selected" : ""}`}
+                        onClick={() => handleSelect(item)}
+                        role="option"
+                        aria-selected={isSelected(item)}
+                    >
+                        <span>{translationPath ? t(`${translationPath}.${item.name}`) : item.name}</span>
+                        {isSelected(item) ? <i className="feather icon-check" /> : null}
+                    </div>
+                ))}
+
+                {filteredData.length === 0 ? (
+                    <div className="multi-select-dropdown-empty">Nenhum resultado encontrado</div>
+                ) : null}
+            </div>
+
+            <div className="multi-select-dropdown-actions">
+                <span className="multi-select-dropdown-count">
+                    {selectedItems.length} selecionado{selectedItems.length === 1 ? "" : "s"}
+                </span>
+                <button
+                    type="button"
+                    className="multi-select-apply-button"
+                    onClick={handleApply}
                 >
-                    {translationPath ? t(`${translationPath}.${item.name}`) : item.name}
-                    {isSelected(item) ? <i className="feather icon-check" /> : null}
-                </div>
-            ))}
+                    Aplicar
+                </button>
+            </div>
         </>
     );
+
+    const handleToggleDropdown = useCallback(() => {
+        if (isOpen) {
+            closeWithoutApplying();
+            return;
+        }
+
+        setIsOpen(true);
+    }, [closeWithoutApplying, isOpen]);
 
     return (
         <div className="MultiSelectInputContainer" ref={dropdownRef}>
             <p>{label}</p>
             <div
-                className="customDropdown"
+                className={`customDropdown ${isOpen ? "customDropdown--open" : ""}`}
                 onClick={(e) => {
                     if (e.target.closest(".multi-select-dropdown-menu")) return;
-
-                    setIsOpen((prev) => {
-                        if (prev) {
-                            commitSelection();
-                        }
-
-                        return !prev;
-                    });
+                    handleToggleDropdown();
                 }}
                 style={{ position: "relative" }}
                 ref={triggerRef}
@@ -242,6 +289,8 @@ const MultiSelectInput = ({
                         className="multi-select-dropdown-menu"
                         style={menuStyle || undefined}
                         ref={menuRef}
+                        role="listbox"
+                        aria-label={label}
                     >
                         {renderDropdownItems()}
                     </div>,

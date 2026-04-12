@@ -1,78 +1,160 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useDeferredValue } from "react";
 import * as echarts from "echarts";
 import brasilMap from "/src/mocks/dashboard/brasil.geo.json";
+import usStatesMap from "./geoJson/us-states.json";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 import { useChartThemeTokens } from "../chartTheme";
+import { formatCompactCurrencyValue, formatCurrencyValue } from "../../../../utils/intlFormat";
 
-echarts.registerMap("brazil-morph", brasilMap);
+if (!echarts.getMap("brazil-morph")) {
+    echarts.registerMap("brazil-morph", brasilMap);
+}
 
-const UF_TO_NAME = {
+if (!echarts.getMap("us-states-morph")) {
+    echarts.registerMap("us-states-morph", usStatesMap);
+}
+
+const BRAZIL_UF_TO_NAME = {
     AC: "Acre",
     AL: "Alagoas",
-    AP: "Amapá",
+    AP: "Amapa",
     AM: "Amazonas",
     BA: "Bahia",
-    CE: "Ceará",
+    CE: "Ceara",
     DF: "Distrito Federal",
-    ES: "Espírito Santo",
-    GO: "Goiás",
-    MA: "Maranhão",
+    ES: "Espirito Santo",
+    GO: "Goias",
+    MA: "Maranhao",
     MT: "Mato Grosso",
     MS: "Mato Grosso do Sul",
     MG: "Minas Gerais",
-    PA: "Pará",
-    PB: "Paraíba",
-    PR: "Paraná",
+    PA: "Para",
+    PB: "Paraiba",
+    PR: "Parana",
     PE: "Pernambuco",
-    PI: "Piauí",
+    PI: "Piaui",
     RJ: "Rio de Janeiro",
     RN: "Rio Grande do Norte",
     RS: "Rio Grande do Sul",
-    RO: "Rondônia",
+    RO: "Rondonia",
     RR: "Roraima",
     SC: "Santa Catarina",
-    SP: "São Paulo",
+    SP: "Sao Paulo",
     SE: "Sergipe",
     TO: "Tocantins"
 };
 
-const NAME_TO_UF = Object.fromEntries(
-    Object.entries(UF_TO_NAME).map(([uf, name]) => [name, uf])
+const normalizeName = (value = "") =>
+    String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+
+const US_NAME_MAP = Object.fromEntries(
+    (usStatesMap.features || [])
+        .map((feature) => feature?.properties?.name)
+        .filter(Boolean)
+        .map((name) => [normalizeName(name), name])
 );
 
-const generateCorporateScale = (count) => {
+const GEO_CONFIG = {
+    brazil: {
+        mapName: "brazil-morph",
+        resolveRegion(row) {
+            const sourceUf = row.client_state ?? row.uf;
+            const uf = typeof sourceUf === "string" ? sourceUf.trim().toUpperCase() : null;
+            if (!uf || !BRAZIL_UF_TO_NAME[uf]) return null;
+
+            return {
+                chartName: BRAZIL_UF_TO_NAME[uf],
+                filterType: "uf",
+                filterValue: uf
+            };
+        },
+        mapOptions: {
+            zoom: 1.18,
+            center: [-55, -15],
+            aspectScale: 1
+        }
+    },
+    us: {
+        mapName: "us-states-morph",
+        resolveRegion(row) {
+            const stateName = row.client_state || row.cliente || row.client_name || row.uf;
+            const normalized = normalizeName(stateName);
+            const chartName = US_NAME_MAP[normalized];
+
+            if (!chartName) return null;
+
+            return {
+                chartName,
+                filterType: "cliente",
+                filterValue: chartName,
+                filterId: row.client_id ?? chartName
+            };
+        },
+        mapOptions: {
+            zoom: 1,
+            center: [-96, 38.5],
+            aspectScale: 0.95
+        }
+    }
+};
+
+const generateCorporateScale = (count, isAdidas) => {
+    if (isAdidas) {
+        return ["#efefef", "#cfcfcf", "#9a9a9a", "#5e5e5e", "#171515"];
+    }
+
     const baseHue = 172;
     const hueSpread = 10;
     const saturation = 46;
     const lightnessStart = 90;
     const lightnessEnd = 34;
 
-    return Array.from({ length: Math.max(count, 2) }, (_, i) => {
-        const hue = (baseHue + (i * hueSpread) / Math.max(count - 1, 1)) % 360;
+    return Array.from({ length: Math.max(count, 2) }, (_, index) => {
+        const hue = (baseHue + (index * hueSpread) / Math.max(count - 1, 1)) % 360;
         const lightness =
-            lightnessStart -
-            ((lightnessStart - lightnessEnd) * i) / Math.max(count - 1, 1);
+            lightnessStart - ((lightnessStart - lightnessEnd) * index) / Math.max(count - 1, 1);
 
         return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     });
 };
 
-const formatCurrencyFull = (value) =>
-    (typeof value === "number" ? value : Number(value || 0)).toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
+const formatMetricFull = (value, currencyCode, locale) =>
+    formatCurrencyValue(typeof value === "number" ? value : Number(value || 0), {
+        currencyCode,
+        locale
     });
 
 const toNumeric = (value) => (typeof value === "number" ? value : Number(value || 0));
 
-export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
+const resolveMetricValue = (row, metric) => {
+    if (metric === "operatingProfit") {
+        return toNumeric(row.operatingProfit ?? row.operating_profit ?? row.valorTotal ?? row.total_amount ?? row.sum_total_amount);
+    }
+
+    return toNumeric(row.valorTotal ?? row.total_amount ?? row.sum_total_amount);
+};
+
+export const useChartMapMorphState = ({
+    backendData,
+    onCrossFilter,
+    geography = "brazil",
+    metric = "totalSales",
+    currencyCode = "BRL",
+    locale = "pt-BR"
+}) => {
     const [open, setOpen] = useState(false);
-    const [selectedUF, setSelectedUF] = useState(null);
+    const [selectedRegion, setSelectedRegion] = useState(null);
     const [viewMode, setViewMode] = useState("map");
     const themeTokens = useChartThemeTokens();
+    const geographyConfig = GEO_CONFIG[geography] || GEO_CONFIG.brazil;
+    const deferredBackendData = useDeferredValue(backendData);
 
     const handleRefresh = useCallback(() => {
-        setSelectedUF(null);
+        setSelectedRegion(null);
         setViewMode("map");
         if (onCrossFilter) onCrossFilter({ type: "reset" });
     }, [onCrossFilter]);
@@ -82,16 +164,16 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
     }, []);
 
     const aggregated = useMemo(() => {
-        const byUF = {};
-        const totals = {};
+        const byRegion = {};
 
-        for (const row of backendData || []) {
-            const sourceUf = row.client_state ?? row.uf;
-            const uf = typeof sourceUf === "string" ? sourceUf.trim().toUpperCase() : null;
-            if (!uf || !UF_TO_NAME[uf]) continue;
+        for (const row of deferredBackendData || []) {
+            const region = geographyConfig.resolveRegion(row);
+            if (!region?.chartName) continue;
 
-            if (!byUF[uf]) {
-                byUF[uf] = {
+            if (!byRegion[region.chartName]) {
+                byRegion[region.chartName] = {
+                    ...region,
+                    total: 0,
                     volume: 0,
                     categoriaValor: {},
                     categoriaQtd: {},
@@ -99,130 +181,103 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
                     fornecedorQtd: {},
                     produtoValor: {},
                     produtoQtd: {},
-                    clientes: new Set(),
-                    categoriaLeaderValor: "-",
-                    categoriaLeaderQtd: "-",
-                    fornecedorLeaderValor: "-",
-                    fornecedorLeaderQtd: "-",
-                    produtoLeaderValor: "-",
-                    produtoLeaderQtd: "-"
+                    clientes: new Set()
                 };
             }
 
-            const bucket = byUF[uf];
-            const value = toNumeric(row.valorTotal ?? row.total_amount ?? row.sum_total_amount);
+            const bucket = byRegion[region.chartName];
+            const value = resolveMetricValue(row, metric);
             const quantity = toNumeric(row.quantidade ?? row.sum_quantity ?? row.quantity_requested);
 
-            totals[uf] = (totals[uf] || 0) + value;
+            bucket.total += value;
             bucket.volume += quantity;
 
-            const updateLeader = (valueMap, quantityMap, leaderValueKey, leaderQuantityKey, label) => {
+            const updateLeader = (valueMap, quantityMap, label) => {
                 if (!label) return;
                 valueMap[label] = (valueMap[label] || 0) + value;
                 quantityMap[label] = (quantityMap[label] || 0) + quantity;
-
-                if (valueMap[label] > (valueMap[bucket[leaderValueKey]] || -1)) {
-                    bucket[leaderValueKey] = label;
-                }
-
-                if (quantityMap[label] > (quantityMap[bucket[leaderQuantityKey]] || -1)) {
-                    bucket[leaderQuantityKey] = label;
-                }
             };
 
-            updateLeader(
-                bucket.categoriaValor,
-                bucket.categoriaQtd,
-                "categoriaLeaderValor",
-                "categoriaLeaderQtd",
-                row.categoria
-            );
-            updateLeader(
-                bucket.fornecedorValor,
-                bucket.fornecedorQtd,
-                "fornecedorLeaderValor",
-                "fornecedorLeaderQtd",
-                row.fornecedor
-            );
-            updateLeader(
-                bucket.produtoValor,
-                bucket.produtoQtd,
-                "produtoLeaderValor",
-                "produtoLeaderQtd",
-                row.produto
-            );
+            updateLeader(bucket.categoriaValor, bucket.categoriaQtd, row.categoria);
+            updateLeader(bucket.fornecedorValor, bucket.fornecedorQtd, row.fornecedor);
+            updateLeader(bucket.produtoValor, bucket.produtoQtd, row.produto);
 
             if (row.cliente) bucket.clientes.add(row.cliente);
         }
 
-        return { totals, byUF };
-    }, [backendData]);
+        return byRegion;
+    }, [deferredBackendData, geographyConfig, metric]);
 
     const mapData = useMemo(
         () =>
-            Object.entries(aggregated.totals)
-                .filter(([uf]) => UF_TO_NAME[uf])
-                .map(([uf, value]) => ({
-                    id: uf,
-                    name: UF_TO_NAME[uf],
-                    value
-                })),
-        [aggregated.totals]
+            Object.values(aggregated).map((item) => ({
+                id: item.filterValue,
+                name: item.chartName,
+                value: item.total
+            })),
+        [aggregated]
     );
 
     const sortedData = useMemo(() => [...mapData].sort((a, b) => b.value - a.value), [mapData]);
-
-    const maxValue = useMemo(
-        () => mapData.reduce((max, item) => (item.value > max ? item.value : max), 0),
-        [mapData]
+    const maxValue = useMemo(() => mapData.reduce((max, item) => Math.max(max, item.value), 0), [mapData]);
+    const visualMapColors = useMemo(
+        () => generateCorporateScale(mapData.length, themeTokens.isAdidas),
+        [mapData.length, themeTokens.isAdidas]
     );
-
-    const visualMapColors = useMemo(() => generateCorporateScale(mapData.length), [mapData.length]);
 
     const tooltipContentByName = useMemo(() => {
         const tooltipMap = {};
 
         for (const item of mapData) {
-            const uf = NAME_TO_UF[item.name];
-            const detail = aggregated.byUF[uf];
+            const detail = aggregated[item.name];
             if (!detail) continue;
+
+            const topLabel = (record) =>
+                Object.entries(record).sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
 
             tooltipMap[item.name] = `
                 <b>${item.name}</b><br/>
-                <b>Valor Movimentado:</b> ${formatCurrencyFull(item.value)}<br/>
-                <b>Volume Movimentado:</b> ${detail.volume}<br/><br/>
-                <b>Categoria Lider (Valor):</b> ${detail.categoriaLeaderValor}<br/>
-                <b>Categoria Lider (Quantidade):</b> ${detail.categoriaLeaderQtd}<br/><br/>
-                <b>Fornecedor Lider (Valor):</b> ${detail.fornecedorLeaderValor}<br/>
-                <b>Fornecedor Lider (Quantidade):</b> ${detail.fornecedorLeaderQtd}<br/><br/>
-                <b>Produto Lider (Valor):</b> ${detail.produtoLeaderValor}<br/>
-                <b>Produto Lider (Quantidade):</b> ${detail.produtoLeaderQtd}<br/><br/>
+                <b>Valor Movimentado:</b> ${formatMetricFull(item.value, currencyCode, locale)}<br/>
+                <b>Volume Movimentado:</b> ${Math.round(detail.volume).toLocaleString("pt-BR")}<br/><br/>
+                <b>Categoria Lider (Valor):</b> ${topLabel(detail.categoriaValor)}<br/>
+                <b>Categoria Lider (Quantidade):</b> ${topLabel(detail.categoriaQtd)}<br/><br/>
+                <b>Fornecedor Lider (Valor):</b> ${topLabel(detail.fornecedorValor)}<br/>
+                <b>Fornecedor Lider (Quantidade):</b> ${topLabel(detail.fornecedorQtd)}<br/><br/>
+                <b>Produto Lider (Valor):</b> ${topLabel(detail.produtoValor)}<br/>
+                <b>Produto Lider (Quantidade):</b> ${topLabel(detail.produtoQtd)}<br/><br/>
                 <b>Clientes Atendidos:</b> ${detail.clientes.size}<br/>
             `;
         }
 
         return tooltipMap;
-    }, [aggregated.byUF, mapData]);
+    }, [aggregated, currencyCode, locale, mapData]);
 
-    const handleClick = useCallback(
-        (params) => {
-            const name = params?.name;
-            if (!name || !onCrossFilter) return;
+    const handleClick = useCallback((params) => {
+        const detail = aggregated[params?.name];
+        if (!detail || !onCrossFilter) return;
 
-            const uf = NAME_TO_UF[name];
-            if (!uf) return;
+        if (selectedRegion === detail.chartName) {
+            setSelectedRegion(null);
+            onCrossFilter({ type: "reset" });
+            return;
+        }
 
-            if (selectedUF === uf) {
-                setSelectedUF(null);
-                onCrossFilter({ type: "reset" });
-                return;
-            }
+        setSelectedRegion(detail.chartName);
 
-            setSelectedUF(uf);
-            onCrossFilter({ type: "uf", value: uf });
-        },
-        [onCrossFilter, selectedUF]
-    );
+        if (detail.filterType === "cliente") {
+            onCrossFilter({
+                type: "cliente",
+                id: detail.filterId,
+                value: detail.filterValue
+            });
+            return;
+        }
+
+        onCrossFilter({
+            type: detail.filterType,
+            value: detail.filterValue
+        });
+    }, [aggregated, onCrossFilter, selectedRegion]);
 
     const option = useMemo(() => {
         const commonTooltip = buildResponsiveTooltip((params) => {
@@ -244,29 +299,27 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
                     inRange: {
                         color: visualMapColors
                     },
-                    formatter: (value) => formatCurrencyFull(value),
+                    formatter: (value) => formatMetricFull(value, currencyCode, locale),
                     calculable: false
                 },
                 series: [
                     {
-                        id: "uf-distribution",
+                        id: "region-distribution",
                         type: "map",
-                        map: "brazil-morph",
+                        map: geographyConfig.mapName,
                         roam: false,
-                        zoom: 1.18,
-                        center: [-55, -15],
-                        aspectScale: 1,
+                        zoom: geographyConfig.mapOptions.zoom,
+                        center: geographyConfig.mapOptions.center,
+                        aspectScale: geographyConfig.mapOptions.aspectScale,
                         selectedMode: false,
-                        label: {
-                            show: false
-                        },
+                        label: { show: false },
                         itemStyle: {
                             areaColor: themeTokens.mapArea,
                             borderColor: themeTokens.mapBorder,
                             borderWidth: 0.8
                         },
                         emphasis: {
-                            label: { show: true, color: themeTokens.mapEmphasisLabel },
+                            label: { show: false, color: themeTokens.mapEmphasisLabel },
                             itemStyle: { areaColor: themeTokens.mapEmphasisArea }
                         },
                         data: mapData
@@ -297,12 +350,7 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
                 axisLabel: {
                     color: themeTokens.textSecondary,
                     fontSize: 10,
-                    formatter: (value) => {
-                        const parsed = Number(value || 0);
-                        if (parsed >= 1_000_000) return `R$ ${(parsed / 1_000_000).toFixed(1)} mi`;
-                        if (parsed >= 1_000) return `R$ ${(parsed / 1_000).toFixed(0)} mil`;
-                        return `R$ ${parsed.toFixed(0)}`;
-                    }
+                    formatter: (value) => formatCompactCurrencyValue(value, { currencyCode, locale })
                 }
             },
             yAxis: {
@@ -326,7 +374,7 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
                     width: 12,
                     right: 4,
                     fillerColor: themeTokens.sliderFill,
-                    handleColor: "#17877e",
+                    handleColor: themeTokens.chartPrimary,
                     handleSize: "100%",
                     start: 0,
                     end: zoomEnd
@@ -343,7 +391,7 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
             ],
             series: [
                 {
-                    id: "uf-distribution",
+                    id: "region-distribution",
                     type: "bar",
                     data: values.map((value, index) => ({
                         value,
@@ -357,7 +405,7 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
                         position: "right",
                         color: themeTokens.chartLabelStrong,
                         fontSize: 10,
-                        formatter: ({ value }) => formatCurrencyFull(value)
+                        formatter: ({ value }) => formatMetricFull(value, currencyCode, locale)
                     },
                     itemStyle: {
                         borderRadius: [0, 6, 6, 0]
@@ -366,6 +414,10 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
             ]
         };
     }, [
+        aggregated,
+        currencyCode,
+        geographyConfig,
+        locale,
         mapData,
         maxValue,
         sortedData,
@@ -385,3 +437,4 @@ export const useChartMapMorphState = ({ backendData, onCrossFilter }) => {
         viewMode
     };
 };
+

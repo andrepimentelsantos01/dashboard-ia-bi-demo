@@ -12,11 +12,13 @@ const ChartBarVertical = ({
                               labels,
                               values,
                               backendData,
-                              color = "#17877e",
+                              color,
                               onCrossFilter,
                               valueFormat = "currency",
                               filterType = "mes",
-                              showTrendLine = true
+                              showTrendLine = true,
+                              currencyCode = "BRL",
+                              locale = "pt-BR"
                           }) => {
     const {
         open,
@@ -36,7 +38,9 @@ const ChartBarVertical = ({
         onCrossFilter,
         valueFormat,
         filterType,
-        showTrendLine
+        showTrendLine,
+        currencyCode,
+        locale
     });
 
     const onRefresh = useCallback(() => {

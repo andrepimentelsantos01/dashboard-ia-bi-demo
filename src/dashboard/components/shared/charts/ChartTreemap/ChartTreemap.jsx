@@ -4,12 +4,16 @@ import ModalComponent from "/src/components/ModalV2";
 import "./ChartTreemap.css";
 import { useChartTreemapState } from "./chartTreemap.state";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
+import { useChartThemeTokens } from "../chartTheme";
 
 const STATUS_COLOR_MAP = {
     Cancelado: "#d95f5f",
     Entregue: "#2a9d8f",
     Atrasado: "#f4a261",
     Faturado: "#4f86c6",
+    "In-store": "#2F80ED",
+    Online: "#27AE60",
+    Outlet: "#F2994A",
     Pendente: "#7b6fd6",
     "Em Trânsito": "#2bb3c0",
     "Em TrÃ¢nsito": "#2bb3c0",
@@ -90,11 +94,11 @@ const getClassificationMessage = (name, legendContext, classificationMode) => {
     return contextHelp.abc[name] || "Classificação ABC.";
 };
 
-const getNodeColor = (name, classificationMode) => {
+const getNodeColor = (name, classificationMode, themeTokens) => {
     if (classificationMode === "abc") return ABC_COLOR_MAP[name] || "#9aa6b2";
     if (classificationMode === "xyz") return XYZ_COLOR_MAP[name] || "#9aa6b2";
     if (classificationMode === "abcxyz") return MATRIX_COLOR_MAP[name] || "#9aa6b2";
-    return STATUS_COLOR_MAP[name] || "#9aa6b2";
+    return themeTokens.statusPalette[name] || STATUS_COLOR_MAP[name] || "#9aa6b2";
 };
 
 const formatCurrency = (value) =>
@@ -112,6 +116,7 @@ const ChartTreemap = ({
     abcXyzLegend = "products",
     classificationMode = null
 }) => {
+    const themeTokens = useChartThemeTokens();
     const { open, setOpen, data, handleClick } = useChartTreemapState({
         backendData,
         dataOverride,
@@ -125,17 +130,17 @@ const ChartTreemap = ({
             baseData.map((item) => ({
                 ...item,
                 itemStyle: {
-                    color: getNodeColor(item.name, classificationMode),
+                    color: getNodeColor(item.name, classificationMode, themeTokens),
                     borderRadius: 14,
                     shadowBlur: 18,
-                    shadowColor: "rgba(12,56,53,0.20)",
+                    shadowColor: themeTokens.isAdidas ? "rgba(0,0,0,0.22)" : "rgba(12,56,53,0.20)",
                     shadowOffsetX: 0,
                     shadowOffsetY: 4,
                     borderColor: "rgba(255,255,255,0.65)",
                     borderWidth: 2
                 }
             })),
-        [baseData, classificationMode]
+        [baseData, classificationMode, themeTokens]
     );
 
     const option = useMemo(

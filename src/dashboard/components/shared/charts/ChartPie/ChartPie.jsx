@@ -20,16 +20,16 @@ const PIE_COLOR_PALETTE = [
     "#1f8a70"
 ];
 
-const stringToIndex = (str) => {
+const stringToIndex = (str, paletteSize) => {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
-    return Math.abs(hash % PIE_COLOR_PALETTE.length);
+    return Math.abs(hash % paletteSize);
 };
 
-const getCorporateColorByName = (name) => {
-    return PIE_COLOR_PALETTE[stringToIndex(name || "")];
+const getCorporateColorByName = (name, palette) => {
+    return palette[stringToIndex(name || "", palette.length)];
 };
 
 const formatCurrency = (value) =>
@@ -41,7 +41,7 @@ const toNumber = (value) => {
     return Number(value.toString().replace(/\./g, "").replace(",", ".").replace(/[^\d.-]/g, "")) || 0;
 };
 
-const ChartPie = ({ data, backendData, onVisualFilter, onCrossFilter, filterType }) => {
+const ChartPie = ({ data, backendData, onVisualFilter, onCrossFilter, filterType, categoryField = "categoria" }) => {
     const themeTokens = useChartThemeTokens();
     const {
         open,
@@ -53,7 +53,7 @@ const ChartPie = ({ data, backendData, onVisualFilter, onCrossFilter, filterType
         handleRefresh,
         chartKey,
         setChartKey
-    } = useChartPieState({ data, backendData, onVisualFilter, onCrossFilter, filterType });
+    } = useChartPieState({ data, backendData, onVisualFilter, onCrossFilter, filterType, categoryField });
 
     const sortDesc = useCallback(
         (record) => Object.entries(record).sort((a, b) => b[1] - a[1])[0]?.[0] || "-",
@@ -122,9 +122,9 @@ const ChartPie = ({ data, backendData, onVisualFilter, onCrossFilter, filterType
                 center: ["50%", "47%"],
                 data: filteredData,
                 itemStyle: {
-                    color: (params) => getCorporateColorByName(params.name),
+                    color: (params) => getCorporateColorByName(params.name, themeTokens.piePalette || PIE_COLOR_PALETTE),
                     borderWidth: 2,
-                    borderColor: "#ffffff"
+                    borderColor: themeTokens.isDark ? "rgba(11, 18, 32, 0.96)" : "#ffffff"
                 },
                 label: {
                     show: true,

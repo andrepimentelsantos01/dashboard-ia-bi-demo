@@ -12,5 +12,21 @@ export default defineConfig({
   },
   server: {
     port: 4173
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return undefined;
+
+          if (id.includes("echarts")) return "vendor-echarts";
+          if (id.includes("xlsx")) return "vendor-xlsx";
+          if (id.includes("jspdf")) return "vendor-pdf";
+          if (id.includes("i18next")) return "vendor-i18n";
+          if (id.includes("bootstrap") || id.includes("react-bootstrap")) return "vendor-ui";
+          return undefined;
+        }
+      }
+    }
   }
 });

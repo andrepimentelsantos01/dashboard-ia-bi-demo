@@ -10,7 +10,9 @@ const chartStyle = { width: "100%", height: "100%" };
 const ChartStackedBar = ({
     backendData,
     onCrossFilter,
-    metric = "quantity"
+    metric = "quantity",
+    currencyCode = "BRL",
+    locale = "pt-BR"
 }) => {
     const {
         open,
@@ -23,7 +25,9 @@ const ChartStackedBar = ({
     } = useChartStackedBarState({
         backendData,
         onCrossFilter,
-        metric
+        metric,
+        currencyCode,
+        locale
     });
 
     const refreshChart = useCallback(() => {

@@ -116,6 +116,60 @@ html[data-theme="dark"] .section-wrapper-collapse-button {
     color: #dff5f1;
 }
 
+html[data-dashboard-schema="adidas"] .section-wrapper-title {
+    color: #111111;
+    border-left-color: #111111;
+}
+
+html[data-dashboard-schema="adidas"] .section-wrapper-collapse-button {
+    color: #111111;
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .section-wrapper-title,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .section-wrapper-collapse-button {
+    color: #f5f5f5;
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .section-wrapper-title {
+    border-left-color: #f5f5f5;
+}
+
+html[data-dashboard-schema="amazon"] .section-wrapper-title {
+    color: #111827;
+    border-left-color: #ff9900;
+}
+
+html[data-dashboard-schema="amazon"] .section-wrapper-collapse-button {
+    color: #1f2937;
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .section-wrapper-title,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .section-wrapper-collapse-button {
+    color: #eef3f8;
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .section-wrapper-title {
+    border-left-color: #ffb84d;
+}
+
+html[data-dashboard-schema="restaurant"] .section-wrapper-title {
+    color: #5b3f2e;
+    border-left-color: #b9895a;
+}
+
+html[data-dashboard-schema="restaurant"] .section-wrapper-collapse-button {
+    color: #6e4f3a;
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .section-wrapper-title,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .section-wrapper-collapse-button {
+    color: #f6eee7;
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .section-wrapper-title {
+    border-left-color: #efc89f;
+}
+
 @media (max-width: 767px) {
     .section-wrapper-card {
         border-radius: 18px;

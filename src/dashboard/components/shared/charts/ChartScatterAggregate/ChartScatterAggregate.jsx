@@ -8,7 +8,12 @@ import { useChartScatterAggregateState } from "./chartScatterAggregate.state";
 const chartStyle = { width: "100%", height: "100%" };
 const chartOpts = { renderer: "canvas" };
 
-const ChartScatterAggregate = ({ backendData, onCrossFilter }) => {
+const ChartScatterAggregate = ({
+    backendData,
+    onCrossFilter,
+    currencyCode = "BRL",
+    locale = "pt-BR"
+}) => {
     const {
         open,
         setOpen,
@@ -19,7 +24,9 @@ const ChartScatterAggregate = ({ backendData, onCrossFilter }) => {
         viewMode
     } = useChartScatterAggregateState({
         backendData,
-        onCrossFilter
+        onCrossFilter,
+        currencyCode,
+        locale
     });
 
     const refreshChart = useCallback(() => {

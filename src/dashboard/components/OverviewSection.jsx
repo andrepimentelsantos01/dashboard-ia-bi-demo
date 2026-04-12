@@ -1,5 +1,9 @@
 import { Card, Row, Col } from "react-bootstrap";
 import React, { useMemo } from "react";
+import DashboardAsyncState, {
+    DashboardOverviewSkeleton,
+    DashboardSectionLoadingOverlay
+} from "./shared/DashboardAsyncState";
 import "./OverviewSection.css";
 
 const ChartHelpTooltip = ({ title, caption }) => {
@@ -21,7 +25,7 @@ const ChartHelpTooltip = ({ title, caption }) => {
     );
 };
 
-const OverviewSection = ({ charts }) => {
+const OverviewSection = ({ charts, isLoading, isRefreshing, error, onRetry }) => {
     const hasCharts = Array.isArray(charts) && charts.length > 0;
 
     const renderedCharts = useMemo(() => {
@@ -48,13 +52,37 @@ const OverviewSection = ({ charts }) => {
         });
     }, [hasCharts, charts]);
 
-    if (!renderedCharts) return null;
+    if (isLoading) {
+        return <DashboardOverviewSkeleton count={4} />;
+    }
+
+    if (error && !hasCharts) {
+        return (
+            <DashboardAsyncState
+                variant="error"
+                title="Nao foi possivel carregar os graficos"
+                description="O dashboard nao conseguiu montar as visualizacoes deste recorte. Tente novamente."
+                onAction={onRetry}
+            />
+        );
+    }
+
+    if (!renderedCharts) {
+        return (
+            <DashboardAsyncState
+                variant="empty"
+                title="Nenhum grafico disponivel"
+                description="Os filtros atuais nao retornaram dados suficientes para compor a visao geral."
+            />
+        );
+    }
 
     const compactCharts = renderedCharts.filter((item) => item.compactLayout);
     const regularCharts = renderedCharts.filter((item) => !item.compactLayout);
 
     return (
-        <>
+        <div className={isRefreshing ? "dashboard-section-loading" : ""}>
+            {isRefreshing ? <DashboardSectionLoadingOverlay label="Atualizando graficos..." /> : null}
             {compactCharts.length ? (
                 <Row className="overview-compact-row">
                     {compactCharts.map(({ key, title, component, caption, fullWidth }) => (
@@ -112,7 +140,7 @@ const OverviewSection = ({ charts }) => {
                     </Col>
                 ))}
             </Row>
-        </>
+        </div>
     );
 };
 

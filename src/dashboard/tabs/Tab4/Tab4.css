@@ -1,0 +1,298 @@
+@import "../shared/dashboardTabTheme.css";
+
+.logistics-scope {
+    --logistics-primary: #d90429;
+    --logistics-primary-hover: #b10322;
+    --logistics-primary-soft: #fdebed;
+    --logistics-surface-dark: #ffffff;
+    --logistics-surface-mid: #fff5f6;
+    --logistics-surface-light: #ffffff;
+    --logistics-border-subtle: #d9dde3;
+    --logistics-text-strong: #111111;
+    --logistics-text-on-dark: #ffffff;
+    --bi-surface: rgba(255, 255, 255, 0.96);
+    --bi-surface-strong: rgba(255, 255, 255, 0.99);
+    --bi-surface-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(247, 248, 250, 0.98) 100%);
+    --bi-border: rgba(217, 221, 227, 0.88);
+    --bi-border-strong: rgba(217, 4, 41, 0.3);
+    --bi-shadow-soft: 0 16px 36px rgba(11, 11, 12, 0.1);
+    --bi-shadow-card: 0 16px 34px rgba(11, 11, 12, 0.12);
+    --bi-shadow-float: 0 22px 44px rgba(11, 11, 12, 0.2);
+    --bi-text: var(--logistics-text-strong);
+    --bi-text-soft: #4b5563;
+    --bi-brand: var(--logistics-primary);
+    --bi-brand-strong: var(--logistics-primary-hover);
+    --bi-accent: var(--logistics-primary);
+    --bi-accent-soft: rgba(217, 4, 41, 0.12);
+}
+
+html[data-theme="dark"] .logistics-scope {
+    --bi-surface: rgba(22, 24, 29, 0.92);
+    --bi-surface-strong: rgba(11, 11, 12, 0.98);
+    --bi-surface-soft: linear-gradient(180deg, rgba(22, 24, 29, 0.98) 0%, rgba(11, 11, 12, 0.99) 100%);
+    --bi-border: rgba(217, 221, 227, 0.14);
+    --bi-border-strong: rgba(217, 4, 41, 0.34);
+    --bi-shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.36);
+    --bi-shadow-card: 0 18px 38px rgba(0, 0, 0, 0.4);
+    --bi-shadow-float: 0 24px 46px rgba(0, 0, 0, 0.46);
+    --bi-text: var(--logistics-text-on-dark);
+    --bi-text-soft: #d9dde3;
+    --bi-brand: #ff3557;
+    --bi-brand-strong: #ffffff;
+    --bi-accent: var(--logistics-primary);
+    --bi-accent-soft: rgba(217, 4, 41, 0.2);
+}
+
+html[data-dashboard-schema="logistics"][data-theme="light"] {
+    --logistics-primary: #d90429;
+    --logistics-primary-hover: #b10322;
+    --logistics-primary-soft: #fdebed;
+    --logistics-surface-dark: #ffffff;
+    --logistics-surface-mid: #fff5f6;
+    --logistics-surface-light: #ffffff;
+    --logistics-border-subtle: #d9dde3;
+    --logistics-text-strong: #111111;
+    --logistics-text-on-dark: #ffffff;
+    --bi-surface: rgba(255, 255, 255, 0.96);
+    --bi-surface-strong: rgba(255, 255, 255, 0.99);
+    --bi-surface-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(247, 248, 250, 0.98) 100%);
+    --bi-border: rgba(217, 221, 227, 0.88);
+    --bi-border-strong: rgba(217, 4, 41, 0.3);
+    --bi-shadow-soft: 0 16px 36px rgba(11, 11, 12, 0.1);
+    --bi-shadow-card: 0 16px 34px rgba(11, 11, 12, 0.12);
+    --bi-shadow-float: 0 22px 44px rgba(11, 11, 12, 0.2);
+    --bi-text: var(--logistics-text-strong);
+    --bi-text-soft: #4b5563;
+    --bi-brand: var(--logistics-primary);
+    --bi-brand-strong: var(--logistics-primary-hover);
+    --bi-accent: var(--logistics-primary);
+    --bi-accent-soft: rgba(217, 4, 41, 0.12);
+}
+
+html[data-dashboard-schema="logistics"][data-theme="dark"] {
+    --logistics-primary: #d90429;
+    --logistics-primary-hover: #ff3557;
+    --logistics-surface-dark: #0b0b0c;
+    --logistics-surface-mid: #171a21;
+    --logistics-text-on-dark: #ffffff;
+    --bi-surface: rgba(22, 24, 29, 0.92);
+    --bi-surface-strong: rgba(11, 11, 12, 0.98);
+    --bi-surface-soft: linear-gradient(180deg, rgba(22, 24, 29, 0.98) 0%, rgba(11, 11, 12, 0.99) 100%);
+    --bi-border: rgba(217, 221, 227, 0.14);
+    --bi-border-strong: rgba(217, 4, 41, 0.34);
+    --bi-shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.36);
+    --bi-shadow-card: 0 18px 38px rgba(0, 0, 0, 0.4);
+    --bi-shadow-float: 0 24px 46px rgba(0, 0, 0, 0.46);
+    --bi-text: var(--logistics-text-on-dark);
+    --bi-text-soft: #d9dde3;
+    --bi-brand: #ff3557;
+    --bi-brand-strong: #ffffff;
+    --bi-accent: var(--logistics-primary);
+    --bi-accent-soft: rgba(217, 4, 41, 0.2);
+}
+
+.logistics-scope .section-wrapper-card {
+    border-color: var(--bi-border);
+}
+
+.logistics-scope .section-wrapper-header,
+.logistics-scope .filter-section-wrapper .section-wrapper-header {
+    background: linear-gradient(135deg, #ffffff 0%, #fff5f6 72%, var(--logistics-primary) 100%);
+    border-bottom-color: rgba(217, 4, 41, 0.35);
+}
+
+.logistics-scope .section-wrapper-title,
+.logistics-scope .section-wrapper-collapse-button {
+    color: var(--logistics-text-strong);
+}
+
+.logistics-scope .section-wrapper-title {
+    border-left-color: var(--logistics-primary);
+}
+
+.logistics-scope .filter-section-card,
+.logistics-scope .selectedItems,
+.logistics-scope .dropdown-button--Default,
+.logistics-scope .date-picker,
+.logistics-scope .datatable-search-shell {
+    border-color: var(--logistics-border-subtle) !important;
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%) !important;
+}
+
+.logistics-scope .selectedItems:focus-within,
+.logistics-scope .dropdown-button:focus-visible,
+.logistics-scope .date-picker:focus,
+.logistics-scope .datatable-search-shell:focus-within {
+    border-color: var(--logistics-primary) !important;
+    box-shadow: 0 0 0 3px rgba(217, 4, 41, 0.16) !important;
+}
+
+.logistics-scope .selectedItemBadge,
+.logistics-scope .datatable-status,
+.logistics-scope .kpi-card-variation {
+    background: var(--logistics-primary) !important;
+    color: var(--logistics-text-on-dark) !important;
+}
+
+.logistics-scope .overview-card,
+.logistics-scope .operational-table-container,
+.logistics-scope .datatable-wrapper {
+    border-color: var(--logistics-border-subtle);
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%);
+    box-shadow: var(--bi-shadow-card);
+}
+
+.logistics-scope .kpi-card {
+    border-color: rgba(217, 4, 41, 0.2) !important;
+    background: linear-gradient(135deg, #ffffff 0%, #fff5f6 72%, var(--logistics-primary) 100%) !important;
+    box-shadow: 0 16px 34px rgba(217, 4, 41, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.76) !important;
+}
+
+.logistics-scope .kpi-card:hover {
+    box-shadow: 0 20px 42px rgba(217, 4, 41, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
+}
+
+.logistics-scope .kpi-card-label {
+    color: #4b5563 !important;
+}
+
+.logistics-scope .kpi-card-value {
+    color: #111111 !important;
+    text-shadow: none !important;
+}
+
+.logistics-scope .overview-card-title,
+.logistics-scope .datatable-search-input,
+.logistics-scope .datatable-cell {
+    color: var(--logistics-text-strong);
+}
+
+.logistics-scope .datatable-header-row {
+    background: linear-gradient(90deg, #ffffff, #fff5f6, var(--logistics-primary));
+    color: #111111;
+}
+
+.logistics-scope .floating-clear-button,
+.logistics-scope .date-filter-buttons .btn-primary,
+.logistics-scope .apply-button--Default {
+    background: var(--logistics-primary) !important;
+    border-color: var(--logistics-primary) !important;
+    color: var(--logistics-text-on-dark) !important;
+}
+
+.logistics-scope .floating-clear-button:hover,
+.logistics-scope .apply-button--Default:hover {
+    background: var(--logistics-primary-hover) !important;
+    border-color: var(--logistics-primary-hover) !important;
+}
+
+.logistics-scope .floating-theme-button,
+.logistics-scope .filter-scroll-button,
+.logistics-scope .operational-zoom-button,
+.logistics-scope .operational-view-more-button,
+.logistics-scope .datatable-export-button {
+    border-color: rgba(217, 4, 41, 0.3) !important;
+    color: var(--logistics-primary) !important;
+}
+
+.logistics-scope .tab4-gauge-card {
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%);
+    border-color: var(--logistics-border-subtle);
+    box-shadow: var(--bi-shadow-card);
+}
+
+.logistics-scope .tab4-gauge-caption {
+    color: var(--logistics-text-strong);
+}
+
+.tab4-gauge-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.tab4-gauge-card {
+    min-height: 250px;
+    padding: 12px 10px 4px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.66);
+    border: 1px solid rgba(15, 79, 76, 0.08);
+    box-shadow: 0 12px 28px rgba(12, 56, 53, 0.08);
+}
+
+.tab4-gauge-caption {
+    margin-top: 6px;
+    text-align: center;
+    font-size: 0.76rem;
+    line-height: 1.45;
+    color: #5f7774;
+    font-weight: 600;
+}
+
+html[data-theme="dark"] .tab4-gauge-card {
+    background: rgba(18, 24, 31, 0.72);
+    border-color: rgba(223, 245, 241, 0.08);
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .tab4-gauge-caption {
+    color: rgba(223, 245, 241, 0.72);
+}
+
+html[data-theme="dark"] .logistics-scope .filter-section-card,
+html[data-theme="dark"] .logistics-scope .selectedItems,
+html[data-theme="dark"] .logistics-scope .dropdown-button--Default,
+html[data-theme="dark"] .logistics-scope .date-picker,
+html[data-theme="dark"] .logistics-scope .overview-card,
+html[data-theme="dark"] .logistics-scope .operational-table-container,
+html[data-theme="dark"] .logistics-scope .datatable-wrapper,
+html[data-theme="dark"] .logistics-scope .datatable-toolbar,
+html[data-theme="dark"] .logistics-scope .datatable-search-shell,
+html[data-theme="dark"] .logistics-scope .tab4-gauge-card {
+    border-color: rgba(217, 4, 41, 0.22) !important;
+    background: linear-gradient(180deg, #171a21 0%, #0b0b0c 100%) !important;
+}
+
+html[data-theme="dark"] .logistics-scope .section-wrapper-header,
+html[data-theme="dark"] .logistics-scope .filter-section-wrapper .section-wrapper-header,
+html[data-theme="dark"] .logistics-scope .datatable-header-row,
+html[data-theme="dark"] .logistics-scope .kpi-card {
+    border-color: rgba(217, 4, 41, 0.26) !important;
+    background: linear-gradient(135deg, #0b0b0c 0%, #171a21 68%, #3f0711 100%) !important;
+    color: var(--logistics-text-on-dark) !important;
+}
+
+html[data-theme="dark"] .logistics-scope .overview-card-title,
+html[data-theme="dark"] .logistics-scope .datatable-search-input,
+html[data-theme="dark"] .logistics-scope .datatable-cell,
+html[data-theme="dark"] .logistics-scope .selectedItems,
+html[data-theme="dark"] .logistics-scope .tab4-gauge-caption,
+html[data-theme="dark"] .logistics-scope .section-wrapper-title,
+html[data-theme="dark"] .logistics-scope .section-wrapper-collapse-button,
+html[data-theme="dark"] .logistics-scope .kpi-card-label,
+html[data-theme="dark"] .logistics-scope .kpi-card-value {
+    color: var(--logistics-text-on-dark) !important;
+}
+
+html[data-theme="dark"] .logistics-scope .kpi-card-value {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.34) !important;
+}
+
+@media (max-width: 1200px) {
+    .tab4-gauge-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .tab4-gauge-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tab4-gauge-card {
+        min-height: 220px;
+    }
+}

@@ -1,22 +1,9 @@
 import { useMemo, useState, useCallback } from "react";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 import { useChartThemeTokens } from "../chartTheme";
+import { formatCompactCurrencyValue, formatCurrencyValue } from "../../../../utils/intlFormat";
 
 export const formatNumber = (num) => Math.round(num).toLocaleString("pt-BR");
-
-export const formatCurrencyFull = (value) =>
-    (typeof value === "number" ? value : Number(value || 0)).toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-
-export const formatCurrencyShort = (value) =>
-    `R$ ${Number(value).toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    })}`;
 
 export const naturalAsc = new Intl.Collator(undefined, {
     numeric: true,
@@ -38,14 +25,11 @@ export const toNumber = (value) => {
     );
 };
 
-export const formatValue = (value, valueFormat) => {
+export const formatValue = (value, valueFormat, currencyCode = "BRL", locale = "pt-BR") => {
     if (valueFormat === "percent") return `${value.toFixed(1)}%`;
     if (valueFormat === "number") return Math.round(value).toLocaleString("pt-BR");
 
-    return `R$ ${Number(value).toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    })}`;
+    return formatCurrencyValue(value, { currencyCode, locale });
 };
 
 const isTemporalLabel = (value) => {
@@ -145,7 +129,7 @@ const buildLeaderSet = (info) => ({
     produtoQuantidade: formatLeader(info.produtoQtd)
 });
 
-export const buildTooltip = ({ aggregated, valueFormat }) =>
+export const buildTooltip = ({ aggregated, valueFormat, currencyCode, locale }) =>
     buildResponsiveTooltip((params) => {
         if (!params?.length) return "";
 
@@ -159,7 +143,7 @@ export const buildTooltip = ({ aggregated, valueFormat }) =>
         if (!info) {
             return `
                 <b>${key}</b><br/>
-                Valor: <b>${formatValue(data, valueFormat)}</b><br/><br/>
+                Valor: <b>${formatValue(data, valueFormat, currencyCode, locale)}</b><br/><br/>
             `;
         }
 
@@ -167,7 +151,7 @@ export const buildTooltip = ({ aggregated, valueFormat }) =>
 
         return `
             <b>${key}</b><br/>
-            Valor: <b>${formatCurrencyFull(data)}</b><br/><br/>
+            Valor: <b>${formatCurrencyValue(data, { currencyCode, locale })}</b><br/><br/>
             <b>Volume Movimentado:</b> ${info.volume.toLocaleString("pt-BR")}<br/><br/>
             <b>Categoria Líder (Valor):</b> ${leaders.categoriaValor}<br/>
             <b>Categoria Líder (Quantidade):</b> ${leaders.categoriaQuantidade}<br/><br/>
@@ -182,15 +166,15 @@ export const buildTooltip = ({ aggregated, valueFormat }) =>
         axisPointer: { type: "shadow" }
     });
 
-const gradient = (color, opacity = "80") => ({
+const gradient = (startColor, endColor, opacity = "80") => ({
     type: "linear",
     x: 0,
     y: 0,
     x2: 0,
     y2: 1,
     colorStops: [
-        { offset: 0, color },
-        { offset: 1, color: `${color}${opacity}` }
+        { offset: 0, color: startColor },
+        { offset: 1, color: `${endColor}${opacity}` }
     ]
 });
 
@@ -202,7 +186,9 @@ export const buildBarVerticalOptions = ({
                                             valueFormat,
                                             showTrendLine,
                                             themeTokens,
-                                            isTemporalOrder = false
+                                            isTemporalOrder = false,
+                                            currencyCode = "BRL",
+                                            locale = "pt-BR"
                                         }) => {
     const totalItems = labels.length;
     const manyItems = totalItems > 10;
@@ -223,16 +209,16 @@ export const buildBarVerticalOptions = ({
             position: "top",
             color: themeTokens.chartLabelStrong,
             fontSize: 10,
-            formatter: ({ value }) => formatValue(value, valueFormat)
+            formatter: ({ value }) => formatValue(value, valueFormat, currencyCode, locale)
         },
         itemStyle: {
             borderRadius: [6, 6, 0, 0],
-            color: gradient(color, "80")
+            color: gradient(themeTokens.chartGradientStart, themeTokens.chartGradientEnd, "80")
         },
         emphasis: {
             itemStyle: {
                 borderRadius: [6, 6, 0, 0],
-                color: gradient(color, "66")
+                color: gradient(themeTokens.chartGradientStart, themeTokens.chartGradientEnd, "66")
             }
         },
         animationDuration: 600
@@ -242,13 +228,18 @@ export const buildBarVerticalOptions = ({
         type: "line",
         data: values,
         smooth: true,
-        lineStyle: { width: 2, color },
+        lineStyle: { width: 2, color: themeTokens.chartGradientStart },
         symbol: "circle",
-        symbolSize: 6
+        symbolSize: 6,
+        itemStyle: {
+            color: themeTokens.chartGradientEnd,
+            borderColor: themeTokens.chartGradientStart,
+            borderWidth: 2
+        }
     };
 
     return {
-        tooltip: buildTooltip({ aggregated, valueFormat }),
+        tooltip: buildTooltip({ aggregated, valueFormat, currencyCode, locale }),
         grid: {
             left: "6%",
             right: -80,
@@ -279,7 +270,10 @@ export const buildBarVerticalOptions = ({
             axisLabel: {
                 color: themeTokens.textSecondary,
                 fontSize: 10,
-                formatter: (value) => formatValue(value, valueFormat)
+                formatter: (value) =>
+                    valueFormat === "currency"
+                        ? formatCompactCurrencyValue(value, { currencyCode, locale })
+                        : formatValue(value, valueFormat, currencyCode, locale)
             }
         },
         dataZoom: [
@@ -314,11 +308,13 @@ export const useChartBarVerticalState = ({
                                              labels,
                                              values,
                                              backendData,
-                                             color = "#17877e",
+                                             color,
                                              valueFormat = "currency",
                                              filterType = "mes",
                                              onCrossFilter,
-                                         showTrendLine
+                                         showTrendLine,
+                                         currencyCode = "BRL",
+                                         locale = "pt-BR"
                                      }) => {
     const shouldDefaultDesc = useMemo(
         () => filterType === "mes" || labels.every(isTemporalLabel),
@@ -329,6 +325,7 @@ export const useChartBarVerticalState = ({
     const [orderState, setOrderState] = useState(shouldDefaultDesc ? "RTL" : "LTR");
     const [chartKey, setChartKey] = useState(0);
     const themeTokens = useChartThemeTokens();
+    const resolvedColor = color || themeTokens.chartPrimary;
 
     const aggregated = useBarVerticalAggregation(backendData || [], filterType);
 
@@ -384,13 +381,15 @@ export const useChartBarVerticalState = ({
             labels: orderedLabels,
             values: orderedValues,
             aggregated,
-            color,
+            color: resolvedColor,
             valueFormat,
             showTrendLine,
             themeTokens,
-            isTemporalOrder: shouldDefaultDesc
+            isTemporalOrder: shouldDefaultDesc,
+            currencyCode,
+            locale
         }),
-        [aggregated, color, orderedLabels, orderedValues, shouldDefaultDesc, showTrendLine, themeTokens, valueFormat]
+        [aggregated, currencyCode, locale, orderedLabels, orderedValues, resolvedColor, shouldDefaultDesc, showTrendLine, themeTokens, valueFormat]
     );
 
     return {

@@ -1,4 +1,5 @@
 import React from "react";
+import DashboardAsyncState from "./DashboardAsyncState";
 
 class DashboardErrorBoundary extends React.Component {
     constructor(props) {
@@ -21,9 +22,12 @@ class DashboardErrorBoundary extends React.Component {
     render() {
         if (this.state.hasError) {
             return this.props.fallback ?? (
-                <div className="alert alert-warning mb-0" role="alert">
-                    Nao foi possivel renderizar esta secao.
-                </div>
+                <DashboardAsyncState
+                    variant="error"
+                    compact
+                    title="Nao foi possivel renderizar esta secao"
+                    description="O componente falhou durante a renderizacao e foi isolado para preservar o restante do dashboard."
+                />
             );
         }
 

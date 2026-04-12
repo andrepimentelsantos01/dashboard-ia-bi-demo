@@ -1,58 +1,45 @@
 import React, { useState, useMemo, Suspense, useCallback, useEffect, startTransition } from "react";
 import { ButtonGroup, Button } from "react-bootstrap";
 import DashboardErrorBoundary from "./components/shared/DashboardErrorBoundary";
+import { DashboardKpiSkeleton, DashboardOverviewSkeleton, DashboardTableSkeleton } from "./components/shared/DashboardAsyncState";
+import { DASHBOARD_DEFAULT_TAB, DASHBOARD_TABS, DASHBOARD_TAB_IDS } from "./config/tabs.config";
 import "./index.css";
 
-const loadOverview = () => import("./tabs/Overview");
-const loadProducts = () => import("./tabs/Products/Products");
-const loadClients = () => import("./tabs/Clients/Clients");
-const loadSuppliers = () => import("./tabs/Suppliers");
-const loadQuotations = () => import("./tabs/Quotations");
-const loadOrders = () => import("./tabs/Orders");
-
-const Overview = React.lazy(loadOverview);
-const Products = React.lazy(loadProducts);
-const Clients = React.lazy(loadClients);
-const Suppliers = React.lazy(loadSuppliers);
-const Quotations = React.lazy(loadQuotations);
-const Orders = React.lazy(loadOrders);
-
 const Skeleton = React.memo(() => (
-    <div className="skeleton-wrapper">
-        <div className="skeleton-block skeleton-title"></div>
-        <div className="skeleton-block skeleton-row"></div>
-        <div className="skeleton-block skeleton-row"></div>
-        <div className="skeleton-block skeleton-row"></div>
+    <div className="d-grid gap-4 pt-3">
+        <DashboardKpiSkeleton />
+        <DashboardOverviewSkeleton count={4} />
+        <DashboardTableSkeleton />
     </div>
 ));
 
-const TABS = [
-    { key: "overview", label: "Vis\u00e3o Geral", component: Overview, preload: loadOverview },
-    { key: "products", label: "Produtos", component: Products, preload: loadProducts },
-    { key: "clients", label: "Clientes", component: Clients, preload: loadClients },
-    { key: "suppliers", label: "Fornecedores", component: Suppliers, preload: loadSuppliers },
-    { key: "quotations", label: "Cota\u00e7\u00f5es", component: Quotations, preload: loadQuotations },
-    { key: "orders", label: "Pedidos & Log\u00edstica", component: Orders, preload: loadOrders }
-];
+const TABS = DASHBOARD_TABS.map((tab) => ({
+    ...tab,
+    component: React.lazy(tab.loadComponent)
+}));
 
 const Dashboard = () => {
-    const [activeTab, setActiveTab] = useState("overview");
+    const [activeTabId, setActiveTabId] = useState(DASHBOARD_DEFAULT_TAB);
 
-    const handleTabChange = useCallback((key) => {
+    const tabConfigById = useMemo(
+        () => new Map(TABS.map((tab) => [tab.id, tab])),
+        []
+    );
+
+    const handleTabChange = useCallback((tabId) => {
         startTransition(() => {
-            setActiveTab(key);
+            setActiveTabId(tabId);
         });
     }, []);
 
-    const preloadTab = useCallback((key) => {
-        const found = TABS.find((tab) => tab.key === key);
-        found?.preload?.();
-    }, []);
+    const preloadTab = useCallback((tabId) => {
+        tabConfigById.get(tabId)?.preload?.();
+    }, [tabConfigById]);
 
     useEffect(() => {
         const preloadNonActiveTabs = () => {
-            TABS.forEach(({ key, preload }) => {
-                if (key !== activeTab) preload?.();
+            TABS.forEach(({ id, preload }) => {
+                if (id !== activeTabId) preload?.();
             });
         };
 
@@ -65,34 +52,49 @@ const Dashboard = () => {
 
         const timeoutId = window.setTimeout(preloadNonActiveTabs, 600);
         return () => window.clearTimeout(timeoutId);
-    }, [activeTab]);
+    }, [activeTabId]);
 
     const currentTabConfig = useMemo(
-        () => TABS.find((tab) => tab.key === activeTab) ?? null,
-        [activeTab]
+        () => tabConfigById.get(activeTabId) ?? null,
+        [activeTabId, tabConfigById]
     );
+
+    useEffect(() => {
+        if (typeof document === "undefined") return undefined;
+
+        const root = document.documentElement;
+        root.setAttribute("data-dashboard-schema", currentTabConfig?.schema || "default");
+
+        return () => {
+            root.setAttribute("data-dashboard-schema", "default");
+        };
+    }, [currentTabConfig]);
 
     const tabButtons = useMemo(
         () =>
-            TABS.map(({ key, label }) => (
+            TABS.map(({ id, label, schema }) => (
                 <Button
-                    key={key}
-                    className="dashboard-tab-btn"
-                    variant={activeTab === key ? "primary" : "outline-primary"}
-                    onClick={() => handleTabChange(key)}
-                    onMouseEnter={() => preloadTab(key)}
-                    onFocus={() => preloadTab(key)}
+                    key={id}
+                    className={`dashboard-tab-btn ${schema !== "default" ? `dashboard-tab-btn--${schema}` : ""}`}
+                    variant={activeTabId === id ? "primary" : "outline-primary"}
+                    onClick={() => handleTabChange(id)}
+                    onMouseEnter={() => preloadTab(id)}
+                    onFocus={() => preloadTab(id)}
                 >
                     {label}
                 </Button>
             )),
-        [activeTab, handleTabChange, preloadTab]
+        [activeTabId, handleTabChange, preloadTab]
     );
 
     const CurrentComponent = currentTabConfig?.component;
 
     return (
-        <div className="dashboard-container">
+        <div
+            className={`dashboard-container ${
+                activeTabId === DASHBOARD_TAB_IDS.TAB1 ? "dashboard-container--adidas-active" : ""
+            }`}
+        >
             <ButtonGroup className="dashboard-btn-group d-flex flex-wrap">
                 {tabButtons}
             </ButtonGroup>
@@ -105,7 +107,7 @@ const Dashboard = () => {
                 }
             >
                 <Suspense fallback={<Skeleton />}>
-                    {CurrentComponent ? <CurrentComponent key={activeTab} /> : null}
+                    {CurrentComponent ? <CurrentComponent key={activeTabId} /> : null}
                 </Suspense>
             </DashboardErrorBoundary>
         </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
+import "./ModalV2.css";
 
 const ModalV2 = ({ open, setOpen, title, content }) => {
   return (
@@ -9,11 +10,15 @@ const ModalV2 = ({ open, setOpen, title, content }) => {
       size="xl"
       centered
       scrollable
+      dialogClassName="dashboard-modal-dialog"
+      contentClassName="dashboard-modal-content"
     >
-      <Modal.Header closeButton>
+      <Modal.Header closeButton className="dashboard-modal-header">
         <Modal.Title>{title || "Detalhes"}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>{content}</Modal.Body>
+      <Modal.Body className="dashboard-modal-body">
+        <div className="dashboard-modal-body-shell">{content}</div>
+      </Modal.Body>
     </Modal>
   );
 };

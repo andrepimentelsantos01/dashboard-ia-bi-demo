@@ -1,10 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 import { useChartThemeTokens } from "../chartTheme";
-
-const LINE_COLOR = "#17877e";
-const LINE_FILL = "rgba(23, 135, 126, 0.24)";
-const SLIDER_FILL = "rgba(25, 181, 159, 0.18)";
+import { formatCompactCurrencyValue, formatCurrencyValue } from "../../../../utils/intlFormat";
 
 const toNumber = (value) => {
     if (typeof value === "number") return value;
@@ -12,13 +9,48 @@ const toNumber = (value) => {
     return Number(value.toString().replace(/\./g, "").replace(",", ".").replace(/[^\d.-]/g, "")) || 0;
 };
 
-const formatShort = (value) => `R$ ${Number(value).toFixed(2).replace(".", ",")}`;
+const formatShort = (value, currencyCode, locale) =>
+    formatCurrencyValue(value, {
+        currencyCode,
+        locale
+    });
 
-export const useChartLineState = ({ backendData, onCrossFilter }) => {
+const formatLineValue = (value, metric, currencyCode, locale) => {
+    if (metric === "quantity") {
+        return Math.round(Number(value || 0)).toLocaleString(locale);
+    }
+
+    return formatShort(value, currencyCode, locale);
+};
+
+const formatLineAxisValue = (value, metric, currencyCode, locale) => {
+    if (metric === "quantity") {
+        return Math.round(Number(value || 0)).toLocaleString(locale);
+    }
+
+    return formatCompactCurrencyValue(value, { currencyCode, locale });
+};
+
+const getMetricLabel = (metric) => {
+    if (metric === "amount") return "Receita";
+    if (metric === "quantity") return "Volume";
+
+    return "Valor Medio";
+};
+
+export const useChartLineState = ({
+    backendData,
+    onCrossFilter,
+    metric = "averageUnitPrice",
+    currencyCode = "BRL",
+    locale = "pt-BR"
+}) => {
     const [open, setOpen] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState(null);
     const [chartKey, setChartKey] = useState(0);
     const themeTokens = useChartThemeTokens();
+    const lineColor = themeTokens.chartGradientStart;
+    const lineFill = themeTokens.chartAreaFill;
 
     const handleRefresh = useCallback(() => {
         setSelectedMonth(null);
@@ -115,12 +147,14 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
 
     const months = useMemo(() => Object.keys(aggregated.grouped).sort().reverse(), [aggregated]);
 
-    const averages = useMemo(
+    const values = useMemo(
         () => months.map((month) => {
             const item = aggregated.grouped[month];
-            return !item || !item.qty ? 0 : item.total / item.qty;
+            if (!item) return 0;
+            if (metric === "quantity") return item.qty;
+            return metric === "amount" ? item.total : item.qty ? item.total / item.qty : 0;
         }),
-        [aggregated, months]
+        [aggregated, metric, months]
     );
 
     const handleClickPoint = useCallback((point) => {
@@ -149,10 +183,11 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                 const value = point.data;
                 const item = aggregated.byMonth[month];
                 if (!item) return "";
+                const metricLabel = getMetricLabel(metric);
 
                 return `
                     <b>${month}</b><br/>
-                    Valor Médio: <b>${formatShort(value)}</b><br/><br/>
+                    ${metricLabel}: <b>${formatLineValue(value, metric, currencyCode, locale)}</b><br/><br/>
                     <b>Volume Movimentado:</b> ${item.volume}<br/><br/>
                     <b>Categoria Líder (Valor):</b> ${item.categoriaLeaderValor}<br/>
                     <b>Categoria Líder (Quantidade):</b> ${item.categoriaLeaderQtd}<br/><br/>
@@ -185,7 +220,7 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                 axisLabel: {
                     color: themeTokens.textSecondary,
                     fontSize: 10,
-                    formatter: (value) => formatShort(value)
+                    formatter: (value) => formatLineAxisValue(value, metric, currencyCode, locale)
                 },
                 splitLine: {
                     lineStyle: { color: themeTokens.splitLine, type: "dashed" }
@@ -201,7 +236,7 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
                     fillerColor: themeTokens.sliderFill,
                     handleIcon: "path://M512 64L576 128 512 192 448 128z",
                     handleSize: "80%",
-                    handleColor: LINE_COLOR,
+                    handleColor: lineColor,
                     start: 0,
                     end: zoomEnd
                 },
@@ -218,24 +253,28 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
             series: [
                 {
                     type: "line",
-                    data: averages,
+                    data: values,
                     smooth: true,
-                    lineStyle: { width: 3, color: LINE_COLOR },
-                    itemStyle: { color: LINE_COLOR },
+                    lineStyle: { width: 3, color: lineColor },
+                    itemStyle: {
+                        color: themeTokens.chartGradientEnd,
+                        borderColor: lineColor,
+                        borderWidth: 2
+                    },
                     symbolSize: 6,
                     animationDuration: 600,
-                    areaStyle: { opacity: 1, color: LINE_FILL },
+                    areaStyle: { opacity: 1, color: lineFill },
                     label: {
                         show: true,
                         position: "top",
                         fontSize: 10,
-                        color: themeTokens.isDark ? "#6de1d0" : LINE_COLOR,
-                        formatter: (point) => formatShort(point.value)
+                        color: themeTokens.chartLabelStrong,
+                        formatter: (point) => formatLineValue(point.value, metric, currencyCode, locale)
                     }
                 }
             ]
         };
-    }, [aggregated, averages, months, themeTokens]);
+    }, [aggregated, currencyCode, lineColor, lineFill, locale, metric, months, themeTokens, values]);
 
     return {
         open,
@@ -244,7 +283,7 @@ export const useChartLineState = ({ backendData, onCrossFilter }) => {
         handleClickPoint,
         aggregated,
         months,
-        averages,
+        averages: values,
         handleRefresh,
         chartKey,
         setChartKey

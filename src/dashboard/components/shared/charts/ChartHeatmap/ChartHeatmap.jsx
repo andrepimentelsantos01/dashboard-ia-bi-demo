@@ -9,7 +9,10 @@ const chartStyle = { width: "100%", height: "100%" };
 
 const ChartHeatmap = ({
     backendData,
-    onCrossFilter
+    onCrossFilter,
+    metric = "totalSales",
+    currencyCode = "BRL",
+    locale = "pt-BR"
 }) => {
     const {
         open,
@@ -21,7 +24,10 @@ const ChartHeatmap = ({
         setChartKey
     } = useChartHeatmapState({
         backendData,
-        onCrossFilter
+        onCrossFilter,
+        metric,
+        currencyCode,
+        locale
     });
 
     const refreshChart = useCallback(() => {

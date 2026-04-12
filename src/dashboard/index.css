@@ -59,6 +59,98 @@
     background: linear-gradient(135deg, #1bc8af 0%, #146d65 100%);
 }
 
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-outline-primary {
+    color: #111111;
+    border-color: rgba(17, 17, 17, 0.78);
+    background: rgba(255, 255, 255, 0.96);
+}
+
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-outline-primary {
+    color: #1f2937;
+    border-color: rgba(17, 24, 39, 0.16);
+    background: rgba(255, 255, 255, 0.98);
+}
+
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-outline-primary:hover,
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-outline-primary:focus {
+    color: #111827;
+    border-color: #ff9900;
+    background: rgba(255, 153, 0, 0.08);
+}
+
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-primary,
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-primary:hover,
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-primary:focus,
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-primary:active {
+    color: #ffffff;
+    border-color: #ff9900;
+    background: linear-gradient(135deg, #111827 0%, #1f2937 78%, #ff9900 100%);
+    box-shadow: 0 12px 24px rgba(17, 24, 39, 0.2);
+}
+
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-outline-primary {
+    color: #2a211b;
+    border-color: rgba(200, 169, 107, 0.74);
+    background: #f6f1ea;
+}
+
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-outline-primary:hover,
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-outline-primary:focus {
+    color: #2a211b;
+    border-color: #c8a96b;
+    background: rgba(200, 169, 107, 0.16);
+}
+
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-primary,
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-primary:hover,
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-primary:focus,
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-primary:active {
+    color: #f8f6f2;
+    border-color: #c8a96b;
+    background: linear-gradient(135deg, #1a1410 0%, #241b16 64%, #5a2e2e 100%);
+    box-shadow: 0 12px 24px rgba(42, 33, 27, 0.22);
+}
+
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-outline-primary {
+    color: #111111;
+    border-color: rgba(217, 4, 41, 0.62);
+    background: #ffffff;
+}
+
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-outline-primary:hover,
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-outline-primary:focus {
+    color: #111111;
+    border-color: #d90429;
+    background: #fdebed;
+}
+
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-primary,
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-primary:hover,
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-primary:focus,
+html[data-dashboard-schema="logistics"] .dashboard-tab-btn--logistics.btn-primary:active {
+    color: #111111;
+    border-color: #d90429;
+    background: linear-gradient(135deg, #ffffff 0%, #fff5f6 70%, #d90429 100%);
+    box-shadow: 0 12px 24px rgba(217, 4, 41, 0.18);
+}
+
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-outline-primary:hover,
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-outline-primary:focus {
+    color: #111111;
+    border-color: #111111;
+    background: rgba(17, 17, 17, 0.06);
+}
+
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-primary,
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-primary:hover,
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-primary:focus,
+html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-primary:active {
+    color: #ffffff;
+    border-color: #111111;
+    background: linear-gradient(135deg, #111111 0%, #2c2c2c 100%);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
 .skeleton-wrapper {
     padding: 1rem;
 }
@@ -112,6 +204,94 @@ html[data-theme="dark"] .dashboard-tab-btn.btn-primary:active {
     color: #031312;
     border-color: #9af0e3;
     background: linear-gradient(135deg, #8ff0e2 0%, #54d8c6 100%);
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-outline-primary {
+    color: #f5f5f5;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(18, 18, 18, 0.92);
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-outline-primary:hover,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-outline-primary:focus {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.7);
+    background: rgba(42, 42, 42, 0.96);
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-primary,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-primary:hover,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-primary:focus,
+html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adidas.btn-primary:active {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.72);
+    background: linear-gradient(135deg, #000000 0%, #262626 100%);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-outline-primary {
+    color: #e7edf6;
+    border-color: rgba(148, 163, 184, 0.22);
+    background: rgba(11, 18, 32, 0.94);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-outline-primary:hover,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-outline-primary:focus {
+    color: #f8fafc;
+    border-color: rgba(255, 187, 79, 0.64);
+    background: rgba(20, 30, 45, 0.98);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-primary,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-primary:hover,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-primary:focus,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-primary:active {
+    color: #ffffff;
+    border-color: rgba(255, 187, 79, 0.72);
+    background: linear-gradient(135deg, #0b1220 0%, #172033 80%, #ff9900 100%);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-outline-primary {
+    color: #f8f6f2;
+    border-color: rgba(200, 169, 107, 0.46);
+    background: rgba(36, 27, 22, 0.94);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-outline-primary:hover,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-outline-primary:focus {
+    color: #ffffff;
+    border-color: rgba(200, 169, 107, 0.72);
+    background: rgba(90, 46, 46, 0.72);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-primary,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-primary:hover,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-primary:focus,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-primary:active {
+    color: #f8f6f2;
+    border-color: rgba(200, 169, 107, 0.74);
+    background: linear-gradient(135deg, #1a1410 0%, #241b16 66%, #c8a96b 100%);
+}
+
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-outline-primary {
+    color: #ffffff;
+    border-color: rgba(217, 4, 41, 0.48);
+    background: rgba(11, 11, 12, 0.94);
+}
+
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-outline-primary:hover,
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-outline-primary:focus {
+    color: #ffffff;
+    border-color: rgba(217, 4, 41, 0.74);
+    background: rgba(22, 24, 29, 0.98);
+}
+
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-primary,
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-primary:hover,
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-primary:focus,
+html[data-dashboard-schema="logistics"][data-theme="dark"] .dashboard-tab-btn--logistics.btn-primary:active {
+    color: #111111;
+    border-color: rgba(217, 4, 41, 0.8);
+    background: linear-gradient(135deg, #ffffff 0%, #fff5f6 72%, #d90429 100%);
 }
 
 html[data-theme="dark"] .skeleton-block {
