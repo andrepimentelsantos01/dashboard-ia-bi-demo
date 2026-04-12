@@ -28,8 +28,8 @@ const Skeleton = React.memo(() => (
 
 const TABS = [
     { key: "overview", label: "Adidas Sales Dataset", component: Overview, preload: loadOverview, schema: "adidas" },
-    { key: "products", label: "Produtos", component: Products, preload: loadProducts, schema: "default" },
-    { key: "clients", label: "Clientes", component: Clients, preload: loadClients, schema: "default" },
+    { key: "products", label: "Amazon Sales Dataset", component: Products, preload: loadProducts, schema: "amazon" },
+    { key: "clients", label: "Restaurant Sales Dataset", component: Clients, preload: loadClients, schema: "restaurant" },
     { key: "suppliers", label: "Fornecedores", component: Suppliers, preload: loadSuppliers, schema: "default" },
     { key: "quotations", label: "Cota\u00e7\u00f5es", component: Quotations, preload: loadQuotations, schema: "default" },
     { key: "orders", label: "Pedidos & Log\u00edstica", component: Orders, preload: loadOrders, schema: "default" }
@@ -85,10 +85,10 @@ const Dashboard = () => {
 
     const tabButtons = useMemo(
         () =>
-            TABS.map(({ key, label }) => (
+            TABS.map(({ key, label, schema }) => (
                 <Button
                     key={key}
-                    className={`dashboard-tab-btn ${key === "overview" ? "dashboard-tab-btn--adidas" : ""}`}
+                    className={`dashboard-tab-btn ${schema !== "default" ? `dashboard-tab-btn--${schema}` : ""}`}
                     variant={activeTab === key ? "primary" : "outline-primary"}
                     onClick={() => handleTabChange(key)}
                     onMouseEnter={() => preloadTab(key)}

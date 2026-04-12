@@ -1,1 +1,35 @@
 @import "../shared/dashboardTabTheme.css";
+
+.amazon-scope {
+    --bi-surface: rgba(255, 255, 255, 0.92);
+    --bi-surface-strong: rgba(255, 255, 255, 0.98);
+    --bi-surface-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 249, 252, 0.98) 100%);
+    --bi-border: rgba(17, 17, 17, 0.08);
+    --bi-border-strong: rgba(255, 153, 0, 0.2);
+    --bi-shadow-soft: 0 16px 36px rgba(17, 17, 17, 0.06);
+    --bi-shadow-card: 0 14px 32px rgba(17, 17, 17, 0.08);
+    --bi-shadow-float: 0 20px 40px rgba(17, 17, 17, 0.14);
+    --bi-text: #111111;
+    --bi-text-soft: #4e5664;
+    --bi-brand: #111111;
+    --bi-brand-strong: #111111;
+    --bi-accent: #ff9900;
+    --bi-accent-soft: rgba(255, 153, 0, 0.12);
+}
+
+html[data-theme="dark"] .amazon-scope {
+    --bi-surface: rgba(13, 18, 24, 0.9);
+    --bi-surface-strong: rgba(16, 22, 30, 0.96);
+    --bi-surface-soft: linear-gradient(180deg, rgba(14, 18, 24, 0.98) 0%, rgba(10, 14, 20, 0.98) 100%);
+    --bi-border: rgba(255, 153, 0, 0.12);
+    --bi-border-strong: rgba(255, 187, 79, 0.18);
+    --bi-shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.36);
+    --bi-shadow-card: 0 16px 34px rgba(0, 0, 0, 0.4);
+    --bi-shadow-float: 0 24px 44px rgba(0, 0, 0, 0.46);
+    --bi-text: #f4f6fb;
+    --bi-text-soft: #c4cfde;
+    --bi-brand: #ffd18a;
+    --bi-brand-strong: #fff1d6;
+    --bi-accent: #ff9900;
+    --bi-accent-soft: rgba(255, 153, 0, 0.18);
+}

@@ -1,1 +1,35 @@
 @import "../shared/dashboardTabTheme.css";
+
+.restaurant-scope {
+    --bi-surface: rgba(255, 251, 247, 0.92);
+    --bi-surface-strong: rgba(255, 252, 249, 0.98);
+    --bi-surface-soft: linear-gradient(180deg, rgba(255, 252, 248, 0.98) 0%, rgba(247, 241, 235, 0.98) 100%);
+    --bi-border: rgba(110, 79, 58, 0.1);
+    --bi-border-strong: rgba(185, 137, 90, 0.2);
+    --bi-shadow-soft: 0 16px 36px rgba(92, 63, 42, 0.08);
+    --bi-shadow-card: 0 14px 32px rgba(92, 63, 42, 0.1);
+    --bi-shadow-float: 0 20px 40px rgba(92, 63, 42, 0.16);
+    --bi-text: #5b3f2e;
+    --bi-text-soft: #816656;
+    --bi-brand: #8f6647;
+    --bi-brand-strong: #6e4f3a;
+    --bi-accent: #d7b28d;
+    --bi-accent-soft: rgba(215, 178, 141, 0.16);
+}
+
+html[data-theme="dark"] .restaurant-scope {
+    --bi-surface: rgba(40, 30, 24, 0.9);
+    --bi-surface-strong: rgba(47, 36, 29, 0.96);
+    --bi-surface-soft: linear-gradient(180deg, rgba(47, 36, 29, 0.98) 0%, rgba(31, 24, 19, 0.98) 100%);
+    --bi-border: rgba(239, 200, 159, 0.12);
+    --bi-border-strong: rgba(239, 200, 159, 0.2);
+    --bi-shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.34);
+    --bi-shadow-card: 0 16px 34px rgba(0, 0, 0, 0.38);
+    --bi-shadow-float: 0 24px 44px rgba(0, 0, 0, 0.42);
+    --bi-text: #f6eee7;
+    --bi-text-soft: #dcbda0;
+    --bi-brand: #efc89f;
+    --bi-brand-strong: #fff3e5;
+    --bi-accent: #c59b73;
+    --bi-accent-soft: rgba(239, 200, 159, 0.18);
+}

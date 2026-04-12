@@ -65,6 +65,52 @@ html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-outline-prim
     background: rgba(255, 255, 255, 0.96);
 }
 
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-outline-primary {
+    color: #111111;
+    border-color: rgba(255, 153, 0, 0.78);
+    background: rgba(255, 255, 255, 0.96);
+}
+
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-outline-primary:hover,
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-outline-primary:focus {
+    color: #111111;
+    border-color: #ff9900;
+    background: rgba(255, 153, 0, 0.1);
+}
+
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-primary,
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-primary:hover,
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-primary:focus,
+html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-primary:active {
+    color: #ffffff;
+    border-color: #ff9900;
+    background: linear-gradient(135deg, #111111 0%, #ff9900 100%);
+    box-shadow: 0 12px 24px rgba(17, 17, 17, 0.18);
+}
+
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-outline-primary {
+    color: #6e4f3a;
+    border-color: rgba(185, 137, 90, 0.72);
+    background: rgba(255, 251, 247, 0.96);
+}
+
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-outline-primary:hover,
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-outline-primary:focus {
+    color: #5b3f2e;
+    border-color: #b9895a;
+    background: rgba(185, 137, 90, 0.1);
+}
+
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-primary,
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-primary:hover,
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-primary:focus,
+html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-primary:active {
+    color: #fffaf5;
+    border-color: #8f6647;
+    background: linear-gradient(135deg, #8f6647 0%, #d7b28d 100%);
+    box-shadow: 0 12px 24px rgba(92, 63, 42, 0.18);
+}
+
 html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-outline-primary:hover,
 html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-outline-primary:focus {
     color: #111111;
@@ -157,6 +203,50 @@ html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adid
     color: #ffffff;
     border-color: rgba(255, 255, 255, 0.72);
     background: linear-gradient(135deg, #000000 0%, #262626 100%);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-outline-primary {
+    color: #ffd18a;
+    border-color: rgba(255, 153, 0, 0.42);
+    background: rgba(11, 15, 21, 0.92);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-outline-primary:hover,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-outline-primary:focus {
+    color: #fff1d6;
+    border-color: rgba(255, 187, 79, 0.64);
+    background: rgba(28, 34, 43, 0.96);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-primary,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-primary:hover,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-primary:focus,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-primary:active {
+    color: #ffffff;
+    border-color: rgba(255, 187, 79, 0.72);
+    background: linear-gradient(135deg, #0b0f14 0%, #ff9900 100%);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-outline-primary {
+    color: #f1d1b0;
+    border-color: rgba(239, 200, 159, 0.4);
+    background: rgba(41, 31, 24, 0.92);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-outline-primary:hover,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-outline-primary:focus {
+    color: #fff3e5;
+    border-color: rgba(239, 200, 159, 0.62);
+    background: rgba(62, 48, 38, 0.96);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-primary,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-primary:hover,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-primary:focus,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-primary:active {
+    color: #fffaf5;
+    border-color: rgba(239, 200, 159, 0.62);
+    background: linear-gradient(135deg, #5a4030 0%, #d7b28d 100%);
 }
 
 html[data-theme="dark"] .skeleton-block {

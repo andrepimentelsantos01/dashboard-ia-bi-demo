@@ -27,7 +27,6 @@ const App = () => {
             title={isDark ? "Ativar tema claro" : "Ativar tema escuro"}
           >
             {isDark ? <FiSun /> : <FiMoon />}
-            <span>{isDark ? "Tema claro" : "Tema escuro"}</span>
           </button>
         </div>
       </section>

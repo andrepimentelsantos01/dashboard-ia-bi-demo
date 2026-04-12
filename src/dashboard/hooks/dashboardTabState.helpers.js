@@ -41,7 +41,7 @@ export const buildDashboardApiFilters = (filters, config = {}) => {
     if (filters.categorias?.length) {
         nextFilters.product_class_material_name = filters.categorias.map(item => item.name);
     }
-    if (filters.status?.length) nextFilters[statusKey] = filters.status.length === 1 ? filters.status[0] : filters.status;
+    if (filters.status?.length) nextFilters[statusKey] = pickSingleOrArray(filters.status, "name");
     if (filters.uf) nextFilters.client_state = filters.uf;
 
     if (includeOrders && filters.orders?.length) {

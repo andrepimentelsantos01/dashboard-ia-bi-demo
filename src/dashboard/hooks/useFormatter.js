@@ -4,19 +4,25 @@ export const useFormatter = () => {
     const parseNumber = useCallback(value => {
         if (value == null) return value;
 
-        let cleaned = String(value).replace(/[^\d.,-]/g, "");
+        let cleaned = String(value).replace(/[^\d.,-]/g, "").trim();
+
+        if (!cleaned) return value;
 
         if (cleaned.includes(",") && cleaned.includes(".")) {
             cleaned = cleaned.replace(/\./g, "").replace(",", ".");
         } else if (cleaned.includes(",")) {
-            cleaned = cleaned.replace(",", ".");
+            const decimalDigits = cleaned.length - cleaned.lastIndexOf(",") - 1;
+            cleaned = decimalDigits === 3
+                ? cleaned.replace(/,/g, "")
+                : cleaned.replace(",", ".");
+        } else if (cleaned.includes(".")) {
+            const decimalDigits = cleaned.length - cleaned.lastIndexOf(".") - 1;
+            if (decimalDigits === 3) {
+                cleaned = cleaned.replace(/\./g, "");
+            }
         }
 
-        let num = Number(cleaned);
-
-        if (!isNaN(num) && num < 10 && cleaned.includes(".")) {
-            num = num * 10;
-        }
+        const num = Number(cleaned);
 
         return isNaN(num) ? value : num;
     }, []);

@@ -105,6 +105,61 @@
     overflow: auto;
 }
 
+.datatable-download-feedback {
+    width: min(100%, 460px);
+    margin: auto;
+    padding: 32px 28px;
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    text-align: center;
+}
+
+.datatable-download-feedback__icon {
+    width: 72px;
+    height: 72px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(22, 103, 98, 0.12) 0%, rgba(23, 135, 126, 0.18) 100%);
+    color: #166762;
+    box-shadow: 0 18px 32px rgba(12, 56, 53, 0.12);
+}
+
+.datatable-download-feedback__icon svg {
+    font-size: 30px;
+}
+
+.datatable-download-feedback-spinner {
+    animation: datatable-download-spin 0.9s linear infinite;
+}
+
+.datatable-download-feedback__copy {
+    display: grid;
+    gap: 8px;
+}
+
+.datatable-download-feedback__copy strong {
+    font-size: 1.05rem;
+    color: #143f3d;
+}
+
+.datatable-download-feedback__copy p {
+    margin: 0;
+    color: #5d7370;
+    line-height: 1.55;
+}
+
+.datatable-download-feedback--success .datatable-download-feedback__icon {
+    background: linear-gradient(135deg, rgba(30, 111, 73, 0.12) 0%, rgba(46, 170, 110, 0.18) 100%);
+    color: #1b7d4f;
+}
+
+.datatable-download-feedback--error .datatable-download-feedback__icon {
+    background: linear-gradient(135deg, rgba(140, 35, 35, 0.12) 0%, rgba(204, 78, 78, 0.18) 100%);
+    color: #b23a3a;
+}
+
 .datatable-table {
     width: 100%;
     border-collapse: separate;
@@ -270,6 +325,20 @@ html[data-theme="dark"] .datatable-table {
     color: #d8eeeb;
 }
 
+html[data-theme="dark"] .datatable-download-feedback__icon {
+    background: linear-gradient(135deg, rgba(111, 213, 200, 0.14) 0%, rgba(79, 188, 174, 0.2) 100%);
+    color: #9ce8dc;
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme="dark"] .datatable-download-feedback__copy strong {
+    color: #d8eeeb;
+}
+
+html[data-theme="dark"] .datatable-download-feedback__copy p {
+    color: #9bc8c2;
+}
+
 html[data-theme="dark"] .datatable-header-row {
     background: linear-gradient(90deg, #113f3d, #1c6e68);
 }
@@ -347,6 +416,20 @@ html[data-dashboard-schema="adidas"] .datatable-row:hover {
     background: rgba(17, 17, 17, 0.04);
 }
 
+html[data-dashboard-schema="adidas"] .datatable-download-feedback__icon {
+    background: linear-gradient(135deg, rgba(17, 17, 17, 0.08) 0%, rgba(71, 71, 71, 0.16) 100%);
+    color: #111111;
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.08);
+}
+
+html[data-dashboard-schema="adidas"] .datatable-download-feedback__copy strong {
+    color: #111111;
+}
+
+html[data-dashboard-schema="adidas"] .datatable-download-feedback__copy p {
+    color: #555555;
+}
+
 html[data-dashboard-schema="adidas"] .datatable-cell {
     color: #1a1a1a;
     border-right-color: rgba(17, 17, 17, 0.06);
@@ -413,6 +496,19 @@ html[data-dashboard-schema="adidas"][data-theme="dark"] .datatable-row:hover {
     background: rgba(255, 255, 255, 0.05);
 }
 
+html[data-dashboard-schema="adidas"][data-theme="dark"] .datatable-download-feedback__icon {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(110, 110, 110, 0.18) 100%);
+    color: #f3f3f3;
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .datatable-download-feedback__copy strong {
+    color: #f3f3f3;
+}
+
+html[data-dashboard-schema="adidas"][data-theme="dark"] .datatable-download-feedback__copy p {
+    color: #d0d0d0;
+}
+
 html[data-dashboard-schema="adidas"][data-theme="dark"] .datatable-cell {
     border-right-color: rgba(255, 255, 255, 0.08);
     border-bottom-color: rgba(255, 255, 255, 0.08);
@@ -425,6 +521,239 @@ html[data-dashboard-schema="adidas"][data-theme="dark"] .datatable-table-shell::
 
 html[data-dashboard-schema="adidas"][data-theme="dark"] .datatable-table-shell::-webkit-scrollbar-track {
     background: rgba(28, 28, 28, 0.88);
+}
+
+html[data-dashboard-schema="amazon"] .datatable-wrapper {
+    border-color: rgba(17, 17, 17, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(247, 249, 252, 0.98) 100%);
+    box-shadow: 0 18px 40px rgba(17, 17, 17, 0.08);
+}
+
+html[data-dashboard-schema="amazon"] .datatable-toolbar {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 248, 251, 0.96) 100%);
+    border-bottom-color: rgba(17, 17, 17, 0.08);
+}
+
+html[data-dashboard-schema="amazon"] .datatable-search-shell {
+    border-color: rgba(17, 17, 17, 0.12);
+}
+
+html[data-dashboard-schema="amazon"] .datatable-search-icon,
+html[data-dashboard-schema="amazon"] .datatable-export-button,
+html[data-dashboard-schema="amazon"] .datatable-export-button--sheet,
+html[data-dashboard-schema="amazon"] .datatable-export-button--pdf {
+    color: #111111;
+}
+
+html[data-dashboard-schema="amazon"] .datatable-export-button {
+    border-color: rgba(255, 153, 0, 0.24);
+    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,244,227,0.98) 100%);
+    box-shadow: 0 10px 22px rgba(17,17,17,0.06);
+}
+
+html[data-dashboard-schema="amazon"] .datatable-header-row {
+    background: linear-gradient(90deg, #111111, #ff9900);
+}
+
+html[data-dashboard-schema="amazon"] .datatable-row:hover {
+    background: rgba(255, 153, 0, 0.06);
+}
+
+html[data-dashboard-schema="amazon"] .datatable-download-feedback__icon {
+    background: linear-gradient(135deg, rgba(255, 153, 0, 0.12) 0%, rgba(84, 145, 220, 0.18) 100%);
+    color: #111111;
+    box-shadow: 0 18px 32px rgba(17,17,17,0.08);
+}
+
+html[data-dashboard-schema="amazon"] .datatable-download-feedback__copy strong {
+    color: #111111;
+}
+
+html[data-dashboard-schema="amazon"] .datatable-download-feedback__copy p {
+    color: #4e5664;
+}
+
+html[data-dashboard-schema="amazon"] .datatable-table-shell::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(17, 17, 17, 0.4), rgba(255, 153, 0, 0.32));
+}
+
+html[data-dashboard-schema="amazon"] .datatable-table-shell::-webkit-scrollbar-track {
+    background: rgba(237, 241, 246, 0.9);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-wrapper {
+    border-color: rgba(255, 153, 0, 0.14);
+    background: linear-gradient(180deg, rgba(12, 16, 22, 0.98) 0%, rgba(16, 22, 30, 0.98) 100%);
+    box-shadow: 0 20px 42px rgba(0, 0, 0, 0.36);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-toolbar {
+    background: linear-gradient(180deg, rgba(15, 19, 25, 0.98) 0%, rgba(20, 26, 35, 0.97) 100%);
+    border-bottom-color: rgba(255, 153, 0, 0.14);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-search-shell {
+    background: rgba(16, 22, 30, 0.96);
+    border-color: rgba(255, 153, 0, 0.18);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-search-icon,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-search-input,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-export-button,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-export-button--sheet,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-export-button--pdf,
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-cell {
+    color: #f4f6fb;
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-export-button {
+    background: linear-gradient(135deg, rgba(17, 22, 29, 0.98) 0%, rgba(39, 46, 56, 0.98) 100%);
+    border-color: rgba(255, 153, 0, 0.22);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-header-row {
+    background: linear-gradient(90deg, #0b0f14, #ff9900);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-row.even {
+    background: rgba(14, 19, 26, 0.96);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-row.odd {
+    background: rgba(18, 24, 32, 0.98);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-row:hover {
+    background: rgba(255, 153, 0, 0.08);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-download-feedback__icon {
+    background: linear-gradient(135deg, rgba(255, 153, 0, 0.16) 0%, rgba(84, 145, 220, 0.22) 100%);
+    color: #ffe0ac;
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-download-feedback__copy strong {
+    color: #f4f6fb;
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .datatable-download-feedback__copy p {
+    color: #c4cfde;
+}
+
+html[data-dashboard-schema="restaurant"] .datatable-wrapper {
+    border-color: rgba(110, 79, 58, 0.08);
+    background: linear-gradient(180deg, rgba(255, 251, 247, 0.99) 0%, rgba(247, 241, 235, 0.98) 100%);
+    box-shadow: 0 18px 40px rgba(92, 63, 42, 0.08);
+}
+
+html[data-dashboard-schema="restaurant"] .datatable-toolbar {
+    background: linear-gradient(180deg, rgba(255, 251, 247, 0.98) 0%, rgba(249, 243, 237, 0.96) 100%);
+    border-bottom-color: rgba(110, 79, 58, 0.08);
+}
+
+html[data-dashboard-schema="restaurant"] .datatable-search-shell {
+    border-color: rgba(110, 79, 58, 0.12);
+}
+
+html[data-dashboard-schema="restaurant"] .datatable-search-icon,
+html[data-dashboard-schema="restaurant"] .datatable-export-button,
+html[data-dashboard-schema="restaurant"] .datatable-export-button--sheet,
+html[data-dashboard-schema="restaurant"] .datatable-export-button--pdf {
+    color: #6e4f3a;
+}
+
+html[data-dashboard-schema="restaurant"] .datatable-export-button {
+    border-color: rgba(185, 137, 90, 0.22);
+    background: linear-gradient(135deg, rgba(255,252,248,0.98) 0%, rgba(247,236,224,0.98) 100%);
+}
+
+html[data-dashboard-schema="restaurant"] .datatable-header-row {
+    background: linear-gradient(90deg, #8f6647, #d7b28d);
+}
+
+html[data-dashboard-schema="restaurant"] .datatable-row:hover {
+    background: rgba(185, 137, 90, 0.08);
+}
+
+html[data-dashboard-schema="restaurant"] .datatable-download-feedback__icon {
+    background: linear-gradient(135deg, rgba(143, 102, 71, 0.12) 0%, rgba(215, 178, 141, 0.2) 100%);
+    color: #6e4f3a;
+    box-shadow: 0 18px 32px rgba(92, 63, 42, 0.08);
+}
+
+html[data-dashboard-schema="restaurant"] .datatable-download-feedback__copy strong {
+    color: #5b3f2e;
+}
+
+html[data-dashboard-schema="restaurant"] .datatable-download-feedback__copy p {
+    color: #816656;
+}
+
+html[data-dashboard-schema="restaurant"] .datatable-table-shell::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(143, 102, 71, 0.42), rgba(215, 178, 141, 0.36));
+}
+
+html[data-dashboard-schema="restaurant"] .datatable-table-shell::-webkit-scrollbar-track {
+    background: rgba(243, 235, 227, 0.9);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-wrapper {
+    border-color: rgba(239, 200, 159, 0.12);
+    background: linear-gradient(180deg, rgba(38, 29, 23, 0.98) 0%, rgba(31, 24, 19, 0.98) 100%);
+    box-shadow: 0 20px 42px rgba(0, 0, 0, 0.36);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-toolbar {
+    background: linear-gradient(180deg, rgba(44, 34, 27, 0.98) 0%, rgba(36, 28, 22, 0.97) 100%);
+    border-bottom-color: rgba(239, 200, 159, 0.12);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-search-shell {
+    background: rgba(44, 34, 27, 0.96);
+    border-color: rgba(239, 200, 159, 0.16);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-search-icon,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-search-input,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-export-button,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-export-button--sheet,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-export-button--pdf,
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-cell {
+    color: #f6eee7;
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-export-button {
+    background: linear-gradient(135deg, rgba(48, 37, 29, 0.98) 0%, rgba(74, 57, 45, 0.98) 100%);
+    border-color: rgba(239, 200, 159, 0.18);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-header-row {
+    background: linear-gradient(90deg, #5a4030, #c59b73);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-row.even {
+    background: rgba(40, 30, 24, 0.96);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-row.odd {
+    background: rgba(47, 36, 29, 0.98);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-row:hover {
+    background: rgba(239, 200, 159, 0.07);
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-download-feedback__icon {
+    background: linear-gradient(135deg, rgba(239, 200, 159, 0.14) 0%, rgba(143, 102, 71, 0.22) 100%);
+    color: #f1d1b0;
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-download-feedback__copy strong {
+    color: #f6eee7;
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-download-feedback__copy p {
+    color: #dcbda0;
 }
 
 @media (max-width: 767px) {
@@ -449,5 +778,15 @@ html[data-dashboard-schema="adidas"][data-theme="dark"] .datatable-table-shell::
     .datatable-header-cell {
         padding-left: 10px;
         padding-right: 10px;
+    }
+}
+
+@keyframes datatable-download-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
     }
 }

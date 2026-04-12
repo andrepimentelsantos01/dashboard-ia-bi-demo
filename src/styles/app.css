@@ -91,6 +91,98 @@ html[data-dashboard-schema="adidas"][data-theme="dark"] {
   --action-btn-icon: #f1f1f1;
 }
 
+html[data-dashboard-schema="amazon"][data-theme="light"] {
+  --app-text: #161616;
+  --app-bg-radial: rgba(255, 153, 0, 0.14);
+  --app-bg-base-start: #fbfbfc;
+  --app-bg-base-end: #f4f6fa;
+  --app-hero-start: #111111;
+  --app-hero-end: #ff9900;
+  --app-hero-shadow: rgba(17, 17, 17, 0.18);
+  --app-hero-text-soft: rgba(255, 255, 255, 0.86);
+  --app-hero-accent: #9fd0ff;
+  --app-theme-btn-bg: rgba(255, 255, 255, 0.14);
+  --app-theme-btn-bg-hover: rgba(255, 255, 255, 0.22);
+  --app-theme-btn-border: rgba(255, 255, 255, 0.22);
+  --app-theme-btn-text: #ffffff;
+  --action-btn-bg: rgba(255, 255, 255, 0.96);
+  --action-btn-bg-hover: rgba(250, 250, 250, 0.98);
+  --action-btn-border: rgba(17, 17, 17, 0.12);
+  --action-btn-border-hover: rgba(255, 153, 0, 0.34);
+  --action-btn-shadow: 0 10px 20px rgba(17, 17, 17, 0.08);
+  --action-btn-shadow-hover: 0 14px 24px rgba(17, 17, 17, 0.12);
+  --action-btn-icon: #111111;
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] {
+  --app-text: #f4f6fb;
+  --app-bg-radial: rgba(255, 153, 0, 0.12);
+  --app-bg-base-start: #06080d;
+  --app-bg-base-end: #10141b;
+  --app-hero-start: #0b0f14;
+  --app-hero-end: #ff9900;
+  --app-hero-shadow: rgba(0, 0, 0, 0.38);
+  --app-hero-text-soft: rgba(240, 244, 252, 0.84);
+  --app-hero-accent: #89bfff;
+  --app-theme-btn-bg: rgba(255, 255, 255, 0.08);
+  --app-theme-btn-bg-hover: rgba(255, 255, 255, 0.14);
+  --app-theme-btn-border: rgba(255, 255, 255, 0.18);
+  --app-theme-btn-text: #ffffff;
+  --action-btn-bg: rgba(15, 19, 25, 0.94);
+  --action-btn-bg-hover: rgba(25, 31, 40, 0.98);
+  --action-btn-border: rgba(255, 153, 0, 0.2);
+  --action-btn-border-hover: rgba(255, 187, 79, 0.34);
+  --action-btn-shadow: 0 12px 22px rgba(0, 0, 0, 0.28);
+  --action-btn-shadow-hover: 0 16px 28px rgba(0, 0, 0, 0.34);
+  --action-btn-icon: #ffd18a;
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="light"] {
+  --app-text: #4a3426;
+  --app-bg-radial: rgba(181, 137, 90, 0.14);
+  --app-bg-base-start: #fbf6f1;
+  --app-bg-base-end: #f4ece4;
+  --app-hero-start: #6e4f3a;
+  --app-hero-end: #b9895a;
+  --app-hero-shadow: rgba(92, 63, 42, 0.18);
+  --app-hero-text-soft: rgba(255, 247, 238, 0.88);
+  --app-hero-accent: #f7d8b4;
+  --app-theme-btn-bg: rgba(255, 255, 255, 0.16);
+  --app-theme-btn-bg-hover: rgba(255, 255, 255, 0.24);
+  --app-theme-btn-border: rgba(255, 240, 224, 0.24);
+  --app-theme-btn-text: #fffaf5;
+  --action-btn-bg: rgba(255, 251, 247, 0.96);
+  --action-btn-bg-hover: rgba(255, 247, 239, 0.98);
+  --action-btn-border: rgba(110, 79, 58, 0.14);
+  --action-btn-border-hover: rgba(185, 137, 90, 0.28);
+  --action-btn-shadow: 0 10px 20px rgba(92, 63, 42, 0.08);
+  --action-btn-shadow-hover: 0 14px 24px rgba(92, 63, 42, 0.12);
+  --action-btn-icon: #7b553d;
+}
+
+html[data-dashboard-schema="restaurant"][data-theme="dark"] {
+  --app-text: #f6eee7;
+  --app-bg-radial: rgba(208, 165, 119, 0.12);
+  --app-bg-base-start: #1e1611;
+  --app-bg-base-end: #2a211a;
+  --app-hero-start: #4a3426;
+  --app-hero-end: #8f6647;
+  --app-hero-shadow: rgba(0, 0, 0, 0.34);
+  --app-hero-text-soft: rgba(248, 238, 228, 0.84);
+  --app-hero-accent: #efc89f;
+  --app-theme-btn-bg: rgba(255, 255, 255, 0.08);
+  --app-theme-btn-bg-hover: rgba(255, 255, 255, 0.14);
+  --app-theme-btn-border: rgba(255, 234, 214, 0.16);
+  --app-theme-btn-text: #fff8f2;
+  --action-btn-bg: rgba(48, 37, 29, 0.94);
+  --action-btn-bg-hover: rgba(62, 48, 38, 0.98);
+  --action-btn-border: rgba(239, 200, 159, 0.16);
+  --action-btn-border-hover: rgba(239, 200, 159, 0.28);
+  --action-btn-shadow: 0 12px 22px rgba(0, 0, 0, 0.28);
+  --action-btn-shadow-hover: 0 16px 28px rgba(0, 0, 0, 0.34);
+  --action-btn-icon: #f1d1b0;
+}
+
 :root {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: var(--app-text);
@@ -168,9 +260,10 @@ button {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 0 16px;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border-radius: 999px;
   border: 1px solid var(--app-theme-btn-border);
   background: var(--app-theme-btn-bg);
@@ -192,12 +285,6 @@ button {
 
 .app-shell__theme-toggle svg {
   font-size: 16px;
-}
-
-.app-shell__theme-toggle span {
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
 }
 
 .app-shell__content {
@@ -307,7 +394,7 @@ button {
   }
 
   .app-shell__theme-toggle {
-    justify-content: center;
-    width: 100%;
+    width: 44px;
+    align-self: flex-end;
   }
 }

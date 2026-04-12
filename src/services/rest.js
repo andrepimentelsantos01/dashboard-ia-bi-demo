@@ -5,6 +5,8 @@ import clientsMock from "../mocks/dashboard/dashboardClients.mock.json";
 import suppliersMock from "../mocks/dashboard/dashboardSuppliers.mock.json";
 import quotationsMock from "../mocks/dashboard/dashboardQuotations.mock.json";
 import adidasSalesRows from "../mocks/datasetReal/adidasUsSales.json";
+import amazonSalesCsvRaw from "../mocks/datasetReal/Amazon Sales 2025 Dataset.csv?raw";
+import restaurantSalesCsvRaw from "../mocks/datasetReal/Restaurant Sales Dataset.csv?raw";
 import { normalizeStatusLabel, slugifyStatus } from "../dashboard/selectors/shared/dashboardStatus";
 import { formatCurrencyValue } from "../dashboard/utils/intlFormat";
 
@@ -93,6 +95,91 @@ const parsePercentValue = (value) => {
   const numeric = parseNumericValue(value);
   if (!numeric) return 0;
   return numeric > 1 ? numeric / 100 : numeric;
+};
+
+const parseCsvLine = (line = "") => {
+  const result = [];
+  let current = "";
+  let insideQuotes = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+    const nextChar = line[index + 1];
+
+    if (char === "\"") {
+      if (insideQuotes && nextChar === "\"") {
+        current += "\"";
+        index += 1;
+      } else {
+        insideQuotes = !insideQuotes;
+      }
+      continue;
+    }
+
+    if (char === "," && !insideQuotes) {
+      result.push(current);
+      current = "";
+      continue;
+    }
+
+    current += char;
+  }
+
+  result.push(current);
+  return result.map((value) => value.trim());
+};
+
+const parseCsvRows = (raw = "") => {
+  const lines = String(raw || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (!lines.length) return [];
+
+  const [headerLine, ...dataLines] = lines;
+  const headers = parseCsvLine(headerLine);
+
+  return dataLines.map((line) => {
+    const values = parseCsvLine(line);
+
+    return headers.reduce((row, header, index) => {
+      row[header] = values[index] ?? "";
+      return row;
+    }, {});
+  });
+};
+
+const parseDayFirstDate = (value) => {
+  if (!value) return null;
+  const match = String(value).trim().match(/^(\d{2})-(\d{2})-(\d{2}|\d{4})$/);
+
+  if (!match) return safeDate(value);
+
+  const [, day, month, yearToken] = match;
+  const year = yearToken.length === 2 ? 2000 + Number(yearToken) : Number(yearToken);
+  const date = new Date(year, Number(month) - 1, Number(day));
+
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const parseRestaurantDate = (value) => {
+  if (!value) return null;
+
+  const raw = String(value).trim();
+
+  if (raw.includes("/")) {
+    const [month, day, year] = raw.split("/").map((part) => Number(part));
+    const date = new Date(year, month - 1, day);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  const dayFirst = raw.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if (!dayFirst) return safeDate(raw);
+
+  const [, day, month, year] = dayFirst;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+  return Number.isNaN(date.getTime()) ? null : date;
 };
 
 const buildIndexMap = (values, prefix) => {
@@ -199,6 +286,12 @@ const applyCommonFilters = (rows, filters = {}) => {
     ) {
       return false;
     }
+    if (!matchesFilter(filters.customer_name, row.customer_name || row.client_name)) return false;
+    if (!matchesFilter(filters.customer_location, row.customer_location)) return false;
+    if (!matchesFilter(filters.payment_method, row.payment_method || row.supplier_name)) return false;
+    if (!matchesFilter(filters.time_of_sale, row.time_of_sale || row.client_name)) return false;
+    if (!matchesFilter(filters.received_by, row.received_by || row.supplier_name)) return false;
+    if (!matchesFilter(filters.transaction_type, row.transaction_type || row.item_status)) return false;
     if (!matchesFilter(filters.item_status, row.item_status)) return false;
     if (
       filters.quotation_status &&
@@ -253,6 +346,13 @@ const buildAdidasPurchaseOrderId = (retailerId, index) =>
 const buildAdidasClientId = (state) => `state-${normalizeToken(state, "unknown")}`;
 const buildAdidasSupplierId = (retailer) => `retailer-${normalizeToken(retailer, "unknown")}`;
 const buildAdidasProductId = (product) => `product-${normalizeToken(product, "unknown")}`;
+const buildAmazonCustomerId = (customer) => `customer-${normalizeToken(customer, "unknown")}`;
+const buildAmazonLocationId = (location) => `location-${normalizeToken(location, "unknown")}`;
+const buildAmazonPaymentId = (paymentMethod) => `payment-${normalizeToken(paymentMethod, "unknown")}`;
+const buildAmazonProductId = (product) => `amazon-product-${normalizeToken(product, "unknown")}`;
+const buildRestaurantShiftId = (shift) => `shift-${normalizeToken(shift, "unknown")}`;
+const buildRestaurantAttendantId = (attendant) => `attendant-${normalizeToken(attendant, "unknown")}`;
+const buildRestaurantProductId = (product) => `restaurant-product-${normalizeToken(product, "unknown")}`;
 
 const adidasOverviewRows = adidasSalesRows
   .map((row, index) => {
@@ -265,11 +365,25 @@ const adidasOverviewRows = adidasSalesRows
     const product = row.Product?.trim();
     const salesMethod = row["Sales Method"]?.trim();
     const unitsSold = parseNumericValue(row["Units Sold"]);
-    const totalSales = parseNumericValue(row["Total Sales"]);
+    const rawTotalSales = parseNumericValue(row["Total Sales"]);
     const pricePerUnit =
-      parseNumericValue(row["Price per Unit"]) || (unitsSold ? totalSales / unitsSold : 0);
-    const operatingProfit = parseNumericValue(row["Operating Profit"]);
+      parseNumericValue(row["Price per Unit"]) || (unitsSold ? rawTotalSales / unitsSold : 0);
+    const expectedTotalSales = pricePerUnit && unitsSold ? pricePerUnit * unitsSold : 0;
+    const totalSales =
+      expectedTotalSales > 0 && rawTotalSales > expectedTotalSales
+        && Math.abs(rawTotalSales / expectedTotalSales - 10) < 0.2
+        ? expectedTotalSales
+        : rawTotalSales;
+    const rawOperatingProfit = parseNumericValue(row["Operating Profit"]);
     const operatingMargin = parsePercentValue(row["Operating Margin"]);
+    const operatingProfit =
+      operatingMargin > 0 && totalSales > 0
+        ? totalSales * operatingMargin
+        : (
+          totalSales !== rawTotalSales && rawTotalSales > 0
+            ? rawOperatingProfit * (totalSales / rawTotalSales)
+            : rawOperatingProfit
+        );
 
     if (!invoiceDate || !retailer || !region || !state || !product || !salesMethod) {
       return null;
@@ -313,6 +427,119 @@ const adidasOverviewRows = adidasSalesRows
       retailer_id: retailerId,
       operating_profit: operatingProfit,
       operating_margin: operatingMargin
+    };
+  })
+  .filter(Boolean);
+
+const amazonProductsRows = parseCsvRows(amazonSalesCsvRaw)
+  .map((row, index) => {
+    const orderDate = parseDayFirstDate(row.Date);
+    const customerName = row["Customer Name"]?.trim();
+    const customerLocation = row["Customer Location"]?.trim();
+    const paymentMethod = row["Payment Method"]?.trim();
+    const productName = row.Product?.trim();
+    const categoryName = row.Category?.trim();
+    const status = normalizeStatusLabel(row.Status?.trim(), { fallback: row.Status?.trim() || "Desconhecido" });
+    const quantity = parseNumericValue(row.Quantity);
+    const totalAmount = parseNumericValue(row["Total Sales"]);
+    const unitPrice = parseNumericValue(row.Price) || (quantity ? totalAmount / quantity : 0);
+    const orderId = row["Order ID"]?.trim() || `AMZ-${String(index + 1).padStart(5, "0")}`;
+
+    if (!orderDate || !productName || !categoryName || !customerLocation || !paymentMethod || !status) {
+      return null;
+    }
+
+    return {
+      row_id: index + 1,
+      currency_code: "USD",
+      client_id: buildAmazonCustomerId(customerName),
+      client_name: customerName,
+      supplier_id: buildAmazonPaymentId(paymentMethod),
+      supplier_name: paymentMethod,
+      product_id: buildAmazonProductId(productName),
+      product_name: productName,
+      product_class_material_name: categoryName,
+      customer_name: customerName,
+      customer_location: customerLocation,
+      location_id: buildAmazonLocationId(customerLocation),
+      payment_method: paymentMethod,
+      order_date: orderDate.toISOString(),
+      year_months: toYearMonth(orderDate),
+      purchase_order_id: orderId,
+      quantity_requested: quantity,
+      sum_quantity_requested: quantity,
+      sum_quantity: quantity,
+      total_amount: totalAmount,
+      sum_total_amount: totalAmount,
+      avg_unit_price: unitPrice,
+      unit_price: unitPrice,
+      item_status: status,
+      order_status: status,
+      logistics_status: status,
+      quotation_status: slugifyStatus(status),
+      glosa: 0,
+      sum_glosa_amount: 0,
+      abc_classification: null,
+      xyz_classification: null,
+      classificacaoABC: null,
+      classificacaoXYZ: null
+    };
+  })
+  .filter(Boolean);
+
+const restaurantClientsRows = parseCsvRows(restaurantSalesCsvRaw)
+  .map((row, index) => {
+    const orderDate = parseRestaurantDate(row.date);
+    const productName = row.item_name?.trim();
+    const categoryName = row.item_type?.trim();
+    const shift = row.time_of_sale?.trim();
+    const attendant = row.received_by?.trim();
+    const transactionType = row.transaction_type?.trim() || "Walk-in";
+    const quantity = parseNumericValue(row.quantity);
+    const totalAmount = parseNumericValue(row.transaction_amount);
+    const unitPrice = parseNumericValue(row.item_price) || (quantity ? totalAmount / quantity : 0);
+    const orderId = row.order_id?.trim() || `RST-${String(index + 1).padStart(5, "0")}`;
+
+    if (!orderDate || !productName || !categoryName || !shift || !attendant) {
+      return null;
+    }
+
+    return {
+      row_id: index + 1,
+      currency_code: "BRL",
+      client_id: buildRestaurantShiftId(shift),
+      client_name: shift,
+      supplier_id: buildRestaurantAttendantId(attendant),
+      supplier_name: attendant,
+      product_id: buildRestaurantProductId(productName),
+      product_name: productName,
+      product_class_material_name: categoryName,
+      customer_name: attendant,
+      customer_location: shift,
+      payment_method: transactionType,
+      transaction_type: transactionType,
+      time_of_sale: shift,
+      received_by: attendant,
+      order_date: orderDate.toISOString(),
+      year_months: toYearMonth(orderDate),
+      purchase_order_id: orderId,
+      quantity_requested: quantity,
+      sum_quantity_requested: quantity,
+      sum_quantity: quantity,
+      total_amount: totalAmount,
+      sum_total_amount: totalAmount,
+      avg_unit_price: unitPrice,
+      unit_price: unitPrice,
+      item_status: transactionType,
+      order_status: transactionType,
+      logistics_status: transactionType,
+      quotation_status: slugifyStatus(transactionType),
+      glosa: 0,
+      sum_glosa_amount: 0,
+      abc_classification: null,
+      xyz_classification: null,
+      classificacaoABC: null,
+      classificacaoXYZ: null
     };
   })
   .filter(Boolean);
@@ -449,6 +676,148 @@ const buildAdidasOverviewResponse = (rows) => {
   };
 };
 
+const buildAmazonProductsResponse = (rows) => {
+  const totalSales = rows.reduce((sum, row) => sum + Number(row.sum_total_amount || 0), 0);
+  const totalUnits = rows.reduce((sum, row) => sum + Number(row.sum_quantity || 0), 0);
+  const totalOrders = rows.length;
+  const completedOrders = rows.filter((row) => row.item_status === "Concluído").length;
+  const monthlyBuckets = rows.reduce((acc, row) => {
+    const month = row.year_months;
+    if (!month) return acc;
+
+    if (!acc[month]) {
+      acc[month] = {
+        sales: 0,
+        orders: 0,
+        units: 0
+      };
+    }
+
+    acc[month].sales += Number(row.sum_total_amount || 0);
+    acc[month].orders += 1;
+    acc[month].units += Number(row.sum_quantity || 0);
+    return acc;
+  }, {});
+
+  const orderedMonths = Object.keys(monthlyBuckets).sort();
+  const currentMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 1]] || {
+    sales: 0,
+    orders: 0,
+    units: 0
+  };
+  const previousMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 2]] || {
+    sales: 0,
+    orders: 0,
+    units: 0
+  };
+
+  const calculateVariation = (current, previous) => {
+    if (!previous && !current) return 0;
+    if (!previous) return current > 0 ? 100 : 0;
+    return ((current - previous) / previous) * 100;
+  };
+
+  return {
+    kpis: {
+      "Receita Total": {
+        value: formatUsdCurrency(totalSales),
+        variation: calculateVariation(currentMonth.sales, previousMonth.sales)
+      },
+      Pedidos: {
+        value: totalOrders.toLocaleString("en-US"),
+        variation: calculateVariation(currentMonth.orders, previousMonth.orders)
+      },
+      "Ticket Médio": {
+        value: formatUsdCurrency(totalOrders ? totalSales / totalOrders : 0),
+        variation: calculateVariation(
+          currentMonth.orders ? currentMonth.sales / currentMonth.orders : 0,
+          previousMonth.orders ? previousMonth.sales / previousMonth.orders : 0
+        )
+      },
+      "Unidades Vendidas": {
+        value: totalUnits.toLocaleString("en-US"),
+        variation: calculateVariation(currentMonth.units, previousMonth.units)
+      }
+    },
+    alertas: {
+      "Taxa de Conclusão": totalOrders ? `${((completedOrders / totalOrders) * 100).toFixed(1)}%` : "0%"
+    },
+    fact: rows,
+    table: rows
+  };
+};
+
+const buildRestaurantClientsResponse = (rows) => {
+  const totalSales = rows.reduce((sum, row) => sum + Number(row.sum_total_amount || 0), 0);
+  const totalUnits = rows.reduce((sum, row) => sum + Number(row.sum_quantity || 0), 0);
+  const totalOrders = rows.length;
+  const onlineOrders = rows.filter((row) => row.item_status === "Online").length;
+  const monthlyBuckets = rows.reduce((acc, row) => {
+    const month = row.year_months;
+    if (!month) return acc;
+
+    if (!acc[month]) {
+      acc[month] = {
+        sales: 0,
+        orders: 0,
+        units: 0
+      };
+    }
+
+    acc[month].sales += Number(row.sum_total_amount || 0);
+    acc[month].orders += 1;
+    acc[month].units += Number(row.sum_quantity || 0);
+    return acc;
+  }, {});
+
+  const orderedMonths = Object.keys(monthlyBuckets).sort();
+  const currentMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 1]] || {
+    sales: 0,
+    orders: 0,
+    units: 0
+  };
+  const previousMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 2]] || {
+    sales: 0,
+    orders: 0,
+    units: 0
+  };
+
+  const calculateVariation = (current, previous) => {
+    if (!previous && !current) return 0;
+    if (!previous) return current > 0 ? 100 : 0;
+    return ((current - previous) / previous) * 100;
+  };
+
+  return {
+    kpis: {
+      "Receita Total": {
+        value: formatCurrency(totalSales),
+        variation: calculateVariation(currentMonth.sales, previousMonth.sales)
+      },
+      Pedidos: {
+        value: totalOrders.toLocaleString("pt-BR"),
+        variation: calculateVariation(currentMonth.orders, previousMonth.orders)
+      },
+      "Ticket Médio": {
+        value: formatCurrency(totalOrders ? totalSales / totalOrders : 0),
+        variation: calculateVariation(
+          currentMonth.orders ? currentMonth.sales / currentMonth.orders : 0,
+          previousMonth.orders ? previousMonth.sales / previousMonth.orders : 0
+        )
+      },
+      "Itens Vendidos": {
+        value: totalUnits.toLocaleString("pt-BR"),
+        variation: calculateVariation(currentMonth.units, previousMonth.units)
+      }
+    },
+    alertas: {
+      "Participação Online": totalOrders ? `${((onlineOrders / totalOrders) * 100).toFixed(1)}%` : "0%"
+    },
+    fact: rows,
+    table: rows
+  };
+};
+
 const buildQuotationsResponse = (rows) => {
   const finalizedRows = rows.filter((row) => row.quotation_status === "finalized");
 
@@ -489,16 +858,12 @@ export const biOrdersLogistics = async (filters = {}) => {
 
 export const biProducts = async (filters = {}) => {
   await delay();
-  return {
-    fact: applyCommonFilters(productsRows, filters)
-  };
+  return buildAmazonProductsResponse(applyCommonFilters(amazonProductsRows, filters));
 };
 
 export const biClients = async (filters = {}) => {
   await delay();
-  return {
-    fact: applyCommonFilters(clientsRows, filters)
-  };
+  return buildRestaurantClientsResponse(applyCommonFilters(restaurantClientsRows, filters));
 };
 
 export const biSuppliers = async (filters = {}) => {

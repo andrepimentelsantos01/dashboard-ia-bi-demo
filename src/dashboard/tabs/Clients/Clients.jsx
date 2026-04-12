@@ -1,17 +1,14 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo } from "react";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
 import ChartBarVertical from "../../components/shared/charts/ChartBarVertical";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal";
 import ChartLine from "../../components/shared/charts/ChartLine";
-import ChartMapMorph from "../../components/shared/charts/ChartMapMorph";
 import ChartPie from "../../components/shared/charts/ChartPie";
 import ChartScatterAggregate from "../../components/shared/charts/ChartScatterAggregate";
 import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
 import ChartTreemap from "../../components/shared/charts/ChartTreemap";
-import ClassificationCurvesButtons from "../../components/shared/classificationControls/ClassificationCurvesButtons";
 import {
-    CURVE_BUTTONS_CONTEXT,
     HEATMAP_CONTEXT,
     SCATTER_CONTEXT,
     STACKED_BAR_CONTEXT
@@ -22,113 +19,136 @@ import "./Clients.css";
 const Clients = () => {
     const {
         filters,
-        setFilters,
         data,
         resetToken,
-        openDateModal,
-        setOpenDateModal,
-        tempDateRange,
-        setTempDateRange,
         showFloatingClear,
         clearButtonRef,
         handleFieldChange,
         clearFilters,
         handleCrossFilter,
-        availableClients,
-        availableSuppliers,
+        availableShifts,
+        availableAttendants,
         availableCategorias,
-        availableProdutos
+        availableProdutos,
+        availableTransactions
     } = useClientsState();
 
-    const overview = useMemo(() => data.overview || {}, [data.overview]);
-    const kpis = useMemo(() => data.kpis || {}, [data.kpis]);
+    const { restaurant, operacionais, kpis, alertas } = data;
+    const tabela = operacionais.tabela || [];
 
-    const historicoMeses = overview.historicoMeses || [];
-    const historicoValores = overview.historicoValores || [];
-    const ticketMedioMensal = overview.ticketMedioMensal || [];
-    const rankingClientes = overview.rankingClientes || [];
-    const categoriasPizza = overview.categoriasPizza || [];
-    const produtosRanking = overview.produtosRanking || [];
-    const fornecedoresRanking = overview.fornecedoresRanking || [];
-    const tabela = data.operacionais?.tabela || [];
-
-    const kpisFiltrados = useMemo(
-        () => Object.fromEntries(Object.entries(kpis).filter(([key]) => key !== "percentualGlosaClientes")),
-        [kpis]
+    const filterInputs = useMemo(
+        () => [
+            { label: "Turnos", name: "shifts", data: availableShifts },
+            { label: "Atendentes", name: "attendants", data: availableAttendants },
+            {
+                label: "Categorias",
+                name: "categorias",
+                data: availableCategorias.map((name) => ({ id: name, name }))
+            },
+            { label: "Itens do Menu", name: "produtos", data: availableProdutos },
+            { label: "Tipo de Transacao", name: "transactionTypes", data: availableTransactions }
+        ],
+        [availableAttendants, availableCategorias, availableProdutos, availableShifts, availableTransactions]
     );
 
     const charts = useMemo(
         () => [
             {
-                title: "",
-                height: 92,
-                fullWidth: true,
-                compactLayout: true,
-                caption: CURVE_BUTTONS_CONTEXT,
-                component: (
-                    <ClassificationCurvesButtons
-                        filters={filters}
-                        setFilters={setFilters}
-                    />
-                )
-            },
-            {
-                title: "Ranking de Cliente Por Valor",
-                height: 260,
-                component: (
-                    <ChartHorizontal
-                        title="Ranking de Clientes"
-                        data={rankingClientes}
-                        backendData={tabela}
-                        order="ASC"
-                        height={250}
-                        onCrossFilter={handleCrossFilter}
-                        filterType="cliente"
-                    />
-                )
-            },
-            {
-                title: "Ranking de Produtos Por Valor",
-                height: 260,
-                component: (
-                    <ChartHorizontal
-                        title="Ranking de Produtos"
-                        data={produtosRanking}
-                        backendData={tabela}
-                        order="ASC"
-                        height={250}
-                        onCrossFilter={handleCrossFilter}
-                        filterType="produto"
-                    />
-                )
-            },
-            {
-                title: "Historico Mensal Valor Consumido",
+                title: "Receita Mensal",
                 height: 260,
                 component: (
                     <ChartBarVertical
-                        labels={historicoMeses}
-                        values={historicoValores}
+                        labels={restaurant.historicoMeses}
+                        values={restaurant.historicoValores}
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
-                        valueFormat="currency"
-                        filterType="mes"
                     />
                 )
             },
             {
-                title: "Mapa de Valor Por Estado",
+                title: "Pedidos por Mes",
                 height: 260,
                 component: (
-                    <ChartMapMorph
+                    <ChartBarVertical
+                        labels={restaurant.historicoMeses}
+                        values={restaurant.historicoPedidos}
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
-                        filterType="uf"
+                        valueFormat="number"
                     />
                 )
             },
             {
-                title: "Evolucao Logistica por Status",
+                title: "Mix por Categoria",
+                height: 260,
+                component: (
+                    <ChartPie
+                        data={restaurant.categoriasPizza}
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Mix por Tipo de Transacao",
+                height: 260,
+                component: (
+                    <ChartTreemap
+                        dataOverride={restaurant.statusTreemap}
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Receita por Turno",
+                height: 260,
+                component: (
+                    <ChartHorizontal
+                        data={restaurant.shiftsRanking}
+                        backendData={tabela}
+                        order="ASC"
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Receita por Tipo de Transacao",
+                height: 260,
+                component: (
+                    <ChartHorizontal
+                        data={restaurant.transactionRanking}
+                        backendData={tabela}
+                        order="ASC"
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Receita por Atendente",
+                height: 260,
+                component: (
+                    <ChartHorizontal
+                        data={restaurant.attendantsRanking}
+                        backendData={tabela}
+                        order="ASC"
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Receita por Transacao ao Longo do Tempo",
+                height: 280,
+                caption: STACKED_BAR_CONTEXT,
+                component: (
+                    <ChartStackedBar
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                        metric="amount"
+                    />
+                )
+            },
+            {
+                title: "Volume por Transacao ao Longo do Tempo",
                 height: 280,
                 caption: STACKED_BAR_CONTEXT,
                 component: (
@@ -136,6 +156,65 @@ const Clients = () => {
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
                         metric="quantity"
+                    />
+                )
+            },
+            {
+                title: "Ranking de Itens por Receita",
+                height: 260,
+                component: (
+                    <ChartHorizontal
+                        data={restaurant.itemsRanking}
+                        backendData={tabela}
+                        order="ASC"
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Ranking de Itens por Volume",
+                height: 260,
+                component: (
+                    <ChartHorizontal
+                        data={restaurant.itemsRankingVolume}
+                        backendData={tabela}
+                        order="ASC"
+                        onCrossFilter={handleCrossFilter}
+                        valueFormat="volume"
+                    />
+                )
+            },
+            {
+                title: "Volume por Turno",
+                height: 260,
+                component: (
+                    <ChartHorizontal
+                        data={restaurant.shiftsRankingVolume}
+                        backendData={tabela}
+                        order="ASC"
+                        onCrossFilter={handleCrossFilter}
+                        valueFormat="volume"
+                    />
+                )
+            },
+            {
+                title: "Evolucao do Preco Medio por Item",
+                height: 260,
+                component: (
+                    <ChartLine
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                    />
+                )
+            },
+            {
+                title: "Dispersao Preco x Volume",
+                height: 300,
+                caption: SCATTER_CONTEXT,
+                component: (
+                    <ChartScatterAggregate
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
                     />
                 )
             },
@@ -149,130 +228,36 @@ const Clients = () => {
                         onCrossFilter={handleCrossFilter}
                     />
                 )
-            },
-            {
-                title: "Dispersao de Preco x Volume",
-                height: 300,
-                caption: SCATTER_CONTEXT,
-                component: (
-                    <ChartScatterAggregate
-                        backendData={tabela}
-                        onCrossFilter={handleCrossFilter}
-                    />
-                )
-            },
-            {
-                title: "Ranking de Fornecedores",
-                height: 260,
-                component: (
-                    <ChartHorizontal
-                        title="Ranking de Fornecedores"
-                        data={fornecedoresRanking}
-                        backendData={tabela}
-                        order="ASC"
-                        height={250}
-                        onCrossFilter={handleCrossFilter}
-                        filterType="fornecedor"
-                    />
-                )
-            },
-            {
-                title: "Distribuicao de Categoria Por Valor",
-                height: 260,
-                component: (
-                    <ChartPie
-                        data={categoriasPizza}
-                        backendData={tabela}
-                        onCrossFilter={handleCrossFilter}
-                        filterType="categoria"
-                    />
-                )
-            },
-            {
-                title: "Status das Entregas",
-                height: 260,
-                component: (
-                    <ChartTreemap
-                        backendData={tabela}
-                        onCrossFilter={handleCrossFilter}
-                    />
-                )
-            },
-            {
-                title: "Evolucao Valor Unitario por Mes",
-                height: 260,
-                component: (
-                    <ChartLine
-                        labels={historicoMeses}
-                        values={ticketMedioMensal}
-                        backendData={tabela}
-                        onCrossFilter={handleCrossFilter}
-                        valueFormat="currency"
-                        filterType="mes"
-                    />
-                )
             }
         ],
-        [
-            categoriasPizza,
-            filters,
-            fornecedoresRanking,
-            handleCrossFilter,
-            historicoMeses,
-            historicoValores,
-            produtosRanking,
-            rankingClientes,
-            setFilters,
-            tabela,
-            ticketMedioMensal
-        ]
+        [handleCrossFilter, restaurant, tabela]
     );
-
-    const handleCloseDateModal = useCallback(() => {
-        setOpenDateModal(false);
-    }, [setOpenDateModal]);
-
-    const handleClearDate = useCallback(() => {
-        setTempDateRange(null);
-        setFilters((previous) => ({ ...previous, dateRange: null }));
-        setOpenDateModal(false);
-    }, [setTempDateRange, setFilters, setOpenDateModal]);
-
-    const handleApplyDate = useCallback(() => {
-        setFilters((previous) => ({ ...previous, dateRange: tempDateRange }));
-        setOpenDateModal(false);
-    }, [tempDateRange, setFilters, setOpenDateModal]);
 
     return (
         <DashboardTabLayout
+            scopeClassName="bi-scope restaurant-scope"
             filters={filters}
             onFilterChange={handleFieldChange}
             clearFilters={clearFilters}
             clearButtonRef={clearButtonRef}
             showFloatingClear={showFloatingClear}
+            filterInputs={filterInputs}
             filterOptions={{
-                fornecedores: availableSuppliers,
-                clientes: availableClients,
+                shifts: availableShifts,
+                attendants: availableAttendants,
                 categorias: availableCategorias,
-                produtos: availableProdutos
+                produtos: availableProdutos,
+                transactionTypes: availableTransactions
             }}
             contentSectionClassName="section-gap"
-            kpiTitle="KPIs de Clientes"
-            overviewTitle="Visao Geral de Clientes"
-            kpis={kpisFiltrados}
+            kpiTitle="KPIs de Restaurant Sales"
+            overviewTitle="Visao Geral de Restaurant Sales"
+            kpis={kpis}
+            alertas={alertas}
             onCrossFilter={handleCrossFilter}
             resetToken={resetToken}
             charts={charts}
             tabela={tabela}
-            dateModal={{
-                open: openDateModal,
-                onClose: handleCloseDateModal,
-                onClear: handleClearDate,
-                onApply: handleApplyDate,
-                value: tempDateRange,
-                onChange: (event) => setTempDateRange(event.target.value),
-                modalClassName: "clients-date-modal"
-            }}
         />
     );
 };

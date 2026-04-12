@@ -1,9 +1,10 @@
-import React, { useMemo, useCallback, useState, useDeferredValue } from "react";
-import { FiFileText, FiGrid, FiSearch } from "react-icons/fi";
+import React, { useMemo, useCallback, useState, useDeferredValue, useEffect, useRef } from "react";
+import { FiAlertCircle, FiCheckCircle, FiFileText, FiGrid, FiLoader, FiSearch } from "react-icons/fi";
 import "./DataTable.css";
 import { useFormatter } from "../../../hooks/useFormatter";
 import { useDataTableState } from "./dataTable.state";
 import { normalizeStatusLabel, STATUS_COLOR_MAP } from "../../../selectors/shared/dashboardStatus";
+import ModalComponent from "../../../../components/ModalV2";
 
 const sanitizeFilePart = (value) =>
     String(value || "exportacao")
@@ -82,7 +83,7 @@ const formatCellValue = ({ column, row, autoFormat }) => {
         return normalizeStatusLabel(rawValue, { fallback: "Desconhecido" });
     }
 
-    if (column.key === "unit_price" || column.label === "Valor Unitário") {
+    if (column.key === "unit_price" || column.label === "Valor Unitario") {
         const numeric = typeof rawValue === "number" ? rawValue : Number(String(rawValue ?? "").replace(",", "."));
 
         if (Number.isFinite(numeric)) {
@@ -105,7 +106,53 @@ const DataTable = ({
 }) => {
     const { autoFormat } = useFormatter();
     const [search, setSearch] = useState("");
+    const [downloadFeedback, setDownloadFeedback] = useState({
+        open: false,
+        status: "idle",
+        title: "",
+        description: ""
+    });
     const deferredSearch = useDeferredValue(search);
+    const downloadFeedbackTimerRef = useRef(null);
+
+    const clearDownloadFeedbackTimer = useCallback(() => {
+        if (downloadFeedbackTimerRef.current) {
+            window.clearTimeout(downloadFeedbackTimerRef.current);
+            downloadFeedbackTimerRef.current = null;
+        }
+    }, []);
+
+    useEffect(() => () => {
+        clearDownloadFeedbackTimer();
+    }, [clearDownloadFeedbackTimer]);
+
+    const closeDownloadFeedback = useCallback(() => {
+        clearDownloadFeedbackTimer();
+        setDownloadFeedback((current) => ({
+            ...current,
+            open: false
+        }));
+    }, [clearDownloadFeedbackTimer]);
+
+    const openDownloadFeedback = useCallback((status, title, description, autoCloseDelay) => {
+        clearDownloadFeedbackTimer();
+        setDownloadFeedback({
+            open: true,
+            status,
+            title,
+            description
+        });
+
+        if (autoCloseDelay) {
+            downloadFeedbackTimerRef.current = window.setTimeout(() => {
+                setDownloadFeedback((current) => ({
+                    ...current,
+                    open: false
+                }));
+                downloadFeedbackTimerRef.current = null;
+            }, autoCloseDelay);
+        }
+    }, [clearDownloadFeedbackTimer]);
 
     const normalizedColumns = useMemo(
         () => columns.map((column) => ({
@@ -168,17 +215,17 @@ const DataTable = ({
     const buildExportDataset = useCallback(
         (sourceRows) =>
             sourceRows.map((row) => {
-            const formattedRow = {};
+                const formattedRow = {};
 
-            normalizedColumns.forEach((column) => {
-                formattedRow[column.label] = formatCellValue({
-                    column,
-                    row,
-                    autoFormat
+                normalizedColumns.forEach((column) => {
+                    formattedRow[column.label] = formatCellValue({
+                        column,
+                        row,
+                        autoFormat
+                    });
                 });
-            });
 
-            return formattedRow;
+                return formattedRow;
             }),
         [autoFormat, normalizedColumns]
     );
@@ -192,158 +239,227 @@ const DataTable = ({
         const exportDataset = buildExportDataset(rowsForExportSource);
         if (!exportDataset.length) return;
 
-        const { utils, writeFile } = await import("xlsx");
+        openDownloadFeedback(
+            "loading",
+            "Preparando planilha",
+            "Gerando a exportacao e organizando os dados para download."
+        );
 
-        const header = normalizedColumns.map((column) => column.label);
-        const worksheet = utils.json_to_sheet(exportDataset, { header });
-        const workbook = utils.book_new();
+        try {
+            const { utils, writeFile } = await import("xlsx");
 
-        utils.book_append_sheet(workbook, worksheet, "Dados");
-        writeFile(workbook, `${exportBaseName}.xlsx`);
-    }, [buildExportDataset, exportBaseName, normalizedColumns, rowsForExportSource]);
+            const header = normalizedColumns.map((column) => column.label);
+            const worksheet = utils.json_to_sheet(exportDataset, { header });
+            const workbook = utils.book_new();
+
+            utils.book_append_sheet(workbook, worksheet, "Dados");
+            writeFile(workbook, `${exportBaseName}.xlsx`);
+
+            openDownloadFeedback(
+                "success",
+                "Planilha pronta",
+                "O download da planilha foi iniciado com sucesso.",
+                1100
+            );
+        } catch (error) {
+            openDownloadFeedback(
+                "error",
+                "Falha ao gerar planilha",
+                "Nao foi possivel concluir o download agora. Tente novamente."
+            );
+            throw error;
+        }
+    }, [buildExportDataset, exportBaseName, normalizedColumns, openDownloadFeedback, rowsForExportSource]);
 
     const handleExportPdf = useCallback(async () => {
         const exportDataset = buildExportDataset(rowsForExportSource);
         if (!exportDataset.length) return;
 
-        const [{ jsPDF }, { default: autoTable }] = await Promise.all([
-            import("jspdf"),
-            import("jspdf-autotable")
-        ]);
+        openDownloadFeedback(
+            "loading",
+            "Preparando PDF",
+            "Montando a versao em PDF para iniciar o download."
+        );
 
-        const document = new jsPDF({
-            orientation: normalizedColumns.length > 6 ? "landscape" : "portrait",
-            unit: "pt",
-            format: "a4"
-        });
+        try {
+            const [{ jsPDF }, { default: autoTable }] = await Promise.all([
+                import("jspdf"),
+                import("jspdf-autotable")
+            ]);
 
-        document.setFontSize(14);
-        document.text(exportTitle, 40, 36);
+            const document = new jsPDF({
+                orientation: normalizedColumns.length > 6 ? "landscape" : "portrait",
+                unit: "pt",
+                format: "a4"
+            });
 
-        autoTable(document, {
-            startY: 52,
-            head: [normalizedColumns.map((column) => column.label)],
-            body: exportDataset.map((row) =>
-                normalizedColumns.map((column) => row[column.label] ?? "")
-            ),
-            styles: {
-                fontSize: 8,
-                cellPadding: 6,
-                overflow: "linebreak"
-            },
-            headStyles: {
-                fillColor: [15, 79, 76],
-                textColor: [255, 255, 255],
-                fontStyle: "bold"
-            },
-            alternateRowStyles: {
-                fillColor: [247, 247, 247]
-            },
-            margin: { top: 52, right: 30, bottom: 30, left: 30 }
-        });
+            document.setFontSize(14);
+            document.text(exportTitle, 40, 36);
 
-        document.save(`${exportBaseName}.pdf`);
-    }, [buildExportDataset, exportBaseName, exportTitle, normalizedColumns, rowsForExportSource]);
+            autoTable(document, {
+                startY: 52,
+                head: [normalizedColumns.map((column) => column.label)],
+                body: exportDataset.map((row) =>
+                    normalizedColumns.map((column) => row[column.label] ?? "")
+                ),
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 6,
+                    overflow: "linebreak"
+                },
+                headStyles: {
+                    fillColor: [15, 79, 76],
+                    textColor: [255, 255, 255],
+                    fontStyle: "bold"
+                },
+                alternateRowStyles: {
+                    fillColor: [247, 247, 247]
+                },
+                margin: { top: 52, right: 30, bottom: 30, left: 30 }
+            });
+
+            document.save(`${exportBaseName}.pdf`);
+
+            openDownloadFeedback(
+                "success",
+                "PDF pronto",
+                "O download do PDF foi iniciado com sucesso.",
+                1100
+            );
+        } catch (error) {
+            openDownloadFeedback(
+                "error",
+                "Falha ao gerar PDF",
+                "Nao foi possivel concluir o download agora. Tente novamente."
+            );
+            throw error;
+        }
+    }, [buildExportDataset, exportBaseName, exportTitle, normalizedColumns, openDownloadFeedback, rowsForExportSource]);
+
+    const downloadFeedbackIcon = useMemo(() => {
+        if (downloadFeedback.status === "success") return <FiCheckCircle />;
+        if (downloadFeedback.status === "error") return <FiAlertCircle />;
+        return <FiLoader className="datatable-download-feedback-spinner" />;
+    }, [downloadFeedback.status]);
 
     return (
-        <div className="datatable-wrapper">
-            <div className="datatable-toolbar">
-                <label className="datatable-search-shell">
-                    <FiSearch className="datatable-search-icon" />
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={(event) => setSearch(event.target.value)}
-                        placeholder="Buscar..."
-                        className="datatable-search-input"
-                    />
-                </label>
+        <>
+            <div className="datatable-wrapper">
+                <div className="datatable-toolbar">
+                    <label className="datatable-search-shell">
+                        <FiSearch className="datatable-search-icon" />
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            placeholder="Buscar..."
+                            className="datatable-search-input"
+                        />
+                    </label>
 
-                <div className="datatable-toolbar-actions">
-                    <button
-                        type="button"
-                        onClick={handleExportSpreadsheet}
-                        className="datatable-export-button datatable-export-button--sheet"
-                    >
-                        <FiGrid />
-                        <span>Planilha</span>
-                    </button>
+                    <div className="datatable-toolbar-actions">
+                        <button
+                            type="button"
+                            onClick={handleExportSpreadsheet}
+                            className="datatable-export-button datatable-export-button--sheet"
+                        >
+                            <FiGrid />
+                            <span>Planilha</span>
+                        </button>
 
-                    <button
-                        type="button"
-                        onClick={handleExportPdf}
-                        className="datatable-export-button datatable-export-button--pdf"
-                    >
-                        <FiFileText />
-                        <span>PDF</span>
-                    </button>
+                        <button
+                            type="button"
+                            onClick={handleExportPdf}
+                            className="datatable-export-button datatable-export-button--pdf"
+                        >
+                            <FiFileText />
+                            <span>PDF</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div className="datatable-table-shell">
+                    <table className="datatable-table">
+                        <thead>
+                            <tr className="datatable-header-row">
+                                {normalizedColumns.map((column) => (
+                                    <th
+                                        key={column.key}
+                                        className="datatable-header-cell"
+                                        onClick={() => handleSortMemo(column.key)}
+                                    >
+                                        <span>{column.label}</span>
+                                        {sortColumn === column.key && (
+                                            <span className="datatable-sort-indicator">
+                                                {sortDirection === "asc" ? "?" : "?"}
+                                            </span>
+                                        )}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {rowsToRender.length ? rowsToRender.map((row, index) => (
+                                <tr
+                                    key={index}
+                                    className={`datatable-row ${index % 2 === 0 ? "even" : "odd"}`}
+                                >
+                                    {normalizedColumns.map((column) => {
+                                        const cell = row.formatted[column.key];
+                                        const isStatus = column.key.toLowerCase().includes("status");
+
+                                        if (!isStatus) {
+                                            return (
+                                                <td key={column.key} className="datatable-cell">
+                                                    {cell}
+                                                </td>
+                                            );
+                                        }
+
+                                        const badgeColor = STATUS_COLOR_MAP[cell] || STATUS_COLOR_MAP.Desconhecido;
+
+                                        return (
+                                            <td key={column.key} className="datatable-cell datatable-cell--status">
+                                                <span
+                                                    className="datatable-status"
+                                                    style={{ backgroundColor: badgeColor }}
+                                                >
+                                                    {cell}
+                                                </span>
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            )) : (
+                                <tr className="datatable-empty-row">
+                                    <td className="datatable-empty-cell" colSpan={normalizedColumns.length || 1}>
+                                        Nenhum registro encontrado para os filtros aplicados.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div className="datatable-table-shell">
-                <table className="datatable-table">
-                    <thead>
-                        <tr className="datatable-header-row">
-                            {normalizedColumns.map((column) => (
-                                <th
-                                    key={column.key}
-                                    className="datatable-header-cell"
-                                    onClick={() => handleSortMemo(column.key)}
-                                >
-                                    <span>{column.label}</span>
-                                    {sortColumn === column.key && (
-                                        <span className="datatable-sort-indicator">
-                                            {sortDirection === "asc" ? "▲" : "▼"}
-                                        </span>
-                                    )}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {rowsToRender.length ? rowsToRender.map((row, index) => (
-                            <tr
-                                key={index}
-                                className={`datatable-row ${index % 2 === 0 ? "even" : "odd"}`}
-                            >
-                                {normalizedColumns.map((column) => {
-                                    const cell = row.formatted[column.key];
-                                    const isStatus = column.key.toLowerCase().includes("status");
-
-                                    if (!isStatus) {
-                                        return (
-                                            <td key={column.key} className="datatable-cell">
-                                                {cell}
-                                            </td>
-                                        );
-                                    }
-
-                                    const badgeColor = STATUS_COLOR_MAP[cell] || STATUS_COLOR_MAP.Desconhecido;
-
-                                    return (
-                                        <td key={column.key} className="datatable-cell datatable-cell--status">
-                                            <span
-                                                className="datatable-status"
-                                                style={{ backgroundColor: badgeColor }}
-                                            >
-                                                {cell}
-                                            </span>
-                                        </td>
-                                    );
-                                })}
-                            </tr>
-                        )) : (
-                            <tr className="datatable-empty-row">
-                                <td className="datatable-empty-cell" colSpan={normalizedColumns.length || 1}>
-                                    Nenhum registro encontrado para os filtros aplicados.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+            <ModalComponent
+                title={downloadFeedback.title}
+                open={downloadFeedback.open}
+                setOpen={closeDownloadFeedback}
+                content={
+                    <div className={`datatable-download-feedback datatable-download-feedback--${downloadFeedback.status}`}>
+                        <div className="datatable-download-feedback__icon">
+                            {downloadFeedbackIcon}
+                        </div>
+                        <div className="datatable-download-feedback__copy">
+                            <strong>{downloadFeedback.title}</strong>
+                            <p>{downloadFeedback.description}</p>
+                        </div>
+                    </div>
+                }
+            />
+        </>
     );
 };
 

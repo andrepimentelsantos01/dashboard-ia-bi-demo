@@ -9,14 +9,18 @@ import "./OperationalDataSection.css";
 const ROW_LIMIT = 10;
 
 const COLUMN_LABELS = {
+    purchase_order_id: "Pedido",
     order_code: "Código Pedido",
     order_date: "Data do Pedido",
     year_months: "Ano/Mês",
     client_name: "Cliente",
+    customer_name: "Cliente",
+    customer_location: "Localidade",
     client_city: "Cidade",
     client_state: "UF",
     region: "Região",
     supplier_name: "Fornecedor",
+    payment_method: "Metodo de Pagamento",
     product_name: "Produto",
     product_class_material_name: "Categoria",
     quantity_requested: "Quantidade",
@@ -255,3 +259,5 @@ const OperationalDataSection = ({ tabela }) => {
 };
 
 export default React.memo(OperationalDataSection);
+
+

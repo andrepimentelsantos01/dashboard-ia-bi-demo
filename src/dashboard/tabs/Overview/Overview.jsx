@@ -252,37 +252,6 @@ const Overview = () => {
                 )
             },
             {
-                title: "Ranking de Estados por Receita",
-                height: 260,
-                component: (
-                    <ChartHorizontal
-                        data={rankingClientes}
-                        backendData={tabela}
-                        order="ASC"
-                        height={250}
-                        onCrossFilter={handleCrossFilter}
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
-                    />
-                )
-            },
-            {
-                title: "Ranking de Estados por Volume",
-                height: 260,
-                component: (
-                    <ChartHorizontal
-                        data={rankingClientesQuantidade}
-                        backendData={tabela}
-                        order="ASC"
-                        height={250}
-                        onCrossFilter={handleCrossFilter}
-                        valueFormat="volume"
-                        currencyCode={OVERVIEW_CURRENCY}
-                        locale={OVERVIEW_LOCALE}
-                    />
-                )
-            },
-            {
                 title: "Dispers\u00e3o Pre\u00e7o x Volume",
                 height: 300,
                 caption: SCATTER_CONTEXT,
