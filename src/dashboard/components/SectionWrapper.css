@@ -135,17 +135,17 @@ html[data-dashboard-schema="adidas"][data-theme="dark"] .section-wrapper-title {
 }
 
 html[data-dashboard-schema="amazon"] .section-wrapper-title {
-    color: #111111;
+    color: #111827;
     border-left-color: #ff9900;
 }
 
 html[data-dashboard-schema="amazon"] .section-wrapper-collapse-button {
-    color: #111111;
+    color: #1f2937;
 }
 
 html[data-dashboard-schema="amazon"][data-theme="dark"] .section-wrapper-title,
 html[data-dashboard-schema="amazon"][data-theme="dark"] .section-wrapper-collapse-button {
-    color: #fff1d6;
+    color: #eef3f8;
 }
 
 html[data-dashboard-schema="amazon"][data-theme="dark"] .section-wrapper-title {

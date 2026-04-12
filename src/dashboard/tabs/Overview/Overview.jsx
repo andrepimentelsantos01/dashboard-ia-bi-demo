@@ -29,6 +29,7 @@ const Overview = () => {
         handleFieldChange,
         clearFilters,
         handleCrossFilter,
+        asyncState,
         availableClients,
         availableSuppliers,
         availableCategorias,
@@ -331,6 +332,7 @@ const Overview = () => {
             resetToken={resetToken}
             charts={charts}
             tabela={tabela}
+            asyncState={asyncState}
         />
     );
 };

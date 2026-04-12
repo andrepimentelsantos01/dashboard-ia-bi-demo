@@ -1,6 +1,7 @@
 import { Row } from "react-bootstrap";
 import React, { useMemo } from "react";
 import KpiCard from "./shared/kpiCard";
+import DashboardAsyncState, { DashboardKpiSkeleton, DashboardSectionLoadingOverlay } from "./shared/DashboardAsyncState";
 import "./KpiSection.css";
 
 const normalizeKpiValue = (entry) => {
@@ -26,7 +27,7 @@ const normalizeKpiValue = (entry) => {
     };
 };
 
-const KpiSection = ({ kpis }) => {
+const KpiSection = ({ kpis = {}, isLoading, isRefreshing, error, onRetry }) => {
     const defaultKeys = ["valorTotalMovimentado", "valorEntregue", "volumeTotal", "quantidadeClientes"];
 
     const isDefault = defaultKeys.every(key => key in kpis);
@@ -84,8 +85,36 @@ const KpiSection = ({ kpis }) => {
             });
     }, [kpis, isDefault]);
 
+    const hasCards = kpiCards.length > 0;
+
+    if (isLoading) {
+        return <DashboardKpiSkeleton />;
+    }
+
+    if (error && !hasCards) {
+        return (
+            <DashboardAsyncState
+                variant="error"
+                title="Nao foi possivel carregar os KPIs"
+                description="O dashboard nao conseguiu montar os indicadores deste recorte. Tente novamente."
+                onAction={onRetry}
+            />
+        );
+    }
+
+    if (!hasCards) {
+        return (
+            <DashboardAsyncState
+                variant="empty"
+                title="Nenhum KPI disponivel"
+                description="Ajuste os filtros para visualizar indicadores deste conjunto de dados."
+            />
+        );
+    }
+
     return (
-        <div className="kpi-section-wrapper">
+        <div className={`kpi-section-wrapper ${isRefreshing ? "dashboard-section-loading" : ""}`}>
+            {isRefreshing ? <DashboardSectionLoadingOverlay label="Atualizando indicadores..." /> : null}
             <Row className="kpi-grid-row">
                 {kpiCards.map(({ label, value, color }) => (
                     <KpiCard

@@ -2,255 +2,104 @@
 
 ## Visao geral
 
-Projeto em React 18 + Vite 6 voltado a portfolio de analytics, no qual cada aba do dashboard representa um dataset real diferente. O objetivo nao e apenas trocar a fonte de dados, mas manter um shell analitico reutilizavel, com identidade visual isolada por dataset, filtros dedicados, tabela operacional compartilhada e componentes graficos reaproveitaveis.
+Aplicacao React 18 + Vite 6 para portfolio de BI com quatro dominos analiticos finais, cada um baseado em dataset real e operando sobre um shell compartilhado de exploracao.
 
-O projeto foi evoluido para suportar multiplos contextos analiticos sem acoplamento entre abas. Cada dataset pode ter:
+Escopo final do projeto:
 
-- pipeline proprio de ingestao e normalizacao;
-- selectors e agregacoes dedicados;
-- filtros customizados por dominio;
-- schema visual proprio;
-- composicao analitica adaptada ao contexto do dataset;
-- compatibilidade com a infraestrutura compartilhada de KPI, chart, cross-filter e exportacao.
+- `Adidas Sales Dataset`
+- `Amazon Sales Dataset`
+- `Restaurant Sales Dataset`
+- `Logistics Performance Dataset`
 
-## Status atual das abas
+As abas `Cotacoes` e `Pedidos & Logistica` foram removidas do produto, do bootstrap de navegacao e da camada de dados. O repositorio agora reflete apenas o escopo final homologado.
 
-### Abas implementadas com dataset real
+## Estado final das abas
 
-- `Adidas Sales Dataset` (`Overview`)
-  Dataset: `Adidas US Sales Datasets.xlsx`
-  Foco: performance comercial por produto, regiao, retailer, canal e estado.
+### 1. Adidas
 
-- `Amazon Sales Dataset` (`Products`)
-  Dataset: `Amazon Sales 2025 Dataset.csv`
-  Foco: receita, volume, status do pedido, categorias, localidade e meios de pagamento.
+- dataset: `src/mocks/datasetReal/adidasUsSales.json`
+- foco: receita, lucro, margem, unidades, regioes, retailers, canais e mapa por estado
+- schema visual: `adidas`
 
-- `Restaurant Sales Dataset` (`Clients`)
-  Dataset: `Restaurant Sales Dataset.csv`
-  Foco: faturamento operacional por turno, atendente, categoria, item e tipo de transacao.
+### 2. Amazon
 
-### Abas ainda em construcao
+- dataset: `src/mocks/datasetReal/Amazon Sales 2025 Dataset.csv`
+- foco: receita, pedidos, ticket medio, categorias, localidade, pagamento e status
+- schema visual: `amazon`
 
-- `Fornecedores`
-- `Cotacoes`
-- `Pedidos & Logistica`
+### 3. Restaurant
 
-## Principios da arquitetura
+- dataset: `src/mocks/datasetReal/Restaurant Sales Dataset.csv`
+- foco: faturamento operacional, turnos, atendentes, itens, categorias e tipo de transacao
+- schema visual: `restaurant`
 
-- isolamento por aba: cada fonte real evolui sem interferir nas demais;
-- shell compartilhado: layout, tabela operacional, modais, cards e estrutura base continuam comuns;
-- schema visual desacoplado: a aba ativa injeta uma identidade visual especifica da empresa ou dataset;
-- contrato interno unificado: datasets heterogeneos sao traduzidos para um shape analitico comum;
-- extensao incremental: novas abas podem ser ligadas com minimo impacto no restante do projeto.
+### 4. Logistics
 
-## Fluxo de dados
+- dataset: `src/mocks/datasetReal/Logistics Shipments Dataset.csv`
+- foco: custo logistico, embarques, SLA, atraso, carriers, warehouses, destinos e rotas
+- schema visual: `default`
+
+## Arquitetura consolidada
+
+Fluxo principal:
 
 ```mermaid
 flowchart LR
-    A["Dataset real (.xlsx / .csv)"] --> B["src/services/rest.js"]
-    B --> C["Normalizacao por dataset"]
+    A["Datasets reais locais"] --> B["src/services/rest.js"]
+    B --> C["normalizacao por dominio"]
     C --> D["tabs/*/*.state.js"]
-    D --> E["selectors por dominio"]
+    D --> E["selectors por dataset"]
     E --> F["tabs/*/*.jsx"]
     F --> G["DashboardTabLayout"]
     G --> H["KPIs / Charts / DataTable / Exportacao"]
 ```
 
-## Camadas principais
+Pontos estruturais do estado final:
 
-### 1. Ingestao e normalizacao
+- navegacao centralizada em `src/dashboard/config/tabs.config.js`;
+- shell das abas lazy-loaded para reduzir custo inicial;
+- camada `rest.js` reduzida aos quatro datasets ativos, sem mocks legados;
+- cross-filter padronizado nos helpers compartilhados;
+- selectors por dataset preservando contrato analitico e separacao de regras de negocio;
+- componentes compartilhados reutilizados entre as quatro abas finais.
 
-Arquivo principal: `src/services/rest.js`
+## Contrato interno de dados
 
-Responsabilidades:
+Os datasets sao heterogeneos na origem e convergem para um contrato interno comum. Campos centrais:
 
-- leitura de datasets reais locais;
-- parsing de `.xlsx` e `.csv`;
-- padronizacao de datas, moeda, quantidade e status;
-- aplicacao de filtros comuns;
-- montagem da resposta consumida por cada aba.
-
-Hoje essa camada ja contem pipelines especificos para:
-
-- Adidas;
-- Amazon;
-- Restaurant.
-
-### 2. Estado por aba
-
-Arquivos principais:
-
-- `src/dashboard/tabs/Overview/overview.state.js`
-- `src/dashboard/tabs/Products/products.state.js`
-- `src/dashboard/tabs/Clients/clients.state.js`
-
-Responsabilidades:
-
-- manter filtros ativos da aba;
-- expor opcoes disponiveis de filtro;
-- coordenar cross-filter;
-- controlar reset e limpeza;
-- desacoplar dimensoes especificas de cada dataset.
-
-### 3. Selectors analiticos por dataset
-
-Arquivos principais:
-
-- `src/dashboard/selectors/overviewSelectors.js`
-- `src/dashboard/selectors/amazonSalesSelectors.js`
-- `src/dashboard/selectors/restaurantSalesSelectors.js`
-
-Responsabilidades:
-
-- derivar KPIs;
-- consolidar rankings;
-- construir series temporais;
-- preparar dados para pie, treemap, stacked bar, scatter, heatmap e mapas;
-- montar tabela operacional normalizada.
-
-Essa separacao permite testar as regras analiticas sem depender da camada visual.
-
-### 4. Shell e componentes compartilhados
-
-Arquivos e diretorios principais:
-
-- `src/dashboard/components/DashboardTabLayout.jsx`
-- `src/dashboard/components/OperationalDataSection.jsx`
-- `src/dashboard/components/shared/`
-
-Responsabilidades:
-
-- composicao base das abas;
-- renderizacao de cards KPI;
-- renderizacao dos charts ECharts;
-- tabela operacional com busca, exportacao e modal de feedback;
-- componentes reutilizaveis de filtros, secoes e modais.
-
-### 5. Schema visual por dataset
-
-Arquivos principais:
-
-- `src/dashboard/index.jsx`
-- `src/styles/app.css`
-- `src/dashboard/index.css`
-- `src/dashboard/components/shared/charts/chartTheme.js`
-
-Funcionamento:
-
-- a aba ativa define o `schema` da interface;
-- o schema atual e refletido em `html[data-dashboard-schema]`;
-- shell, secoes, cards, tabela e charts leem esse schema para trocar paleta, contraste e tokens visuais;
-- cada aba implementada pode ter identidade propria sem contaminar as demais.
-
-Schemas atuais:
-
-- `adidas`
-- `amazon`
-- `restaurant`
-- `default`
-
-## Schema interno de dados
-
-Os datasets reais nao compartilham a mesma estrutura de origem. Para manter a plataforma escalavel, eles sao convertidos para um contrato analitico interno unico.
-
-Campos centrais mais utilizados:
-
-| Campo interno | Papel no dashboard |
+| Campo | Papel |
 |---|---|
-| `purchase_order_id` | identificador da linha/pedido |
-| `order_date` | data operacional usada em tabela e agregacoes |
-| `year_months` | chave de serie temporal mensal |
-| `cliente` | primeira dimensao contextual da aba |
-| `cidade` | recorte geografico ou operacional secundario |
-| `estado` | granularidade territorial para rankings ou mapas |
-| `fornecedor` | segunda dimensao contextual da aba |
-| `produto` | item principal analisado |
-| `categoria` | agrupador de portfolio |
-| `quantity_requested` | volume vendido |
+| `purchase_order_id` | identificador operacional |
+| `order_date` | data base para agregacoes |
+| `year_months` | bucket mensal |
+| `client_name` | dimensao primaria do contexto |
+| `supplier_name` | dimensao secundaria |
+| `product_name` | item principal analisado |
+| `product_class_material_name` | categoria ou agrupador analitico |
+| `quantity_requested` | volume operacional |
 | `unit_price` | preco unitario |
-| `total_amount` | receita ou valor transacionado |
-| `operating_margin` | margem quando disponivel |
-| `operating_profit` | lucro quando disponivel |
-| `item_status` | status transacional usado por charts e filtros |
-| `curve_abc` | classificacao operacional quando aplicavel |
+| `total_amount` | valor financeiro |
+| `item_status` | status principal para filtros e charts |
 
-### Mapeamento por dataset
+Mapeamento dominante por aba:
 
-#### Adidas
-
-- `cliente` -> cidade / mercado local
-- `fornecedor` -> retailer
-- `categoria` -> regiao
-- `produto` -> produto Adidas
-- `item_status` -> canal de venda
-
-#### Amazon
-
-- `cliente` -> localidade do cliente
-- `fornecedor` -> metodo de pagamento
-- `categoria` -> categoria do produto
-- `produto` -> nome do produto
-- `item_status` -> status do pedido
-
-#### Restaurant
-
-- `cliente` -> turno de venda
-- `fornecedor` -> atendente
-- `categoria` -> tipo de item
-- `produto` -> item do menu
-- `item_status` -> tipo de transacao
-
-## Escopo analitico por aba
-
-### Adidas Sales Dataset
-
-- KPIs de receita, lucro, margem e unidades;
-- filtros por retailer, estado, regiao, produto e canal;
-- analise temporal, geografica, canais, rankings e mapa por estado;
-- tabela operacional integrada ao cross-filter;
-- schema visual da Adidas.
-
-### Amazon Sales Dataset
-
-- KPIs de receita, pedidos, ticket medio e unidades;
-- filtros por localidade, cliente, categoria, produto, pagamento e status;
-- leitura executiva de tendencia e mix nas primeiras linhas;
-- aprofundamento em canais de receita, status e rankings de produtos;
-- diagnostico complementar por preco, dispersao e heatmap;
-- schema visual da Amazon.
-
-### Restaurant Sales Dataset
-
-- KPIs de receita, pedidos, ticket medio e itens vendidos;
-- filtros por turno, atendente, categoria, item e tipo de transacao;
-- foco em dinamica operacional de restaurante;
-- leitura de faturamento por turno, transacao, atendente e itens;
-- diagnostico complementar por preco, dispersao e heatmap;
-- schema visual proprio com tons terrosos e pasteis.
-
-## Cross-filter e tabela operacional
-
-As abas implementadas compartilham um mesmo comportamento de exploracao:
-
-- clique nos charts para aplicar filtros contextuais;
-- sincronizacao entre visualizacoes e tabela operacional;
-- exportacao para planilha e PDF;
-- feedback visual para carregamento de exportacoes;
-- modal de ampliacao de chart;
-- fallback de carregamento em operacoes mais pesadas.
+- Adidas: `client_name=state`, `supplier_name=retailer`, `product_class_material_name=region`, `item_status=sales_method`
+- Amazon: `client_name=customer`, `supplier_name=payment_method`, `product_class_material_name=category`, `item_status=status`
+- Restaurant: `client_name=shift`, `supplier_name=attendant`, `product_class_material_name=item_type`, `item_status=transaction_type`
+- Logistics: `client_name=destination`, `supplier_name=carrier`, `product_class_material_name=origin_warehouse`, `item_status=shipment_status`
 
 ## Performance e manutencao
 
-Decisoes relevantes ja adotadas:
+Ajustes finais aplicados:
 
-- selectors por dataset para reduzir acoplamento;
-- uso de estado por aba para filtros especificos;
-- temas por schema ao inves de condicionais espalhadas;
-- carregamento e normalizacao local via `rest.js`;
-- pontos de defer e transicao nas interacoes mais pesadas;
-- estrutura pronta para ampliar testes unitarios em selectors e hooks.
+- remocao de abas, selectors e mocks fora do escopo;
+- centralizacao da configuracao de tabs para reduzir duplicacao e risco de drift;
+- consolidacao dos handlers de cross-filter repetidos em helper compartilhado;
+- reducao da camada de servico para somente datasets ativos;
+- `manualChunks` no Vite para distribuir melhor bibliotecas pesadas como `echarts`, `xlsx` e `jspdf`;
+- lazy loading das tabs mantido para preservar responsividade do shell.
 
-## Estrutura do projeto
+## Estrutura principal
 
 ```text
 src/
@@ -259,20 +108,23 @@ src/
 |-- services/
 |   |-- rest.js
 |-- mocks/
-|   |-- dashboard/
 |   |-- datasetReal/
 |-- dashboard/
+|   |-- config/
+|   |   |-- tabs.config.js
+|   |-- components/
+|   |-- hooks/
+|   |-- selectors/
+|   |-- tabs/
+|   |   |-- Overview/
+|   |   |-- Products/
+|   |   |-- Clients/
+|   |   |-- Suppliers/
 |   |-- index.jsx
 |   |-- index.css
-|   |-- selectors/
-|   |-- components/
-|   |-- tabs/
-|       |-- Overview/
-|       |-- Products/
-|       |-- Clients/
-|-- components/
 |-- styles/
 tests/
+|-- dashboardTabState.helpers.test.js
 |-- run.js
 ```
 
@@ -282,12 +134,12 @@ tests/
 |---|---|
 | Runtime | React 18, React DOM 18 |
 | Build | Vite 6 |
-| UI | React Bootstrap, Bootstrap 5 |
+| UI | Bootstrap 5, React Bootstrap |
 | Charts | ECharts, echarts-for-react |
 | Exportacao | xlsx, jspdf, jspdf-autotable |
 | Datas | date-fns, react-datepicker |
 | i18n | i18next, react-i18next |
-| Estilos | CSS por feature + themes por schema |
+| Estilos | CSS por feature e themes por schema |
 
 ## Como rodar
 
@@ -326,10 +178,11 @@ Preview:
 npm run preview
 ```
 
-## Roadmap
+## Encerramento do projeto
 
-- conectar novos datasets reais nas abas restantes;
-- manter um schema visual isolado por dataset;
-- ampliar testes unitarios de selectors e hooks;
-- continuar evoluindo performance de charts mais pesados;
-- consolidar o projeto como portfolio de analytics com datasets reais do Kaggle.
+Este repositorio esta alinhado com o estado final do projeto para entrega:
+
+- apenas quatro abas finais ativas;
+- sem codigo ou mocks de abas descontinuadas na navegacao e na camada de dados;
+- arquitetura documentada conforme implementacao real;
+- build e testes validando o baseline final.

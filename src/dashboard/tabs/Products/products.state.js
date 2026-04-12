@@ -5,7 +5,9 @@ import {
     buildDashboardApiFilters,
     createClearFilters,
     createDashboardFilters,
-    createHandleFieldChange
+    createHandleFieldChange,
+    createMappedCrossFilterHandler,
+    toSingleOrArraySelection
 } from "../../hooks/dashboardTabState.helpers";
 import { useDashboardTabUi } from "../../hooks/useDashboardTabUi";
 import {
@@ -21,15 +23,6 @@ export const initialFilters = createDashboardFilters({
     paymentMethods: []
 });
 
-const toSingleOrArray = (items = [], fallbackKey = "name") => {
-    const values = items
-        .map((item) => item?.id ?? item?.[fallbackKey] ?? item?.name ?? item)
-        .filter((value) => value !== undefined && value !== null && value !== "");
-
-    if (!values.length) return undefined;
-    return values.length === 1 ? values[0] : values;
-};
-
 export const useProductsState = () => {
     const { key, passport } = useAuth();
     const [, startFiltersTransition] = useTransition();
@@ -42,6 +35,11 @@ export const useProductsState = () => {
         table: [],
         alertas: {}
     });
+    const [requestState, setRequestState] = useState({
+        status: "loading",
+        error: null,
+        reloadToken: 0
+    });
 
     const {
         resetToken,
@@ -51,14 +49,15 @@ export const useProductsState = () => {
     } = useDashboardTabUi();
 
     const deferredFilters = useDeferredValue(filters);
+    const hasCachedData = Boolean(rawResponse.fact?.length);
 
     const apiFilters = useMemo(
         () => buildDashboardApiFilters(deferredFilters, {
             includeOrders: true,
             extra: {
-                customer_location: (currentFilters) => toSingleOrArray(currentFilters.locations, "name"),
-                customer_name: (currentFilters) => toSingleOrArray(currentFilters.customers, "name"),
-                payment_method: (currentFilters) => toSingleOrArray(currentFilters.paymentMethods, "name")
+                customer_location: (currentFilters) => toSingleOrArraySelection(currentFilters.locations, "name"),
+                customer_name: (currentFilters) => toSingleOrArraySelection(currentFilters.customers, "name"),
+                payment_method: (currentFilters) => toSingleOrArraySelection(currentFilters.paymentMethods, "name")
             }
         }),
         [deferredFilters]
@@ -68,12 +67,33 @@ export const useProductsState = () => {
         let active = true;
 
         const load = async () => {
-            const response = await biProducts(apiFilters, { key, passport });
+            setRequestState((current) => ({
+                ...current,
+                status: hasCachedData ? "refreshing" : "loading",
+                error: null
+            }));
 
-            if (active) {
-                startDataTransition(() => {
-                    setRawResponse(response);
-                });
+            try {
+                const response = await biProducts(apiFilters, { key, passport });
+
+                if (active) {
+                    startDataTransition(() => {
+                        setRawResponse(response);
+                    });
+                    setRequestState((current) => ({
+                        ...current,
+                        status: "success",
+                        error: null
+                    }));
+                }
+            } catch (error) {
+                if (active) {
+                    setRequestState((current) => ({
+                        ...current,
+                        status: "error",
+                        error
+                    }));
+                }
             }
         };
 
@@ -82,7 +102,7 @@ export const useProductsState = () => {
         return () => {
             active = false;
         };
-    }, [apiFilters, key, passport, startDataTransition]);
+    }, [apiFilters, hasCachedData, key, passport, requestState.reloadToken, startDataTransition]);
 
     const analytics = useMemo(
         () => normalizeAmazonSalesAnalytics(rawResponse.fact || []),
@@ -118,37 +138,41 @@ export const useProductsState = () => {
 
     const handleCrossFilter = useCallback((payload) => {
         startFiltersTransition(() => {
-            if (!payload) return;
+            createMappedCrossFilterHandler(
+                setFilters,
+                createClearFilters(setFilters, initialFilters, bumpResetToken),
+                (nextPayload) => {
+                    if (nextPayload.type === "merge") {
+                        return nextPayload.filters || {};
+                    }
 
-            if (payload.type === "reset") {
-                createClearFilters(setFilters, initialFilters, bumpResetToken)();
-                return;
-            }
+                    const option = { id: nextPayload.id ?? nextPayload.value, name: nextPayload.value };
+                    const handlers = {
+                        cliente: () => ({ locations: [option] }),
+                        fornecedor: () => ({ paymentMethods: [option] }),
+                        categoria: () => ({ categorias: [{ name: nextPayload.value }] }),
+                        produto: () => ({ produtos: [option] }),
+                        status: () => ({ status: [nextPayload.value] }),
+                        mes: () => ({ mes: nextPayload.value }),
+                        customer: () => ({ customers: [option] }),
+                        location: () => ({ locations: [option] }),
+                        paymentMethod: () => ({ paymentMethods: [option] })
+                    };
 
-            if (payload.type === "merge") {
-                setFilters((previous) => ({ ...previous, ...(payload.filters || {}) }));
-                return;
-            }
-
-            const option = { id: payload.id ?? payload.value, name: payload.value };
-            const handlers = {
-                cliente: () => ({ locations: [option] }),
-                fornecedor: () => ({ paymentMethods: [option] }),
-                categoria: () => ({ categorias: [{ name: payload.value }] }),
-                produto: () => ({ produtos: [option] }),
-                status: () => ({ status: [payload.value] }),
-                mes: () => ({ mes: payload.value }),
-                customer: () => ({ customers: [option] }),
-                location: () => ({ locations: [option] }),
-                paymentMethod: () => ({ paymentMethods: [option] })
-            };
-
-            const nextFilters = handlers[payload.type]?.();
-            if (!nextFilters) return;
-
-            setFilters((previous) => ({ ...previous, ...nextFilters }));
+                    return handlers[nextPayload.type]?.();
+                }
+            )(payload);
         });
     }, [bumpResetToken, startFiltersTransition]);
+
+    const retry = useCallback(() => {
+        setRequestState((current) => ({
+            ...current,
+            status: hasCachedData ? "refreshing" : "loading",
+            error: null,
+            reloadToken: current.reloadToken + 1
+        }));
+    }, [hasCachedData]);
 
     return {
         filters,
@@ -165,6 +189,13 @@ export const useProductsState = () => {
         handleFieldChange,
         clearFilters,
         handleCrossFilter,
+        asyncState: {
+            isLoading: requestState.status === "loading",
+            isRefreshing: requestState.status === "refreshing",
+            error: requestState.error,
+            hasData: Boolean(tabela.length || analytics.length),
+            onRetry: retry
+        },
         ...availableFilters
     };
 };

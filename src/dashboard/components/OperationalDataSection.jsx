@@ -3,6 +3,10 @@ import { Row, Col, Button } from "react-bootstrap";
 import { FiMaximize2, FiMinus, FiPlus } from "react-icons/fi";
 import DataTable from "./shared/dataTable";
 import ModalComponent from "/src/components/ModalV2";
+import DashboardAsyncState, {
+    DashboardSectionLoadingOverlay,
+    DashboardTableSkeleton
+} from "./shared/DashboardAsyncState";
 import { normalizeStatusLabel } from "../selectors/shared/dashboardStatus";
 import "./OperationalDataSection.css";
 
@@ -126,7 +130,7 @@ const COLUMN_PRIORITY = {
     partial_delivery_flag: 1
 };
 
-const OperationalDataSection = ({ tabela }) => {
+const OperationalDataSection = ({ tabela = [], isLoading, isRefreshing, error, onRetry }) => {
     const [state, setState] = useState({
         expanded: false,
         zoom: 0.96,
@@ -213,8 +217,34 @@ const OperationalDataSection = ({ tabela }) => {
         });
     }, [expanded, setExpanded, startTransition]);
 
+    if (isLoading) {
+        return <DashboardTableSkeleton />;
+    }
+
+    if (error && !normalizedTable.length) {
+        return (
+            <DashboardAsyncState
+                variant="error"
+                title="Nao foi possivel carregar a tabela"
+                description="Os dados operacionais nao puderam ser carregados neste momento. Tente novamente."
+                onAction={onRetry}
+            />
+        );
+    }
+
+    if (!normalizedTable.length) {
+        return (
+            <DashboardAsyncState
+                variant="empty"
+                title="Nenhum dado operacional encontrado"
+                description="Ajuste os filtros para visualizar registros na tabela consolidada."
+            />
+        );
+    }
+
     return (
-        <div className="operational-section-wrapper">
+        <div className={`operational-section-wrapper ${isRefreshing ? "dashboard-section-loading" : ""}`}>
+            {isRefreshing ? <DashboardSectionLoadingOverlay label="Atualizando tabela..." /> : null}
             <Row className="mb-0">
                 <Col xs={12}>
                     <div className="operational-title-container">

@@ -8,6 +8,7 @@ import OverviewSection from "./OverviewSection";
 import SectionWrapper from "./SectionWrapper";
 import DashboardDateFilterModal from "./DashboardDateFilterModal";
 import DashboardErrorBoundary from "./shared/DashboardErrorBoundary";
+import DashboardAsyncState from "./shared/DashboardAsyncState";
 import { useThemeMode } from "../../hooks/useThemeMode";
 
 const DashboardTabLayout = ({
@@ -33,9 +34,17 @@ const DashboardTabLayout = ({
     charts = [],
     tabela = [],
     dateModal,
-    overviewResetKey = true
+    overviewResetKey = true,
+    asyncState
 }) => {
     const { isDark, toggleTheme } = useThemeMode();
+    const {
+        isLoading = false,
+        isRefreshing = false,
+        error = null,
+        hasData = false,
+        onRetry
+    } = asyncState || {};
     const filterSectionKey = useMemo(() => {
         const filterSchema = Object.keys(filterOptions).sort().join("|");
         const filterInputSchema = (filterInputs || []).map(({ name }) => name).sort().join("|");
@@ -48,10 +57,11 @@ const DashboardTabLayout = ({
             size="sm"
             onClick={clearFilters}
             ref={clearButtonRef}
+            disabled={isLoading || isRefreshing}
         >
             Limpar
         </Button>
-    ), [clearButtonRef, clearFilters]);
+    ), [clearButtonRef, clearFilters, isLoading, isRefreshing]);
 
     return (
         <div className={scopeClassName}>
@@ -69,20 +79,40 @@ const DashboardTabLayout = ({
                 />
             ) : null}
 
+            {error && hasData ? (
+                <div className="mb-3">
+                    <DashboardAsyncState
+                        variant="error"
+                        compact
+                        title="Nao foi possivel atualizar todos os dados"
+                        description="O dashboard manteve a ultima visao disponivel. Tente carregar novamente."
+                        onAction={onRetry}
+                    />
+                </div>
+            ) : null}
+
             <SectionWrapper
                 className={filterSectionClassName}
                 title={filterTitle}
                 actions={filterActions}
             >
-                <FilterSection
-                    key={filterSectionKey}
-                    filters={filters}
-                    onChange={onFilterChange}
-                    onClear={clearFilters}
-                    filterInputs={filterInputs}
-                    hiddenFilterNames={hiddenFilterNames}
-                    {...filterOptions}
-                />
+                <div
+                    className={isLoading || isRefreshing ? "dashboard-section-loading" : ""}
+                    aria-busy={isLoading || isRefreshing}
+                    style={{
+                        pointerEvents: isLoading || isRefreshing ? "none" : undefined
+                    }}
+                >
+                    <FilterSection
+                        key={filterSectionKey}
+                        filters={filters}
+                        onChange={onFilterChange}
+                        onClear={clearFilters}
+                        filterInputs={filterInputs}
+                        hiddenFilterNames={hiddenFilterNames}
+                        {...filterOptions}
+                    />
+                </div>
             </SectionWrapper>
 
             <SectionWrapper title={kpiTitle} className={contentSectionClassName}>
@@ -92,6 +122,10 @@ const DashboardTabLayout = ({
                         alertas={alertas}
                         onCrossFilter={onCrossFilter}
                         resetToken={resetToken}
+                        isLoading={isLoading && !hasData}
+                        isRefreshing={isRefreshing && hasData}
+                        error={error}
+                        onRetry={onRetry}
                     />
                 </DashboardErrorBoundary>
             </SectionWrapper>
@@ -101,13 +135,23 @@ const DashboardTabLayout = ({
                     <OverviewSection
                         charts={charts}
                         key={overviewResetKey ? resetToken : undefined}
+                        isLoading={isLoading && !hasData}
+                        isRefreshing={isRefreshing && hasData}
+                        error={error}
+                        onRetry={onRetry}
                     />
                 </DashboardErrorBoundary>
             </SectionWrapper>
 
             <SectionWrapper title={tableTitle} className={contentSectionClassName}>
                 <DashboardErrorBoundary>
-                    <OperationalDataSection tabela={tabela} />
+                    <OperationalDataSection
+                        tabela={tabela}
+                        isLoading={isLoading && !hasData}
+                        isRefreshing={isRefreshing && hasData}
+                        error={error}
+                        onRetry={onRetry}
+                    />
                 </DashboardErrorBoundary>
             </SectionWrapper>
 
@@ -118,6 +162,7 @@ const DashboardTabLayout = ({
                         size="sm"
                         onClick={toggleTheme}
                         className="floating-theme-button"
+                        disabled={isLoading || isRefreshing}
                         aria-label={isDark ? "Ativar tema claro" : "Ativar tema escuro"}
                         title={isDark ? "Ativar tema claro" : "Ativar tema escuro"}
                     >
@@ -129,6 +174,7 @@ const DashboardTabLayout = ({
                         size="sm"
                         onClick={clearFilters}
                         className="floating-clear-button"
+                        disabled={isLoading || isRefreshing}
                     >
                         Limpar
                     </Button>

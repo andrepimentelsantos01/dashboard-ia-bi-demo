@@ -33,21 +33,35 @@ html[data-dashboard-schema="adidas"] .kpi-card-value {
 
 html[data-dashboard-schema="amazon"] .kpi-card {
     border: 1px solid rgba(255,255,255,0.06);
-    background: linear-gradient(135deg, #111111 0%, #ff9900 100%);
-    box-shadow: 0 4px 14px rgba(17,17,17,0.22), inset 0 0 12px rgba(255,255,255,0.02);
+    background: linear-gradient(135deg, #111827 0%, #1f2937 78%, #ff9900 100%);
+    box-shadow: 0 4px 14px rgba(17,24,39,0.22), inset 0 0 12px rgba(255,255,255,0.02);
 }
 
 html[data-dashboard-schema="amazon"] .kpi-card:hover {
-    box-shadow: 0 8px 24px rgba(17,17,17,0.28), inset 0 0 14px rgba(255,255,255,0.03);
+    box-shadow: 0 8px 24px rgba(17,24,39,0.28), inset 0 0 14px rgba(255,255,255,0.03);
 }
 
 html[data-dashboard-schema="amazon"] .kpi-card-label {
-    color: rgba(255,255,255,0.8);
+    color: rgba(236,241,247,0.84);
 }
 
 html[data-dashboard-schema="amazon"] .kpi-card-value {
     color: #ffffff;
-    text-shadow: 0 2px 4px rgba(17,17,17,0.4);
+    text-shadow: 0 2px 4px rgba(15,23,42,0.4);
+}
+
+html[data-dashboard-schema="amazon"] .kpi-card-variation {
+    background: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 244, 222, 0.96);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .kpi-card {
+    border-color: rgba(148, 163, 184, 0.14);
+    background: linear-gradient(135deg, #0b1220 0%, #172033 80%, #ff9900 100%);
+}
+
+html[data-dashboard-schema="amazon"][data-theme="dark"] .kpi-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.34), inset 0 0 14px rgba(255,255,255,0.03);
 }
 
 html[data-dashboard-schema="restaurant"] .kpi-card {

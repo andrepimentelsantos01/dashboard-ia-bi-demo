@@ -5,7 +5,9 @@ import {
     buildDashboardApiFilters,
     createClearFilters,
     createDashboardFilters,
-    createHandleFieldChange
+    createHandleFieldChange,
+    createMappedCrossFilterHandler,
+    toSingleOrArraySelection
 } from "../../hooks/dashboardTabState.helpers";
 import { useDashboardTabUi } from "../../hooks/useDashboardTabUi";
 import {
@@ -21,15 +23,6 @@ export const initialFilters = createDashboardFilters({
     destinations: []
 });
 
-const toSingleOrArray = (items = [], fallbackKey = "name") => {
-    const values = items
-        .map((item) => item?.id ?? item?.[fallbackKey] ?? item?.name ?? item)
-        .filter((value) => value !== undefined && value !== null && value !== "");
-
-    if (!values.length) return undefined;
-    return values.length === 1 ? values[0] : values;
-};
-
 export const useSuppliersState = () => {
     const { key, passport } = useAuth();
     const [, startFiltersTransition] = useTransition();
@@ -42,6 +35,11 @@ export const useSuppliersState = () => {
         table: [],
         alertas: {}
     });
+    const [requestState, setRequestState] = useState({
+        status: "loading",
+        error: null,
+        reloadToken: 0
+    });
 
     const {
         resetToken,
@@ -51,14 +49,15 @@ export const useSuppliersState = () => {
     } = useDashboardTabUi();
 
     const deferredFilters = useDeferredValue(filters);
+    const hasCachedData = Boolean(rawResponse.fact?.length);
 
     const apiFilters = useMemo(
         () => buildDashboardApiFilters(deferredFilters, {
             includeOrders: true,
             extra: {
-                carrier: (currentFilters) => toSingleOrArray(currentFilters.carriers, "name"),
-                origin_warehouse: (currentFilters) => toSingleOrArray(currentFilters.warehouses, "name"),
-                destination: (currentFilters) => toSingleOrArray(currentFilters.destinations, "name")
+                carrier: (currentFilters) => toSingleOrArraySelection(currentFilters.carriers, "name"),
+                origin_warehouse: (currentFilters) => toSingleOrArraySelection(currentFilters.warehouses, "name"),
+                destination: (currentFilters) => toSingleOrArraySelection(currentFilters.destinations, "name")
             }
         }),
         [deferredFilters]
@@ -68,12 +67,33 @@ export const useSuppliersState = () => {
         let active = true;
 
         const load = async () => {
-            const response = await biSuppliers(apiFilters, { key, passport });
+            setRequestState((current) => ({
+                ...current,
+                status: hasCachedData ? "refreshing" : "loading",
+                error: null
+            }));
 
-            if (active) {
-                startDataTransition(() => {
-                    setRawResponse(response);
-                });
+            try {
+                const response = await biSuppliers(apiFilters, { key, passport });
+
+                if (active) {
+                    startDataTransition(() => {
+                        setRawResponse(response);
+                    });
+                    setRequestState((current) => ({
+                        ...current,
+                        status: "success",
+                        error: null
+                    }));
+                }
+            } catch (error) {
+                if (active) {
+                    setRequestState((current) => ({
+                        ...current,
+                        status: "error",
+                        error
+                    }));
+                }
             }
         };
 
@@ -82,7 +102,7 @@ export const useSuppliersState = () => {
         return () => {
             active = false;
         };
-    }, [apiFilters, key, passport, startDataTransition]);
+    }, [apiFilters, hasCachedData, key, passport, requestState.reloadToken, startDataTransition]);
 
     const analytics = useMemo(
         () => normalizeLogisticsPerformanceAnalytics(rawResponse.fact || []),
@@ -118,43 +138,47 @@ export const useSuppliersState = () => {
 
     const handleCrossFilter = useCallback((payload) => {
         startFiltersTransition(() => {
-            if (!payload) return;
+            createMappedCrossFilterHandler(
+                setFilters,
+                createClearFilters(setFilters, initialFilters, bumpResetToken),
+                (nextPayload) => {
+                    if (nextPayload.type === "merge") {
+                        const nextFilters = { ...(nextPayload.filters || {}) };
 
-            if (payload.type === "reset") {
-                createClearFilters(setFilters, initialFilters, bumpResetToken)();
-                return;
-            }
+                        if (nextFilters.categorias?.length) {
+                            nextFilters.warehouses = nextFilters.categorias.map((item) => ({
+                                id: item?.id ?? item?.name ?? item,
+                                name: item?.name ?? item
+                            }));
+                        }
 
-            if (payload.type === "merge") {
-                const nextFilters = { ...(payload.filters || {}) };
+                        return nextFilters;
+                    }
 
-                if (nextFilters.categorias?.length) {
-                    nextFilters.warehouses = nextFilters.categorias.map((item) => ({
-                        id: item?.id ?? item?.name ?? item,
-                        name: item?.name ?? item
-                    }));
+                    const option = { id: nextPayload.id ?? nextPayload.value, name: nextPayload.value };
+                    const handlers = {
+                        fornecedor: () => ({ carriers: [option] }),
+                        cliente: () => ({ destinations: [option] }),
+                        categoria: () => ({ warehouses: [option] }),
+                        produto: () => ({ produtos: [option] }),
+                        status: () => ({ status: [nextPayload.value] }),
+                        mes: () => ({ mes: nextPayload.value })
+                    };
+
+                    return handlers[nextPayload.type]?.();
                 }
-
-                setFilters((previous) => ({ ...previous, ...nextFilters }));
-                return;
-            }
-
-            const option = { id: payload.id ?? payload.value, name: payload.value };
-            const handlers = {
-                fornecedor: () => ({ carriers: [option] }),
-                cliente: () => ({ destinations: [option] }),
-                categoria: () => ({ warehouses: [option] }),
-                produto: () => ({ produtos: [option] }),
-                status: () => ({ status: [payload.value] }),
-                mes: () => ({ mes: payload.value })
-            };
-
-            const nextFilters = handlers[payload.type]?.();
-            if (!nextFilters) return;
-
-            setFilters((previous) => ({ ...previous, ...nextFilters }));
+            )(payload);
         });
     }, [bumpResetToken, startFiltersTransition]);
+
+    const retry = useCallback(() => {
+        setRequestState((current) => ({
+            ...current,
+            status: hasCachedData ? "refreshing" : "loading",
+            error: null,
+            reloadToken: current.reloadToken + 1
+        }));
+    }, [hasCachedData]);
 
     return {
         filters,
@@ -171,6 +195,13 @@ export const useSuppliersState = () => {
         handleFieldChange,
         clearFilters,
         handleCrossFilter,
+        asyncState: {
+            isLoading: requestState.status === "loading",
+            isRefreshing: requestState.status === "refreshing",
+            error: requestState.error,
+            hasData: Boolean(tabela.length || analytics.length),
+            onRetry: retry
+        },
         ...availableFilters
     };
 };

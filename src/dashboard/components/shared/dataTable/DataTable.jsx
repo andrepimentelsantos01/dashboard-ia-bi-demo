@@ -369,9 +369,11 @@ const DataTable = ({
         return <FiLoader className="datatable-download-feedback-spinner" />;
     }, [downloadFeedback.status]);
 
+    const isExporting = downloadFeedback.open && downloadFeedback.status === "loading";
+
     return (
         <>
-            <div className="datatable-wrapper">
+            <div className="datatable-wrapper" aria-busy={isExporting}>
                 <div className="datatable-toolbar">
                     <label className="datatable-search-shell">
                         <FiSearch className="datatable-search-icon" />
@@ -381,6 +383,7 @@ const DataTable = ({
                             onChange={(event) => setSearch(event.target.value)}
                             placeholder="Buscar..."
                             className="datatable-search-input"
+                            disabled={isExporting}
                         />
                     </label>
 
@@ -389,18 +392,20 @@ const DataTable = ({
                             type="button"
                             onClick={handleExportSpreadsheet}
                             className="datatable-export-button datatable-export-button--sheet"
+                            disabled={isExporting}
                         >
                             <FiGrid />
-                            <span>Planilha</span>
+                            <span>{isExporting ? "Gerando..." : "Planilha"}</span>
                         </button>
 
                         <button
                             type="button"
                             onClick={handleExportPdf}
                             className="datatable-export-button datatable-export-button--pdf"
+                            disabled={isExporting}
                         >
                             <FiFileText />
-                            <span>PDF</span>
+                            <span>{isExporting ? "Gerando..." : "PDF"}</span>
                         </button>
                     </div>
                 </div>

@@ -2,159 +2,100 @@
 
 ## Objetivo
 
-Este documento define o padrao oficial para evolucao do ambiente de BI standalone.
-Ele substitui o blueprint anterior com foco em:
+Este blueprint oficializa o estado final do projeto e o padrao de manutencao para o portfolio de BI standalone.
 
-- padronizacao arquitetural real;
-- melhor separacao de responsabilidades;
-- performance previsivel;
-- facilidade de manutencao;
-- migracao futura para backend real sem refactor estrutural grande.
+Ele passa a considerar apenas os quatro dominios ativos:
 
-Este blueprint vale para novas abas e para refatoracao progressiva das abas existentes.
+- Adidas
+- Amazon
+- Restaurant
+- Logistics
 
----
+Abas descontinuadas nao fazem mais parte do escopo, da navegacao nem da camada de dados.
 
-## Principios
+## Principios obrigatorios
 
-1. A aba nao deve conhecer detalhes do backend.
-2. O contrato de dados deve entrar por uma camada de servico.
-3. Normalizacao e agregacao nao devem ficar misturadas com UI.
-4. Regras de filtros devem ser padronizadas e reusaveis.
-5. Componentes visuais devem receber dados prontos para renderizar.
-6. Performance deve ser desenhada desde a estrutura, nao corrigida no fim.
+1. UI nao conhece parsing bruto de dataset.
+2. Cada aba consome apenas view model pronto do seu state hook.
+3. Regras analiticas ficam em selectors puros por dominio.
+4. Contrato de dados interno deve permanecer estavel entre datasets.
+5. Cross-filter e traducao de filtros devem ser padronizados em helpers compartilhados.
+6. Otimizacoes de bundle e lazy loading sao parte da arquitetura, nao pos-processo.
 
----
+## Arquitetura oficial
 
-## Arquitetura alvo
+Fluxo adotado no repositorio:
 
-Cada dominio do BI deve seguir esta cadeia:
-
-`mock/api ou backend -> services -> adapters -> selectors -> hook da aba -> componente da aba`
+`dataset real local -> services/rest.js -> state hook da aba -> selectors do dominio -> tab -> shell compartilhado`
 
 ### Responsabilidades
 
-- `services`
-  - Carregam os dados.
-  - Aplicam filtros no caso de mock local.
-  - Sao a unica camada autorizada a conhecer endpoint, arquivo mock ou origem externa.
+- `src/services/rest.js`
+  - le datasets reais locais;
+  - normaliza cada dominio para o contrato interno comum;
+  - aplica filtros de consulta consumidos pelas abas.
 
-- `adapters`
-  - Convertem o contrato bruto da API para um modelo interno consistente.
-  - Padronizam nomes como `client_name`, `supplier_name`, `order_date`, `year_months`.
+- `src/dashboard/tabs/*/*.state.js`
+  - mantem estado de UI da aba;
+  - traduz filtros do shell para payload da camada de dados;
+  - orquestra servico, selectors e cross-filter.
 
-- `selectors`
-  - Calculam KPIs, rankings, series, mapas, cards e tabela operacional.
-  - Devem ser funcoes puras.
+- `src/dashboard/selectors/*.js`
+  - calculam KPIs, rankings, series, heatmaps, gauges e tabela operacional;
+  - devem permanecer puros e previsiveis.
 
-- `hooks`
-  - Gerenciam estado de interface: filtros, modal de data, reset, cross-filter, carregamento.
-  - Orquestram `service + adapter + selectors`.
-  - Nao devem concentrar regras grandes de agregacao.
+- `src/dashboard/components/`
+  - renderizam layout, secoes, cards, charts, tabela e modal de data;
+  - nao devem incorporar regra analitica de dominio.
 
-- `tabs`
-  - Compoem a tela com os componentes reutilizaveis.
-  - Nao devem recalcular dominio pesado no JSX.
+- `src/dashboard/config/tabs.config.js`
+  - fonte unica de verdade para navegacao, preload e schema visual das abas finais.
 
----
+## Estrutura final recomendada
 
-## Estrutura recomendada
-
-```txt
+```text
 src/
-|
-+-- app/
-|   +-- providers/
-|   +-- router/
-|
-+-- components/
-|   +-- layout/
-|   +-- sections/
-|   +-- shared/
-|
-+-- features/
-|   +-- dashboard/
-|       +-- tabs/
-|       |   +-- Overview/
-|       |   |   +-- Overview.jsx
-|       |   |   +-- overview.hook.js
-|       |   |   +-- Overview.css
-|       |   +-- Products/
-|       |   +-- Clients/
-|       |   +-- Suppliers/
-|       |   +-- Quotations/
-|       |   +-- Orders/
-|       |
-|       +-- services/
-|       |   +-- dashboard.service.js
-|       |
-|       +-- adapters/
-|       |   +-- overview.adapter.js
-|       |   +-- products.adapter.js
-|       |   +-- clients.adapter.js
-|       |   +-- suppliers.adapter.js
-|       |   +-- quotations.adapter.js
-|       |   +-- orders.adapter.js
-|       |
-|       +-- selectors/
-|       |   +-- common/
-|       |   +-- overview.selectors.js
-|       |   +-- products.selectors.js
-|       |   +-- clients.selectors.js
-|       |   +-- suppliers.selectors.js
-|       |   +-- quotations.selectors.js
-|       |   +-- orders.selectors.js
-|       |
-|       +-- config/
-|       |   +-- filters.config.js
-|       |   +-- tabs.config.js
-|       |
-|       +-- mocks/
-|           +-- api/
-|               +-- overview.json
-|               +-- products.json
-|               +-- clients.json
-|               +-- suppliers.json
-|               +-- quotations.json
-|               +-- orders.json
-|
-+-- services/
-|   +-- http/
-|   +-- auth/
-|
-+-- utils/
-|   +-- dates/
-|   +-- format/
-|   +-- filters/
+|-- services/
+|   |-- rest.js
+|-- dashboard/
+|   |-- config/
+|   |   |-- tabs.config.js
+|   |-- components/
+|   |-- hooks/
+|   |   |-- dashboardTabState.helpers.js
+|   |   |-- useDashboardTabUi.js
+|   |-- selectors/
+|   |   |-- overviewSelectors.js
+|   |   |-- amazonSalesSelectors.js
+|   |   |-- restaurantSalesSelectors.js
+|   |   |-- logisticsPerformanceSelectors.js
+|   |   |-- shared/
+|   |-- tabs/
+|   |   |-- Overview/
+|   |   |-- Products/
+|   |   |-- Clients/
+|   |   |-- Suppliers/
+|   |-- index.jsx
 ```
 
-### Observacao
+## Contrato interno de dados
 
-No estado atual do projeto, parte desse papel esta centralizada em [rest.js](C:/Users/Mundimed-10/Downloads/dashboard/src/services/rest.js). Isso foi correto para tirar a feature do SaaS original, mas o proximo passo e quebrar essa camada por dominio e por responsabilidade.
-
----
-
-## Contrato de dados
-
-O modelo interno do dashboard precisa ser unico e estavel.
-
-Toda aba deve trabalhar sobre um shape normalizado como este:
+Toda aba deve operar sobre um shape normalizado compativel com o contrato abaixo:
 
 ```js
 {
   row_id: 1,
-  client_id: "client-1",
-  client_name: "Hospital Sao Paulo",
-  supplier_id: "supplier-1",
-  supplier_name: "Fornecedor X",
-  product_id: "product-1",
-  product_name: "Produto X",
-  product_class_material_name: "Medicamentos",
-  client_state: "SP",
-  order_date: "2024-03-10",
-  year_months: "2024-03",
-  purchase_order_id: 1234,
-  quotation_code: 5678,
+  client_id: "...",
+  client_name: "...",
+  supplier_id: "...",
+  supplier_name: "...",
+  product_id: "...",
+  product_name: "...",
+  product_class_material_name: "...",
+  client_state: "...",
+  order_date: "2025-01-10T00:00:00.000Z",
+  year_months: "2025-01",
+  purchase_order_id: "...",
   quantity_requested: 100,
   sum_quantity_requested: 100,
   sum_quantity: 100,
@@ -163,96 +104,44 @@ Toda aba deve trabalhar sobre um shape normalizado como este:
   avg_unit_price: 50,
   unit_price: 50,
   item_status: "Entregue",
-  quotation_status: "finalized",
-  glosa: 0,
-  sum_glosa_amount: 0,
-  abc_classification: "A",
-  xyz_classification: "X"
+  logistics_status: "Entregue",
+  quotation_status: "delivered"
 }
 ```
 
 ### Regra
 
-Nenhum componente visual deve depender de chaves alternativas como `cliente`, `fornecedor`, `produto` se o modelo normalizado ja existir.
+Componentes visuais nao devem depender de campos crus do dataset se o contrato normalizado ja atender o caso.
 
----
+## Dominios ativos
 
-## Regras para mocks
+### Adidas
 
-Os mocks devem simular o backend, nao a UI.
+- origem: `adidasUsSales.json`
+- especialidades: `operating_profit`, `operating_margin`, `region`, `sales_method`
+- schema visual: `adidas`
 
-### O que fazer
+### Amazon
 
-- Centralizar mocks em `mocks/api/`.
-- Manter um arquivo por dominio.
-- Usar o mesmo schema que o servico consumiria do backend real.
-- Se necessario, gerar dados derivados dentro de `selectors`, nao no JSON.
+- origem: `Amazon Sales 2025 Dataset.csv`
+- especialidades: `customer_name`, `customer_location`, `payment_method`
+- schema visual: `amazon`
 
-### O que evitar
+### Restaurant
 
-- Mock por aba com shape acoplado ao JSX.
-- Estruturas diferentes para cada dominio sem justificativa.
-- Campos duplicados apenas para acomodar componentes.
+- origem: `Restaurant Sales Dataset.csv`
+- especialidades: `time_of_sale`, `received_by`, `transaction_type`
+- schema visual: `restaurant`
 
-### Regra de ouro
+### Logistics
 
-Se o backend real pudesse substituir o mock sem alterar o componente da aba, o mock esta no lugar certo.
-
----
-
-## Blueprint de uma nova aba
-
-Toda nova aba deve ter:
-
-```txt
-tabs/<NomeDaAba>/
-|
-+-- <NomeDaAba>.jsx
-+-- <nomeDaAba>.hook.js
-+-- <NomeDaAba>.css
-```
-
-### O componente da aba deve:
-
-- consumir um hook unico da aba;
-- montar filtros, KPIs, overview e tabela;
-- usar apenas dados prontos;
-- evitar `useMemo` pesado para regra de negocio.
-
-### O hook da aba deve:
-
-- manter `filters`, `tempDateRange`, `openDateModal`, `resetToken`;
-- chamar o servico;
-- aplicar adapter;
-- chamar selectors;
-- expor handlers de UI.
-
-### O hook da aba nao deve:
-
-- fazer agregacoes longas inline;
-- recalcular series complexas duplicadas em cada render;
-- conhecer detalhes de componente de grafico.
-
----
-
-## Pipeline padrao da aba
-
-```txt
-1. carregar dados brutos via service
-2. adaptar dados para modelo normalizado
-3. aplicar filtros base
-4. gerar listas de filtros disponiveis
-5. gerar KPIs
-6. gerar charts
-7. gerar tabela operacional
-8. entregar view model para a aba
-```
-
----
+- origem: `Logistics Shipments Dataset.csv`
+- especialidades: `origin_warehouse`, `destination`, `carrier`, `delay_days`, `on_time_flag`
+- schema visual: `default`
 
 ## Padrao de filtros
 
-Os filtros devem ser unificados em um modelo compartilhado:
+Shape base compartilhado:
 
 ```js
 export const initialFilters = {
@@ -262,248 +151,100 @@ export const initialFilters = {
   categorias: [],
   produtos: [],
   orders: [],
-  numeroCotacao: [],
   status: [],
   mes: null,
-  uf: null,
-  classificacaoABC: null,
-  classificacaoXYZ: null
+  uf: null
 };
 ```
 
 ### Regras
 
-- Toda aba usa o mesmo shape base.
-- Campos nao usados podem ser ignorados, mas nao reinventados.
-- `handleFieldChange`, `clearFilters` e `handleCrossFilter` devem seguir API padrao.
+- cada aba pode estender o shape com filtros especificos do dominio;
+- traducao para payload de consulta deve passar por `buildDashboardApiFilters`;
+- cross-filter deve usar helpers compartilhados antes de criar logica customizada;
+- mapeamentos customizados devem ficar no `*.state.js` da aba, nunca no JSX.
 
-### Padrao para cross-filter
+## Padrao dos state hooks
 
-```js
-{ type: "cliente", id: "...", value: "Hospital X" }
-{ type: "fornecedor", id: "...", value: "Fornecedor X" }
-{ type: "produto", id: "...", value: "Produto X" }
-{ type: "categoria", value: "Medicamentos" }
-{ type: "mes", value: "2024-03" }
-{ type: "status", value: "Entregue" }
-{ type: "uf", value: "SP" }
-{ type: "reset" }
-```
+Todo `*.state.js` deve:
 
-### Diretriz
+1. montar `initialFilters` da aba;
+2. gerar `apiFilters` via helper compartilhado;
+3. buscar dados via `rest.js`;
+4. memoizar analytics, tabela e view model;
+5. expor handlers previsiveis de filtro, clear e cross-filter.
 
-O mapeamento de `payload.type -> alteracao em filtros` deve ser compartilhado quando possivel, nao reimplementado em cada aba.
+O hook nao deve:
 
----
+- montar grafico no hook;
+- duplicar parsing do dataset;
+- embutir regra visual;
+- recalcular agregacoes pesadas fora de `useMemo`.
 
-## Selectors padronizados
+## Padrao visual
 
-Selectors devem ser funcoes puras e reaproveitaveis.
+A composicao oficial das abas continua:
 
-### Exemplo de grupos
+1. filtros
+2. KPIs
+3. visao geral
+4. dados operacionais
+5. acoes flutuantes
 
-- `buildAvailableClients(rows)`
-- `buildAvailableSuppliers(rows)`
-- `buildKpis(rows)`
-- `buildMonthlyHistory(rows)`
-- `buildCategoryDistribution(rows)`
-- `buildOperationalTable(rows)`
-- `buildMapData(rows)`
+### Regras
 
-### Beneficios
-
-- remove duplicacao dos `*.state.js`;
-- facilita teste unitario;
-- melhora previsibilidade de performance;
-- reduz risco de divergencia entre abas.
-
----
-
-## Padrao visual e composicao
-
-A ordem das secoes continua a mesma:
-
-1. filtro de periodo
-2. filtros e segmentacao
-3. KPIs
-4. visao geral
-5. dados operacionais
-6. botao flutuante de limpar
-
-### Regras visuais
-
-- no maximo 2 graficos por linha em desktop;
-- 1 grafico por linha em mobile;
-- KPI cards com altura minima consistente;
-- tabela operacional com altura controlada e cabecalho fixo;
-- sem margens negativas estruturais;
-- sem layout depender de overflow acidental.
-
----
+- no maximo 2 visualizacoes por linha em desktop;
+- 1 visualizacao por linha em mobile;
+- tabela operacional integrada ao cross-filter;
+- schema visual controlado por `html[data-dashboard-schema]`;
+- fallback de erro por aba e por secao critica.
 
 ## Performance
 
-Performance e obrigatoria no blueprint.
+Otimizacoes obrigatorias no estado final:
 
-### Regras
+- tabs lazy-loaded;
+- preload oportunistico das tabs nao ativas;
+- camada `rest.js` sem codigo morto de dominios removidos;
+- helpers compartilhados para reduzir duplicacao de cross-filter;
+- `manualChunks` no Vite para separar dependencias pesadas;
+- selectors memoizados antes da renderizacao dos charts.
 
-1. Dados brutos devem ser carregados uma vez por mudanca de filtro relevante.
-2. Normalizacao deve ocorrer uma vez por payload.
-3. Selectors devem ser memoizados no hook, nao espalhados no JSX.
-4. Componentes de grafico devem receber apenas props necessarias.
-5. O mapa deve permanecer lazy-loaded.
-6. Evitar recalculo de arrays grandes em varios componentes filhos.
-7. Nao usar `useMemo` por reflexo; usar onde ha custo real.
+### Diretriz
 
-### Alertas atuais do projeto
-
-- hooks de aba fazem normalizacao e agregacao juntos;
-- logica de listas disponiveis e cross-filter esta duplicada;
-- bundle do mapa e muito pesado;
-- varios graficos recebem tabelas completas quando poderiam receber shape reduzido.
-
-### Metas de evolucao
-
-- mover agregadores para selectors;
-- separar `ChartMap` em chunk isolado;
-- reduzir props de alto volume;
-- criar cache simples por dominio quando fizer sentido.
-
----
-
-## Integracao futura com backend real
-
-Quando a API real substituir o mock:
-
-1. trocar apenas a implementacao de `services`;
-2. preservar `adapters`;
-3. preservar `selectors`;
-4. preservar `hooks` e `tabs` com alteracoes minimas.
-
-### Regra
-
-Se a troca do backend exigir mudar componente visual, a arquitetura esta vazando contrato demais.
-
----
+Qualquer nova otimizacao deve priorizar baixo risco sobre microganho. Em BI, regressao silenciosa de contrato vale mais do que ganho marginal de bundle.
 
 ## Testabilidade
 
-O projeto deve ser testavel por camadas.
+Cobertura minima esperada:
 
-### Prioridade de testes
+- helpers compartilhados de filtros;
+- selectors com agregacoes criticas;
+- build de producao sem erro.
 
-- `adapters`
-  - garantem normalizacao consistente;
-- `selectors`
-  - garantem calculo de KPIs e series;
-- `services`
-  - garantem aplicacao correta dos filtros locais;
-- `hooks`
-  - apenas comportamento de orquestracao;
-- `components`
-  - preferencialmente testes visuais/comportamentais leves.
+### Prioridade futura, se houver manutencao adicional
 
----
+1. testes unitarios dos selectors de Amazon, Restaurant e Logistics;
+2. testes especificos do contrato normalizado por dataset;
+3. smoke test de navegacao das quatro abas finais.
 
-## Convencoes de codigo
+## Regra de evolucao
 
-### Nomes
+Qualquer manutencao futura deve preservar:
 
-- `*.hook.js` para hooks de aba;
-- `*.adapter.js` para normalizadores;
-- `*.selectors.js` para agregadores;
-- `*.service.js` para acesso a dados.
-
-### Regras
-
-- ASCII por padrao em arquivos de codigo;
-- evitar literais repetidos de status e labels;
-- mover configuracoes repetidas para `config/`;
-- componentes devem ser pequenos e previsiveis.
-
----
-
-## Estrategia de migracao a partir do estado atual
-
-Como o projeto ja funciona, a evolucao deve ser incremental.
-
-### Fase 1
-
-- manter o standalone funcional;
-- consolidar este blueprint;
-- estabilizar imports e contratos.
-
-### Fase 2
-
-- extrair selectors compartilhados das abas atuais;
-- extrair helpers de filtros;
-- reduzir duplicacao dos `*.state.js`.
-
-### Fase 3
-
-- quebrar [rest.js](C:/Users/Mundimed-10/Downloads/dashboard/src/services/rest.js) em servicos por dominio;
-- criar adapters dedicados;
-- migrar `state.js` para `*.hook.js`.
-
-### Fase 4
-
-- adicionar testes para adapters e selectors;
-- otimizar chunking e graficos pesados;
-- preparar transicao para backend real.
-
----
-
-## Template de implementacao
-
-```js
-// products.hook.js
-export const useProductsTab = () => {
-  const [filters, setFilters] = useState(initialFilters);
-  const [openDateModal, setOpenDateModal] = useState(false);
-  const [tempDateRange, setTempDateRange] = useState(null);
-
-  const rawResponse = useProductsData(filters);
-  const normalizedRows = useMemo(
-    () => adaptProductsResponse(rawResponse),
-    [rawResponse]
-  );
-
-  const filteredRows = useMemo(
-    () => applyDashboardFilters(normalizedRows, filters),
-    [normalizedRows, filters]
-  );
-
-  const viewModel = useMemo(
-    () => buildProductsViewModel(filteredRows),
-    [filteredRows]
-  );
-
-  return {
-    filters,
-    setFilters,
-    openDateModal,
-    setOpenDateModal,
-    tempDateRange,
-    setTempDateRange,
-    ...viewModel
-  };
-};
-```
-
-Este e o padrao desejado. Curto no hook, forte nas camadas.
-
----
+- apenas os quatro dominios finais;
+- contrato interno estavel;
+- navegacao centralizada em config;
+- servico unico coerente com datasets locais ativos;
+- documentacao sincronizada com a implementacao real.
 
 ## Conclusao
 
-O Blueprint v2 formaliza o caminho certo para o standalone:
+O projeto finalizado fica padronizado sobre uma base simples e suficiente para portfolio de BI:
 
-- abas simples;
-- hooks orquestradores;
-- dados centralizados;
-- selectors puros;
-- contrato estavel;
-- performance tratada como requisito.
-
-Ele nao congela o legado atual.
-Ele cria uma trilha segura para padronizar o que ja existe e crescer sem acumular mais acoplamento.
+- quatro abas reais;
+- shell compartilhado;
+- dominio isolado por selectors;
+- contrato de dados uniforme;
+- codigo legado removido do caminho critico;
+- bundle organizado para entrega final.

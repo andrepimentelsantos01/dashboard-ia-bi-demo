@@ -32,6 +32,11 @@ export const useOverviewState = () => {
         fact: [],
         table: []
     });
+    const [requestState, setRequestState] = useState({
+        status: "loading",
+        error: null,
+        reloadToken: 0
+    });
 
     const {
         resetToken,
@@ -45,6 +50,7 @@ export const useOverviewState = () => {
     } = useDashboardTabUi();
 
     const deferredFilters = useDeferredValue(filters);
+    const hasCachedData = Boolean(rawResponse.fact?.length);
 
     const apiFilters = useMemo(
         () => buildDashboardApiFilters(deferredFilters, { includeOrders: true }),
@@ -55,12 +61,33 @@ export const useOverviewState = () => {
         let active = true;
 
         const load = async () => {
-            const response = await biOverview(apiFilters, { key, passport });
+            setRequestState((current) => ({
+                ...current,
+                status: hasCachedData ? "refreshing" : "loading",
+                error: null
+            }));
 
-            if (active) {
-                startDataTransition(() => {
-                    setRawResponse(response);
-                });
+            try {
+                const response = await biOverview(apiFilters, { key, passport });
+
+                if (active) {
+                    startDataTransition(() => {
+                        setRawResponse(response);
+                    });
+                    setRequestState((current) => ({
+                        ...current,
+                        status: "success",
+                        error: null
+                    }));
+                }
+            } catch (error) {
+                if (active) {
+                    setRequestState((current) => ({
+                        ...current,
+                        status: "error",
+                        error
+                    }));
+                }
             }
         };
 
@@ -69,7 +96,7 @@ export const useOverviewState = () => {
         return () => {
             active = false;
         };
-    }, [apiFilters, key, passport]);
+    }, [apiFilters, hasCachedData, key, passport, requestState.reloadToken]);
 
     const analytics = useMemo(
         () => normalizeOverviewAnalytics(rawResponse.fact || []),
@@ -118,6 +145,15 @@ export const useOverviewState = () => {
         [availableFilters]
     );
 
+    const retry = useCallback(() => {
+        setRequestState((current) => ({
+            ...current,
+            status: hasCachedData ? "refreshing" : "loading",
+            error: null,
+            reloadToken: current.reloadToken + 1
+        }));
+    }, [hasCachedData]);
+
     return {
         filters,
         setFilters,
@@ -139,6 +175,13 @@ export const useOverviewState = () => {
         handleFieldChange,
         clearFilters,
         handleCrossFilter,
+        asyncState: {
+            isLoading: requestState.status === "loading",
+            isRefreshing: requestState.status === "refreshing",
+            error: requestState.error,
+            hasData: Boolean(tabela.length || analytics.length),
+            onRetry: retry
+        },
         availableOptions,
         ...availableFilters
     };

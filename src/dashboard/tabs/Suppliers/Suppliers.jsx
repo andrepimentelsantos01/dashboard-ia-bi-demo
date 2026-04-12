@@ -76,6 +76,7 @@ const Suppliers = () => {
         handleFieldChange,
         clearFilters,
         handleCrossFilter,
+        asyncState,
         availableCarriers,
         availableWarehouses,
         availableDestinations,
@@ -260,6 +261,7 @@ const Suppliers = () => {
             resetToken={resetToken}
             charts={charts}
             tabela={tabela}
+            asyncState={asyncState}
         />
     );
 };

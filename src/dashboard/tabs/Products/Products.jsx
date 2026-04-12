@@ -29,6 +29,7 @@ const Products = () => {
         handleFieldChange,
         clearFilters,
         handleCrossFilter,
+        asyncState,
         availableCustomers,
         availableLocations,
         availableCategorias,
@@ -297,6 +298,7 @@ const Products = () => {
             resetToken={resetToken}
             charts={charts}
             tabela={tabela}
+            asyncState={asyncState}
         />
     );
 };

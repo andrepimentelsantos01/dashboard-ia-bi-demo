@@ -66,16 +66,16 @@ html[data-dashboard-schema="adidas"] .dashboard-tab-btn--adidas.btn-outline-prim
 }
 
 html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-outline-primary {
-    color: #111111;
-    border-color: rgba(255, 153, 0, 0.78);
-    background: rgba(255, 255, 255, 0.96);
+    color: #1f2937;
+    border-color: rgba(17, 24, 39, 0.16);
+    background: rgba(255, 255, 255, 0.98);
 }
 
 html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-outline-primary:hover,
 html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-outline-primary:focus {
-    color: #111111;
+    color: #111827;
     border-color: #ff9900;
-    background: rgba(255, 153, 0, 0.1);
+    background: rgba(255, 153, 0, 0.08);
 }
 
 html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-primary,
@@ -84,8 +84,8 @@ html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-primary:focu
 html[data-dashboard-schema="amazon"] .dashboard-tab-btn--amazon.btn-primary:active {
     color: #ffffff;
     border-color: #ff9900;
-    background: linear-gradient(135deg, #111111 0%, #ff9900 100%);
-    box-shadow: 0 12px 24px rgba(17, 17, 17, 0.18);
+    background: linear-gradient(135deg, #111827 0%, #1f2937 78%, #ff9900 100%);
+    box-shadow: 0 12px 24px rgba(17, 24, 39, 0.2);
 }
 
 html[data-dashboard-schema="restaurant"] .dashboard-tab-btn--restaurant.btn-outline-primary {
@@ -206,16 +206,16 @@ html[data-dashboard-schema="adidas"][data-theme="dark"] .dashboard-tab-btn--adid
 }
 
 html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-outline-primary {
-    color: #ffd18a;
-    border-color: rgba(255, 153, 0, 0.42);
-    background: rgba(11, 15, 21, 0.92);
+    color: #e7edf6;
+    border-color: rgba(148, 163, 184, 0.22);
+    background: rgba(11, 18, 32, 0.94);
 }
 
 html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-outline-primary:hover,
 html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-outline-primary:focus {
-    color: #fff1d6;
+    color: #f8fafc;
     border-color: rgba(255, 187, 79, 0.64);
-    background: rgba(28, 34, 43, 0.96);
+    background: rgba(20, 30, 45, 0.98);
 }
 
 html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-primary,
@@ -224,7 +224,7 @@ html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amaz
 html[data-dashboard-schema="amazon"][data-theme="dark"] .dashboard-tab-btn--amazon.btn-primary:active {
     color: #ffffff;
     border-color: rgba(255, 187, 79, 0.72);
-    background: linear-gradient(135deg, #0b0f14 0%, #ff9900 100%);
+    background: linear-gradient(135deg, #0b1220 0%, #172033 80%, #ff9900 100%);
 }
 
 html[data-dashboard-schema="restaurant"][data-theme="dark"] .dashboard-tab-btn--restaurant.btn-outline-primary {

@@ -26,6 +26,7 @@ const Clients = () => {
         handleFieldChange,
         clearFilters,
         handleCrossFilter,
+        asyncState,
         availableShifts,
         availableAttendants,
         availableCategorias,
@@ -258,6 +259,7 @@ const Clients = () => {
             resetToken={resetToken}
             charts={charts}
             tabela={tabela}
+            asyncState={asyncState}
         />
     );
 };

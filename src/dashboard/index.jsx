@@ -1,42 +1,30 @@
 import React, { useState, useMemo, Suspense, useCallback, useEffect, startTransition } from "react";
 import { ButtonGroup, Button } from "react-bootstrap";
 import DashboardErrorBoundary from "./components/shared/DashboardErrorBoundary";
+import { DashboardKpiSkeleton, DashboardOverviewSkeleton, DashboardTableSkeleton } from "./components/shared/DashboardAsyncState";
+import { DASHBOARD_DEFAULT_TAB, DASHBOARD_TABS } from "./config/tabs.config";
 import "./index.css";
 
-const loadOverview = () => import("./tabs/Overview");
-const loadProducts = () => import("./tabs/Products/Products");
-const loadClients = () => import("./tabs/Clients/Clients");
-const loadSuppliers = () => import("./tabs/Suppliers");
-const loadQuotations = () => import("./tabs/Quotations");
-const loadOrders = () => import("./tabs/Orders");
-
-const Overview = React.lazy(loadOverview);
-const Products = React.lazy(loadProducts);
-const Clients = React.lazy(loadClients);
-const Suppliers = React.lazy(loadSuppliers);
-const Quotations = React.lazy(loadQuotations);
-const Orders = React.lazy(loadOrders);
-
 const Skeleton = React.memo(() => (
-    <div className="skeleton-wrapper">
-        <div className="skeleton-block skeleton-title"></div>
-        <div className="skeleton-block skeleton-row"></div>
-        <div className="skeleton-block skeleton-row"></div>
-        <div className="skeleton-block skeleton-row"></div>
+    <div className="d-grid gap-4 pt-3">
+        <DashboardKpiSkeleton />
+        <DashboardOverviewSkeleton count={4} />
+        <DashboardTableSkeleton />
     </div>
 ));
 
-const TABS = [
-    { key: "overview", label: "Adidas Sales Dataset", component: Overview, preload: loadOverview, schema: "adidas" },
-    { key: "products", label: "Amazon Sales Dataset", component: Products, preload: loadProducts, schema: "amazon" },
-    { key: "clients", label: "Restaurant Sales Dataset", component: Clients, preload: loadClients, schema: "restaurant" },
-    { key: "suppliers", label: "Logistics Performance Dataset", component: Suppliers, preload: loadSuppliers, schema: "default" },
-    { key: "quotations", label: "Cota\u00e7\u00f5es", component: Quotations, preload: loadQuotations, schema: "default" },
-    { key: "orders", label: "Pedidos & Log\u00edstica", component: Orders, preload: loadOrders, schema: "default" }
-];
+const TABS = DASHBOARD_TABS.map((tab) => ({
+    ...tab,
+    component: React.lazy(tab.loadComponent)
+}));
 
 const Dashboard = () => {
-    const [activeTab, setActiveTab] = useState("overview");
+    const [activeTab, setActiveTab] = useState(DASHBOARD_DEFAULT_TAB);
+
+    const tabMap = useMemo(
+        () => new Map(TABS.map((tab) => [tab.key, tab])),
+        []
+    );
 
     const handleTabChange = useCallback((key) => {
         startTransition(() => {
@@ -45,9 +33,8 @@ const Dashboard = () => {
     }, []);
 
     const preloadTab = useCallback((key) => {
-        const found = TABS.find((tab) => tab.key === key);
-        found?.preload?.();
-    }, []);
+        tabMap.get(key)?.preload?.();
+    }, [tabMap]);
 
     useEffect(() => {
         const preloadNonActiveTabs = () => {
@@ -68,8 +55,8 @@ const Dashboard = () => {
     }, [activeTab]);
 
     const currentTabConfig = useMemo(
-        () => TABS.find((tab) => tab.key === activeTab) ?? null,
-        [activeTab]
+        () => tabMap.get(activeTab) ?? null,
+        [activeTab, tabMap]
     );
 
     useEffect(() => {

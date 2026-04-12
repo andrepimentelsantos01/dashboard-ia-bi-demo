@@ -1,13 +1,7 @@
-import overviewMock from "../mocks/dashboard/dashboardOverview.mock.json";
-import ordersMock from "../mocks/dashboard/dashboardOrders.mock.json";
-import productsMock from "../mocks/dashboard/dashboardProducts.mock.json";
-import clientsMock from "../mocks/dashboard/dashboardClients.mock.json";
-import suppliersMock from "../mocks/dashboard/dashboardSuppliers.mock.json";
-import quotationsMock from "../mocks/dashboard/dashboardQuotations.mock.json";
 import adidasSalesRows from "../mocks/datasetReal/adidasUsSales.json";
 import amazonSalesCsvRaw from "../mocks/datasetReal/Amazon Sales 2025 Dataset.csv?raw";
-import restaurantSalesCsvRaw from "../mocks/datasetReal/Restaurant Sales Dataset.csv?raw";
 import logisticsShipmentsCsvRaw from "../mocks/datasetReal/Logistics Shipments Dataset.csv?raw";
+import restaurantSalesCsvRaw from "../mocks/datasetReal/Restaurant Sales Dataset.csv?raw";
 import { normalizeStatusLabel, slugifyStatus } from "../dashboard/selectors/shared/dashboardStatus";
 import { formatCurrencyValue } from "../dashboard/utils/intlFormat";
 
@@ -41,8 +35,10 @@ const toYearMonth = (value) => {
 
 const compareDateRange = (dateValue, range) => {
   if (!range?.start && !range?.end) return true;
+
   const value = safeDate(dateValue);
   if (!value) return false;
+
   const start = safeDate(range.start);
   const end = safeDate(range.end);
 
@@ -107,9 +103,9 @@ const parseCsvLine = (line = "") => {
     const char = line[index];
     const nextChar = line[index + 1];
 
-    if (char === "\"") {
-      if (insideQuotes && nextChar === "\"") {
-        current += "\"";
+    if (char === '"') {
+      if (insideQuotes && nextChar === '"') {
+        current += '"';
         index += 1;
       } else {
         insideQuotes = !insideQuotes;
@@ -127,7 +123,7 @@ const parseCsvLine = (line = "") => {
   }
 
   result.push(current);
-  return result.map((value) => value.trim());
+  return result.map((item) => item.trim());
 };
 
 const parseCsvRows = (raw = "") => {
@@ -153,8 +149,8 @@ const parseCsvRows = (raw = "") => {
 
 const parseDayFirstDate = (value) => {
   if (!value) return null;
-  const match = String(value).trim().match(/^(\d{2})-(\d{2})-(\d{2}|\d{4})$/);
 
+  const match = String(value).trim().match(/^(\d{2})-(\d{2})-(\d{2}|\d{4})$/);
   if (!match) return safeDate(value);
 
   const [, day, month, yearToken] = match;
@@ -183,153 +179,6 @@ const parseRestaurantDate = (value) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const buildIndexMap = (values, prefix) => {
-  const map = new Map();
-  let index = 1;
-
-  values.forEach((value) => {
-    if (!value || map.has(value)) return;
-    map.set(value, `${prefix}-${index}`);
-    index += 1;
-  });
-
-  return map;
-};
-
-const normalizeRows = (rows, config) => {
-  const {
-    dateKey,
-    orderKey,
-    quotationKey,
-    quantityKey = "quantidade",
-    totalKey = "valorTotal",
-    unitKey = "valorUnitario",
-    statusKey = "status",
-    classAbcKey,
-    classXyzKey,
-    glosaKey = "glosa"
-  } = config;
-
-  const clientIds = buildIndexMap(rows.map((row) => row.cliente), "client");
-  const supplierIds = buildIndexMap(rows.map((row) => row.fornecedor), "supplier");
-  const productIds = buildIndexMap(rows.map((row) => row.produto), "product");
-
-  return rows.map((row, index) => {
-    const quantity = Number(row[quantityKey] || 0);
-    const total = Number(row[totalKey] || 0);
-    const unitPrice = Number(row[unitKey] || 0);
-    const orderDate = row[dateKey] || null;
-    const clientName = row.cliente || null;
-    const supplierName = row.fornecedor || null;
-    const productName = row.produto || null;
-    const categoryName = row.categoria || null;
-    const clientState = row.uf || null;
-    const purchaseOrderId =
-      row[orderKey] ?? row.numeroPedido ?? row.ordemCompra ?? null;
-    const quotationCode = row[quotationKey] ?? row.numeroCotacao ?? null;
-    const rawItemStatus = row[statusKey] || null;
-    const logisticsStatus = normalizeStatusLabel(rawItemStatus, { fallback: null });
-    const itemStatus = logisticsStatus || rawItemStatus;
-
-    return {
-      row_id: index + 1,
-      client_id: clientIds.get(clientName) || null,
-      client_name: clientName,
-      supplier_id: supplierIds.get(supplierName) || null,
-      supplier_name: supplierName,
-      product_id: productIds.get(productName) || null,
-      product_name: productName,
-      product_class_material_name: categoryName,
-      client_state: clientState,
-      order_date: orderDate,
-      year_months: toYearMonth(orderDate),
-      purchase_order_id: purchaseOrderId,
-      quotation_code: quotationCode,
-      quantity_requested: quantity,
-      sum_quantity_requested: quantity,
-      sum_quantity: quantity,
-      total_amount: total,
-      sum_total_amount: total,
-      avg_unit_price: unitPrice || (quantity ? total / quantity : 0),
-      unit_price: unitPrice || (quantity ? total / quantity : 0),
-      item_status: itemStatus,
-      order_status: itemStatus,
-      logistics_status: logisticsStatus,
-      quotation_status: slugifyStatus(rawItemStatus || itemStatus),
-      glosa: Number(row[glosaKey] || 0),
-      sum_glosa_amount: Number(row[glosaKey] || 0),
-      abc_classification: classAbcKey ? row[classAbcKey] || null : null,
-      xyz_classification: classXyzKey ? row[classXyzKey] || null : null,
-      classificacaoABC: classAbcKey ? row[classAbcKey] || null : null,
-      classificacaoXYZ: classXyzKey ? row[classXyzKey] || null : null
-    };
-  });
-};
-
-const applyCommonFilters = (rows, filters = {}) => {
-  const matchesFilter = (filterValue, rowValue, normalize = (value) => value) => {
-    if (filterValue === undefined || filterValue === null || filterValue === "") return true;
-
-    if (Array.isArray(filterValue)) {
-      return filterValue.some((value) => normalize(value) === normalize(rowValue));
-    }
-
-    return normalize(filterValue) === normalize(rowValue);
-  };
-
-  return rows.filter((row) => {
-    if (!matchesFilter(filters.client_id, row.client_id)) return false;
-    if (!matchesFilter(filters.supplier_id, row.supplier_id)) return false;
-    if (!matchesFilter(filters.product_id, row.product_id)) return false;
-    if (
-      filters.product_class_material_name?.length &&
-      !filters.product_class_material_name.includes(row.product_class_material_name)
-    ) {
-      return false;
-    }
-    if (!matchesFilter(filters.customer_name, row.customer_name || row.client_name)) return false;
-    if (!matchesFilter(filters.customer_location, row.customer_location)) return false;
-    if (!matchesFilter(filters.payment_method, row.payment_method || row.supplier_name)) return false;
-    if (!matchesFilter(filters.origin_warehouse, row.origin_warehouse || row.product_class_material_name)) return false;
-    if (!matchesFilter(filters.destination, row.destination || row.client_name)) return false;
-    if (!matchesFilter(filters.carrier, row.carrier || row.supplier_name)) return false;
-    if (!matchesFilter(filters.time_of_sale, row.time_of_sale || row.client_name)) return false;
-    if (!matchesFilter(filters.received_by, row.received_by || row.supplier_name)) return false;
-    if (!matchesFilter(filters.transaction_type, row.transaction_type || row.item_status)) return false;
-    if (!matchesFilter(filters.item_status, row.item_status)) return false;
-    if (
-      filters.quotation_status &&
-      !matchesFilter(filters.quotation_status, row.quotation_status, slugifyStatus)
-    ) {
-      return false;
-    }
-    if (filters.client_state && row.client_state !== filters.client_state) return false;
-    if (
-      filters.purchase_order_id &&
-      !matchesFilter(filters.purchase_order_id, row.purchase_order_id, (value) => String(value))
-    ) {
-      return false;
-    }
-    if (
-      filters.quotation_code &&
-      !matchesFilter(filters.quotation_code, row.quotation_code, (value) => String(value))
-    ) {
-      return false;
-    }
-    if (filters.year_months && row.year_months !== filters.year_months) return false;
-    if (filters.classificacao_abc && row.classificacaoABC !== filters.classificacao_abc) {
-      return false;
-    }
-    if (filters.classificacao_xyz && row.classificacaoXYZ !== filters.classificacao_xyz) {
-      return false;
-    }
-    if (filters.order_date && !compareDateRange(row.order_date, filters.order_date)) {
-      return false;
-    }
-    return true;
-  });
-};
-
 const formatCurrency = (value) =>
   Number(value || 0).toLocaleString("pt-BR", {
     style: "currency",
@@ -343,6 +192,85 @@ const formatUsdCurrency = (value) =>
   });
 
 const countDistinct = (rows, key) => new Set(rows.map((row) => row[key]).filter(Boolean)).size;
+
+const calculateVariation = (current, previous) => {
+  if (!previous && !current) return 0;
+  if (!previous) return current > 0 ? 100 : 0;
+  return ((current - previous) / previous) * 100;
+};
+
+const buildMonthlyBuckets = (rows, config) =>
+  rows.reduce((acc, row) => {
+    const month = row.year_months;
+    if (!month) return acc;
+
+    if (!acc[month]) {
+      acc[month] = config.create();
+    }
+
+    config.accumulate(acc[month], row);
+    return acc;
+  }, {});
+
+const getMonthPair = (monthlyBuckets) => {
+  const orderedMonths = Object.keys(monthlyBuckets).sort();
+  return {
+    current: monthlyBuckets[orderedMonths[orderedMonths.length - 1]] || null,
+    previous: monthlyBuckets[orderedMonths[orderedMonths.length - 2]] || null
+  };
+};
+
+const matchesFilter = (filterValue, rowValue, normalize = (value) => value) => {
+  if (filterValue === undefined || filterValue === null || filterValue === "") return true;
+
+  if (Array.isArray(filterValue)) {
+    return filterValue.some((value) => normalize(value) === normalize(rowValue));
+  }
+
+  return normalize(filterValue) === normalize(rowValue);
+};
+
+const applyCommonFilters = (rows, filters = {}) =>
+  rows.filter((row) => {
+    if (!matchesFilter(filters.client_id, row.client_id)) return false;
+    if (!matchesFilter(filters.supplier_id, row.supplier_id)) return false;
+    if (!matchesFilter(filters.product_id, row.product_id)) return false;
+
+    if (
+      filters.product_class_material_name?.length &&
+      !filters.product_class_material_name.includes(row.product_class_material_name)
+    ) {
+      return false;
+    }
+
+    if (!matchesFilter(filters.customer_name, row.customer_name || row.client_name)) return false;
+    if (!matchesFilter(filters.customer_location, row.customer_location)) return false;
+    if (!matchesFilter(filters.payment_method, row.payment_method || row.supplier_name)) return false;
+    if (!matchesFilter(filters.origin_warehouse, row.origin_warehouse || row.product_class_material_name)) return false;
+    if (!matchesFilter(filters.destination, row.destination || row.client_name)) return false;
+    if (!matchesFilter(filters.carrier, row.carrier || row.supplier_name)) return false;
+    if (!matchesFilter(filters.time_of_sale, row.time_of_sale || row.client_name)) return false;
+    if (!matchesFilter(filters.received_by, row.received_by || row.supplier_name)) return false;
+    if (!matchesFilter(filters.transaction_type, row.transaction_type || row.item_status)) return false;
+    if (!matchesFilter(filters.item_status, row.item_status)) return false;
+
+    if (filters.client_state && row.client_state !== filters.client_state) return false;
+
+    if (
+      filters.purchase_order_id &&
+      !matchesFilter(filters.purchase_order_id, row.purchase_order_id, (value) => String(value))
+    ) {
+      return false;
+    }
+
+    if (filters.year_months && row.year_months !== filters.year_months) return false;
+
+    if (filters.order_date && !compareDateRange(row.order_date, filters.order_date)) {
+      return false;
+    }
+
+    return true;
+  });
 
 const buildAdidasPurchaseOrderId = (retailerId, index) =>
   `INV-${String(retailerId || "NA")}-${String(index + 1).padStart(5, "0")}`;
@@ -378,8 +306,8 @@ const adidasOverviewRows = adidasSalesRows
       parseNumericValue(row["Price per Unit"]) || (unitsSold ? rawTotalSales / unitsSold : 0);
     const expectedTotalSales = pricePerUnit && unitsSold ? pricePerUnit * unitsSold : 0;
     const totalSales =
-      expectedTotalSales > 0 && rawTotalSales > expectedTotalSales
-        && Math.abs(rawTotalSales / expectedTotalSales - 10) < 0.2
+      expectedTotalSales > 0 && rawTotalSales > expectedTotalSales &&
+      Math.abs(rawTotalSales / expectedTotalSales - 10) < 0.2
         ? expectedTotalSales
         : rawTotalSales;
     const rawOperatingProfit = parseNumericValue(row["Operating Profit"]);
@@ -637,131 +565,40 @@ const logisticsSuppliersRows = parseCsvRows(logisticsShipmentsCsvRaw)
   })
   .filter(Boolean);
 
-const overviewRows = normalizeRows(overviewMock.tabelaConsolidada, {
-  dateKey: "data",
-  orderKey: "pedido"
-});
-
-const ordersRows = normalizeRows(ordersMock.tabelaPedidos, {
-  dateKey: "dataCriacao",
-  orderKey: "pedidoId"
-});
-
-const productsRows = normalizeRows(productsMock.tabelaProdutos, {
-  dateKey: "data",
-  orderKey: "pedido",
-  classAbcKey: "classificacaoABC",
-  classXyzKey: "classificacaoXYZ"
-});
-
-const clientsRows = normalizeRows(clientsMock.tabelaClientes, {
-  dateKey: "data",
-  orderKey: "id",
-  classAbcKey: "classificacaoABC",
-  classXyzKey: "classificacaoXYZ"
-});
-
-const suppliersRows = normalizeRows(suppliersMock.tabelaFornecedores, {
-  dateKey: "data",
-  orderKey: "numeroPedido",
-  quotationKey: "numeroCotacao",
-  classAbcKey: "classificacaoABC",
-  classXyzKey: "classificacaoXYZ"
-});
-
-const quotationsRows = normalizeRows(quotationsMock.tabelaCotas, {
-  dateKey: "data",
-  orderKey: "ordemCompra",
-  quotationKey: "numeroCotacao"
-});
-
-const buildOverviewResponse = (rows) => {
-  const totalAmount = rows.reduce((sum, row) => sum + row.sum_total_amount, 0);
-  const delivered = rows
-    .filter((row) => (row.logistics_status || row.item_status) === "Entregue")
-    .reduce((sum, row) => sum + row.sum_total_amount, 0);
-
-  return {
-    kpis: {
-      total_amount_moved: totalAmount,
-      total_amount_delivered: delivered,
-      total_volume_products: rows.reduce((sum, row) => sum + row.sum_quantity, 0),
-      total_clients: countDistinct(rows, "client_id"),
-      clients_with_delay: countDistinct(
-        rows.filter((row) => (row.logistics_status || row.item_status) === "Atrasado"),
-        "client_id"
-      ),
-      suppliers_with_delay: countDistinct(
-        rows.filter((row) => (row.logistics_status || row.item_status) === "Atrasado"),
-        "supplier_id"
-      ),
-      orders_with_delay: rows.filter(
-        (row) => (row.logistics_status || row.item_status) === "Atrasado"
-      ).length
-    },
-    fact: rows,
-    table: rows
-  };
-};
-
 const buildAdidasOverviewResponse = (rows) => {
   const totalSales = rows.reduce((sum, row) => sum + Number(row.sum_total_amount || 0), 0);
   const totalProfit = rows.reduce((sum, row) => sum + Number(row.operating_profit || 0), 0);
   const totalUnits = rows.reduce((sum, row) => sum + Number(row.sum_quantity || 0), 0);
   const weightedMargin = totalSales > 0 ? totalProfit / totalSales : 0;
-  const monthlyBuckets = rows.reduce((acc, row) => {
-    const month = row.year_months;
-    if (!month) return acc;
-
-    if (!acc[month]) {
-      acc[month] = {
-        sales: 0,
-        profit: 0,
-        units: 0
-      };
+  const monthlyBuckets = buildMonthlyBuckets(rows, {
+    create: () => ({ sales: 0, profit: 0, units: 0 }),
+    accumulate: (bucket, row) => {
+      bucket.sales += Number(row.sum_total_amount || 0);
+      bucket.profit += Number(row.operating_profit || 0);
+      bucket.units += Number(row.sum_quantity || 0);
     }
-
-    acc[month].sales += Number(row.sum_total_amount || 0);
-    acc[month].profit += Number(row.operating_profit || 0);
-    acc[month].units += Number(row.sum_quantity || 0);
-    return acc;
-  }, {});
-  const orderedMonths = Object.keys(monthlyBuckets).sort();
-  const currentMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 1]] || {
-    sales: 0,
-    profit: 0,
-    units: 0
-  };
-  const previousMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 2]] || {
-    sales: 0,
-    profit: 0,
-    units: 0
-  };
-  const currentMargin = currentMonth.sales > 0 ? currentMonth.profit / currentMonth.sales : 0;
-  const previousMargin = previousMonth.sales > 0 ? previousMonth.profit / previousMonth.sales : 0;
-  const calculateVariation = (current, previous) => {
-    if (!previous && !current) return 0;
-    if (!previous) return current > 0 ? 100 : 0;
-    return ((current - previous) / previous) * 100;
-  };
+  });
+  const { current, previous } = getMonthPair(monthlyBuckets);
+  const currentMargin = current?.sales ? current.profit / current.sales : 0;
+  const previousMargin = previous?.sales ? previous.profit / previous.sales : 0;
 
   return {
     kpis: {
       "Receita Total": {
         value: formatUsdCurrency(totalSales),
-        variation: calculateVariation(currentMonth.sales, previousMonth.sales)
+        variation: calculateVariation(current?.sales || 0, previous?.sales || 0)
       },
       "Lucro Operacional": {
         value: formatUsdCurrency(totalProfit),
-        variation: calculateVariation(currentMonth.profit, previousMonth.profit)
+        variation: calculateVariation(current?.profit || 0, previous?.profit || 0)
       },
-      "Margem Operacional M\u00e9dia": {
+      "Margem Operacional Media": {
         value: `${(weightedMargin * 100).toFixed(1)}%`,
         variation: calculateVariation(currentMargin, previousMargin)
       },
       "Unidades Vendidas": {
         value: totalUnits.toLocaleString("pt-BR"),
-        variation: calculateVariation(currentMonth.units, previousMonth.units)
+        variation: calculateVariation(current?.units || 0, previous?.units || 0)
       }
     },
     fact: rows,
@@ -773,67 +610,41 @@ const buildAmazonProductsResponse = (rows) => {
   const totalSales = rows.reduce((sum, row) => sum + Number(row.sum_total_amount || 0), 0);
   const totalUnits = rows.reduce((sum, row) => sum + Number(row.sum_quantity || 0), 0);
   const totalOrders = rows.length;
-  const completedOrders = rows.filter((row) => row.item_status === "Concluído").length;
-  const monthlyBuckets = rows.reduce((acc, row) => {
-    const month = row.year_months;
-    if (!month) return acc;
-
-    if (!acc[month]) {
-      acc[month] = {
-        sales: 0,
-        orders: 0,
-        units: 0
-      };
+  const completedOrders = rows.filter((row) => slugifyStatus(row.item_status) === "completed").length;
+  const monthlyBuckets = buildMonthlyBuckets(rows, {
+    create: () => ({ sales: 0, orders: 0, units: 0 }),
+    accumulate: (bucket, row) => {
+      bucket.sales += Number(row.sum_total_amount || 0);
+      bucket.orders += 1;
+      bucket.units += Number(row.sum_quantity || 0);
     }
-
-    acc[month].sales += Number(row.sum_total_amount || 0);
-    acc[month].orders += 1;
-    acc[month].units += Number(row.sum_quantity || 0);
-    return acc;
-  }, {});
-
-  const orderedMonths = Object.keys(monthlyBuckets).sort();
-  const currentMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 1]] || {
-    sales: 0,
-    orders: 0,
-    units: 0
-  };
-  const previousMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 2]] || {
-    sales: 0,
-    orders: 0,
-    units: 0
-  };
-
-  const calculateVariation = (current, previous) => {
-    if (!previous && !current) return 0;
-    if (!previous) return current > 0 ? 100 : 0;
-    return ((current - previous) / previous) * 100;
-  };
+  });
+  const { current, previous } = getMonthPair(monthlyBuckets);
 
   return {
     kpis: {
       "Receita Total": {
         value: formatUsdCurrency(totalSales),
-        variation: calculateVariation(currentMonth.sales, previousMonth.sales)
+        variation: calculateVariation(current?.sales || 0, previous?.sales || 0)
       },
       Pedidos: {
         value: totalOrders.toLocaleString("en-US"),
-        variation: calculateVariation(currentMonth.orders, previousMonth.orders)
+        variation: calculateVariation(current?.orders || 0, previous?.orders || 0)
       },
-      "Ticket Médio": {
+      "Ticket Medio": {
         value: formatUsdCurrency(totalOrders ? totalSales / totalOrders : 0),
         variation: calculateVariation(
-          currentMonth.orders ? currentMonth.sales / currentMonth.orders : 0,
-          previousMonth.orders ? previousMonth.sales / previousMonth.orders : 0
+          current?.orders ? current.sales / current.orders : 0,
+          previous?.orders ? previous.sales / previous.orders : 0
         )
       },
       "Unidades Vendidas": {
         value: totalUnits.toLocaleString("en-US"),
-        variation: calculateVariation(currentMonth.units, previousMonth.units)
+        variation: calculateVariation(current?.units || 0, previous?.units || 0)
       }
     },
     alertas: {
-      "Taxa de Conclusão": totalOrders ? `${((completedOrders / totalOrders) * 100).toFixed(1)}%` : "0%"
+      "Taxa de Conclusao": totalOrders ? `${((completedOrders / totalOrders) * 100).toFixed(1)}%` : "0%"
     },
     fact: rows,
     table: rows
@@ -845,66 +656,40 @@ const buildRestaurantClientsResponse = (rows) => {
   const totalUnits = rows.reduce((sum, row) => sum + Number(row.sum_quantity || 0), 0);
   const totalOrders = rows.length;
   const onlineOrders = rows.filter((row) => row.item_status === "Online").length;
-  const monthlyBuckets = rows.reduce((acc, row) => {
-    const month = row.year_months;
-    if (!month) return acc;
-
-    if (!acc[month]) {
-      acc[month] = {
-        sales: 0,
-        orders: 0,
-        units: 0
-      };
+  const monthlyBuckets = buildMonthlyBuckets(rows, {
+    create: () => ({ sales: 0, orders: 0, units: 0 }),
+    accumulate: (bucket, row) => {
+      bucket.sales += Number(row.sum_total_amount || 0);
+      bucket.orders += 1;
+      bucket.units += Number(row.sum_quantity || 0);
     }
-
-    acc[month].sales += Number(row.sum_total_amount || 0);
-    acc[month].orders += 1;
-    acc[month].units += Number(row.sum_quantity || 0);
-    return acc;
-  }, {});
-
-  const orderedMonths = Object.keys(monthlyBuckets).sort();
-  const currentMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 1]] || {
-    sales: 0,
-    orders: 0,
-    units: 0
-  };
-  const previousMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 2]] || {
-    sales: 0,
-    orders: 0,
-    units: 0
-  };
-
-  const calculateVariation = (current, previous) => {
-    if (!previous && !current) return 0;
-    if (!previous) return current > 0 ? 100 : 0;
-    return ((current - previous) / previous) * 100;
-  };
+  });
+  const { current, previous } = getMonthPair(monthlyBuckets);
 
   return {
     kpis: {
       "Receita Total": {
         value: formatCurrency(totalSales),
-        variation: calculateVariation(currentMonth.sales, previousMonth.sales)
+        variation: calculateVariation(current?.sales || 0, previous?.sales || 0)
       },
       Pedidos: {
         value: totalOrders.toLocaleString("pt-BR"),
-        variation: calculateVariation(currentMonth.orders, previousMonth.orders)
+        variation: calculateVariation(current?.orders || 0, previous?.orders || 0)
       },
-      "Ticket Médio": {
+      "Ticket Medio": {
         value: formatCurrency(totalOrders ? totalSales / totalOrders : 0),
         variation: calculateVariation(
-          currentMonth.orders ? currentMonth.sales / currentMonth.orders : 0,
-          previousMonth.orders ? previousMonth.sales / previousMonth.orders : 0
+          current?.orders ? current.sales / current.orders : 0,
+          previous?.orders ? previous.sales / previous.orders : 0
         )
       },
       "Itens Vendidos": {
         value: totalUnits.toLocaleString("pt-BR"),
-        variation: calculateVariation(currentMonth.units, previousMonth.units)
+        variation: calculateVariation(current?.units || 0, previous?.units || 0)
       }
     },
     alertas: {
-      "Participação Online": totalOrders ? `${((onlineOrders / totalOrders) * 100).toFixed(1)}%` : "0%"
+      "Participacao Online": totalOrders ? `${((onlineOrders / totalOrders) * 100).toFixed(1)}%` : "0%"
     },
     fact: rows,
     table: rows
@@ -916,51 +701,25 @@ const buildLogisticsSuppliersResponse = (rows) => {
   const totalShipments = rows.length;
   const totalWeight = rows.reduce((sum, row) => sum + Number(row.weight_kg || row.sum_quantity || 0), 0);
   const totalDelayDays = rows.reduce((sum, row) => sum + Number(row.delay_days || 0), 0);
-  const monthlyBuckets = rows.reduce((acc, row) => {
-    const month = row.year_months;
-    if (!month) return acc;
-
-    if (!acc[month]) {
-      acc[month] = {
-        cost: 0,
-        shipments: 0,
-        delayDays: 0
-      };
+  const monthlyBuckets = buildMonthlyBuckets(rows, {
+    create: () => ({ cost: 0, shipments: 0, delayDays: 0 }),
+    accumulate: (bucket, row) => {
+      bucket.cost += Number(row.sum_total_amount || 0);
+      bucket.shipments += 1;
+      bucket.delayDays += Number(row.delay_days || 0);
     }
-
-    acc[month].cost += Number(row.sum_total_amount || 0);
-    acc[month].shipments += 1;
-    acc[month].delayDays += Number(row.delay_days || 0);
-    return acc;
-  }, {});
-
-  const orderedMonths = Object.keys(monthlyBuckets).sort();
-  const currentMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 1]] || {
-    cost: 0,
-    shipments: 0,
-    delayDays: 0
-  };
-  const previousMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 2]] || {
-    cost: 0,
-    shipments: 0,
-    delayDays: 0
-  };
-
-  const calculateVariation = (current, previous) => {
-    if (!previous && !current) return 0;
-    if (!previous) return current > 0 ? 100 : 0;
-    return ((current - previous) / previous) * 100;
-  };
+  });
+  const { current, previous } = getMonthPair(monthlyBuckets);
 
   return {
     kpis: {
       "Custo Total": {
         value: formatUsdCurrency(totalCost),
-        variation: calculateVariation(currentMonth.cost, previousMonth.cost)
+        variation: calculateVariation(current?.cost || 0, previous?.cost || 0)
       },
       Embarques: {
         value: totalShipments.toLocaleString("en-US"),
-        variation: calculateVariation(currentMonth.shipments, previousMonth.shipments)
+        variation: calculateVariation(current?.shipments || 0, previous?.shipments || 0)
       },
       "Peso Transportado": {
         value: `${Math.round(totalWeight).toLocaleString("en-US")} kg`,
@@ -968,35 +727,13 @@ const buildLogisticsSuppliersResponse = (rows) => {
       },
       "Atraso Medio": {
         value: `${(totalShipments ? totalDelayDays / totalShipments : 0).toFixed(1)} dias`,
-        variation: calculateVariation(currentMonth.delayDays, previousMonth.delayDays)
+        variation: calculateVariation(current?.delayDays || 0, previous?.delayDays || 0)
       }
     },
     alertas: {
       "Delivery Success Rate": totalShipments
         ? `${((rows.filter((row) => row.delivery_success_flag).length / totalShipments) * 100).toFixed(1)}%`
         : "0%"
-    },
-    fact: rows,
-    table: rows
-  };
-};
-
-const buildQuotationsResponse = (rows) => {
-  const finalizedRows = rows.filter((row) => row.quotation_status === "finalized");
-
-  return {
-    kpis: {
-      total_amount_finalized: formatCurrency(
-        finalizedRows.reduce((sum, row) => sum + row.sum_total_amount, 0)
-      ),
-      finalized_quotations: finalizedRows.length,
-      total_quotations: rows.length,
-      lowest_price: formatCurrency(
-        rows.length
-          ? Math.min(...rows.map((row) => Number(row.avg_unit_price || 0)))
-          : 0
-      ),
-      open_quotations: rows.filter((row) => row.quotation_status === "under_quotation").length
     },
     fact: rows,
     table: rows
@@ -1012,13 +749,6 @@ export const biOverview = async (filters = {}) => {
   return buildAdidasOverviewResponse(applyCommonFilters(adidasOverviewRows, filters));
 };
 
-export const biOrdersLogistics = async (filters = {}) => {
-  await delay();
-  return {
-    fact: applyCommonFilters(ordersRows, filters)
-  };
-};
-
 export const biProducts = async (filters = {}) => {
   await delay();
   return buildAmazonProductsResponse(applyCommonFilters(amazonProductsRows, filters));
@@ -1032,9 +762,4 @@ export const biClients = async (filters = {}) => {
 export const biSuppliers = async (filters = {}) => {
   await delay();
   return buildLogisticsSuppliersResponse(applyCommonFilters(logisticsSuppliersRows, filters));
-};
-
-export const biQuotations = async (filters = {}) => {
-  await delay();
-  return buildQuotationsResponse(applyCommonFilters(quotationsRows, filters));
 };
