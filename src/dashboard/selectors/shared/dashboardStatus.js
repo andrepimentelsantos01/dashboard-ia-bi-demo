@@ -29,6 +29,7 @@ const STATUS_LABELS = {
     cash: "Cash",
     closed: "Fechado",
     completed: "Concluído",
+    concluido: "Concluído",
     delivered: "Entregue",
     entregue: "Entregue",
     disqualified: "Desclassificado",
@@ -133,6 +134,7 @@ export const STATUS_COLOR_MAP = {
     Cancelado: "#0e4946",
     Cash: "#1b8f86",
     Fechado: "#93a9a6",
+    Concluido: "#177972",
     Concluído: "#177972",
     Entregue: "#177972",
     Desclassificado: "#93a9a6",
@@ -214,6 +216,7 @@ const STATUS_SLUG_ALIASES = {
     em_cotacao: "under_quotation",
     rejeitado: "rejected",
     entregue: "delivered",
+    concluido: "completed",
     atrasado: "pending",
     cancelado: "cancelled",
     em_transporte: "in_transit"

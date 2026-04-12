@@ -207,14 +207,14 @@ html[data-dashboard-schema="logistics"][data-theme="light"] {
 }
 
 html[data-dashboard-schema="logistics"][data-theme="dark"] {
-  --app-text: #111111;
-  --app-bg-radial: rgba(217, 4, 41, 0.14);
-  --app-bg-base-start: #ffffff;
-  --app-bg-base-end: #f7f8fa;
-  --app-hero-start: #ffffff;
-  --app-hero-end: #fff5f6;
-  --app-hero-shadow: rgba(217, 4, 41, 0.16);
-  --app-hero-text-soft: rgba(75, 85, 99, 0.9);
+  --app-text: #f8fafc;
+  --app-bg-radial: rgba(217, 4, 41, 0.18);
+  --app-bg-base-start: #08090c;
+  --app-bg-base-end: #171a21;
+  --app-hero-start: #0b0b0c;
+  --app-hero-end: #3f0711;
+  --app-hero-shadow: rgba(0, 0, 0, 0.42);
+  --app-hero-text-soft: rgba(248, 250, 252, 0.82);
   --app-hero-accent: #ffb3c0;
   --app-theme-btn-bg: rgba(255, 255, 255, 0.08);
   --app-theme-btn-bg-hover: rgba(255, 255, 255, 0.14);
@@ -229,7 +229,7 @@ html[data-dashboard-schema="logistics"][data-theme="dark"] {
   --action-btn-icon: #ff6b84;
 }
 
-html[data-dashboard-schema="logistics"] .app-shell__hero {
+html[data-dashboard-schema="logistics"][data-theme="light"] .app-shell__hero {
   color: #111111;
 }
 

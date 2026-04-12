@@ -282,6 +282,18 @@ const buildAmazonCustomerId = (customer) => `customer-${normalizeToken(customer,
 const buildAmazonLocationId = (location) => `location-${normalizeToken(location, "unknown")}`;
 const buildAmazonPaymentId = (paymentMethod) => `payment-${normalizeToken(paymentMethod, "unknown")}`;
 const buildAmazonProductId = (product) => `amazon-product-${normalizeToken(product, "unknown")}`;
+const normalizeAmazonOrderStatus = (value) => {
+  const rawValue = String(value || "").trim();
+  const token = normalizeToken(rawValue, "");
+  const statusMap = {
+    cancelled: "Cancelado",
+    canceled: "Cancelado",
+    completed: "Concluído",
+    pending: "Pendente"
+  };
+
+  return statusMap[token] || normalizeStatusLabel(rawValue, { fallback: rawValue || "Desconhecido" });
+};
 const buildRestaurantShiftId = (shift) => `shift-${normalizeToken(shift, "unknown")}`;
 const buildRestaurantAttendantId = (attendant) => `attendant-${normalizeToken(attendant, "unknown")}`;
 const buildRestaurantProductId = (product) => `restaurant-product-${normalizeToken(product, "unknown")}`;
@@ -375,7 +387,7 @@ const tab2Rows = parseCsvRows(amazonSalesCsvRaw)
     const paymentMethod = row["Payment Method"]?.trim();
     const productName = row.Product?.trim();
     const categoryName = row.Category?.trim();
-    const status = normalizeStatusLabel(row.Status?.trim(), { fallback: row.Status?.trim() || "Desconhecido" });
+    const status = normalizeAmazonOrderStatus(row.Status);
     const quantity = parseNumericValue(row.Quantity);
     const totalAmount = parseNumericValue(row["Total Sales"]);
     const unitPrice = parseNumericValue(row.Price) || (quantity ? totalAmount / quantity : 0);
