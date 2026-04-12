@@ -30,7 +30,7 @@ const TABS = [
     { key: "overview", label: "Adidas Sales Dataset", component: Overview, preload: loadOverview, schema: "adidas" },
     { key: "products", label: "Amazon Sales Dataset", component: Products, preload: loadProducts, schema: "amazon" },
     { key: "clients", label: "Restaurant Sales Dataset", component: Clients, preload: loadClients, schema: "restaurant" },
-    { key: "suppliers", label: "Fornecedores", component: Suppliers, preload: loadSuppliers, schema: "default" },
+    { key: "suppliers", label: "Logistics Performance Dataset", component: Suppliers, preload: loadSuppliers, schema: "default" },
     { key: "quotations", label: "Cota\u00e7\u00f5es", component: Quotations, preload: loadQuotations, schema: "default" },
     { key: "orders", label: "Pedidos & Log\u00edstica", component: Orders, preload: loadOrders, schema: "default" }
 ];

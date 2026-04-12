@@ -110,7 +110,9 @@ const STATUS_LABELS = {
     delayed: "Atrasado",
     late: "Atrasado",
     overdue: "Atrasado",
-    atrasado: "Atrasado"
+    atrasado: "Atrasado",
+    lost: "Extraviado",
+    extraviado: "Extraviado"
 };
 
 export const STATUS_COLOR_MAP = {
@@ -199,6 +201,7 @@ export const STATUS_COLOR_MAP = {
     "Em Habilitação": "#1b8f86",
     "Em Cotação": "#1b8f86",
     Atrasado: "#12635e",
+    Extraviado: "#8b1e3f",
     "Sem status": "#7b8e8c",
     Desconhecido: "#5f7572"
 };

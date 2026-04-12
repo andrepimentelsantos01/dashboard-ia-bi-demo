@@ -46,6 +46,29 @@ const isDateColumn = (column) => {
         || label.includes("data");
 };
 
+const isFlagColumn = (column) => {
+    const key = String(column.key || "").toLowerCase();
+    const label = String(column.label || "").toLowerCase();
+
+    return key.endsWith("_flag")
+        || key.startsWith("is_")
+        || label.includes("flag")
+        || label.includes("sucesso")
+        || label.includes("excecao")
+        || label.includes("no prazo");
+};
+
+const formatFlagValue = (value) => {
+    if (value === null || value === undefined || value === "") return "-";
+    if (typeof value === "boolean") return value ? "Sim" : "Nao";
+
+    const normalized = String(value).trim().toLowerCase();
+    if (["true", "1", "yes", "y", "sim"].includes(normalized)) return "Sim";
+    if (["false", "0", "no", "n", "nao"].includes(normalized)) return "Nao";
+
+    return value;
+};
+
 const formatHumanDate = (value) => {
     if (!value) return value;
 
@@ -77,6 +100,10 @@ const formatCellValue = ({ column, row, autoFormat }) => {
 
     if (isDateColumn(column)) {
         return formatHumanDate(rawValue);
+    }
+
+    if (isFlagColumn(column)) {
+        return formatFlagValue(rawValue);
     }
 
     if (column.key.toLowerCase().includes("status")) {

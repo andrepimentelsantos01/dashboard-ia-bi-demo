@@ -10,21 +10,32 @@ const ROW_LIMIT = 10;
 
 const COLUMN_LABELS = {
     purchase_order_id: "Pedido",
-    order_code: "Código Pedido",
+    shipment_id: "Embarque",
+    order_code: "Codigo Pedido",
     order_date: "Data do Pedido",
-    year_months: "Ano/Mês",
+    shipment_date: "Data do Embarque",
+    year_months: "Ano/Mes",
     client_name: "Cliente",
     customer_name: "Cliente",
     customer_location: "Localidade",
     client_city: "Cidade",
     client_state: "UF",
-    region: "Região",
+    region: "Regiao",
     supplier_name: "Fornecedor",
+    carrier: "Carrier",
     payment_method: "Metodo de Pagamento",
+    transaction_type: "Tipo de Transacao",
+    time_of_sale: "Turno",
+    received_by: "Atendente",
     product_name: "Produto",
+    route_name: "Rota",
     product_class_material_name: "Categoria",
+    origin_warehouse: "Warehouse Origem",
+    destination: "Destino",
     quantity_requested: "Quantidade",
-    unit_price: "Valor Unitário",
+    weight_kg: "Peso (kg)",
+    distance_miles: "Distancia (mi)",
+    unit_price: "Valor Unitario",
     total_amount: "Valor Total",
     operating_profit: "Lucro Operacional",
     operating_margin_percent: "Margem Operacional (%)",
@@ -34,8 +45,13 @@ const COLUMN_LABELS = {
     sales_method: "Canal de Venda",
     expected_delivery_date: "Entrega Prevista",
     actual_delivery_date: "Entrega Real",
+    transit_days: "Prazo Planejado (dias)",
+    actual_transit_days: "Transito Real (dias)",
     delay_days: "Dias de Atraso",
     partial_delivery_flag: "Entrega Parcial",
+    on_time_flag: "No Prazo",
+    delivery_success_flag: "Sucesso na Entrega",
+    exception_flag: "Excecao",
     sum_total_amount: "Valor Total",
     sum_quantity: "Quantidade",
     count_items: "Itens",
@@ -64,17 +80,50 @@ const mapOperationalRow = (row) => {
 };
 
 const COLUMN_PRIORITY = {
-    total_amount: 1,
-    sum_total_amount: 2,
-    unit_price: 1,
-    avg_unit_price: 2,
+    shipment_id: 1,
+    purchase_order_id: 1,
+    order_date: 1,
+    shipment_date: 1,
+    expected_delivery_date: 1,
+    actual_delivery_date: 1,
+    year_months: 1,
+    customer_name: 1,
+    client_name: 2,
+    customer_location: 1,
+    client_city: 2,
+    client_state: 2,
+    region: 2,
+    supplier_name: 1,
+    carrier: 1,
+    payment_method: 1,
+    transaction_type: 1,
+    time_of_sale: 1,
+    received_by: 1,
+    product_name: 1,
+    route_name: 1,
+    product_class_material_name: 1,
+    origin_warehouse: 1,
+    destination: 1,
     quantity_requested: 1,
     sum_quantity: 2,
-    order_date: 1,
-    year_months: 1,
+    weight_kg: 1,
+    distance_miles: 1,
+    unit_price: 1,
+    avg_unit_price: 2,
+    total_amount: 1,
+    sum_total_amount: 2,
+    operating_profit: 1,
     item_status: 1,
     order_status: 2,
-    status: 3
+    status: 3,
+    sales_method: 1,
+    transit_days: 1,
+    actual_transit_days: 1,
+    delay_days: 1,
+    on_time_flag: 1,
+    delivery_success_flag: 1,
+    exception_flag: 1,
+    partial_delivery_flag: 1
 };
 
 const OperationalDataSection = ({ tabela }) => {
@@ -138,10 +187,17 @@ const OperationalDataSection = ({ tabela }) => {
                 }
             });
 
-        return Array.from(byLabel.values()).map(({ key, label }) => ({
-            key,
-            label
-        }));
+        return Array.from(byLabel.values())
+            .sort((a, b) => {
+                if (a.priority !== b.priority) return a.priority - b.priority;
+                return String(a.label).localeCompare(String(b.label), undefined, {
+                    sensitivity: "base"
+                });
+            })
+            .map(({ key, label }) => ({
+                key,
+                label
+            }));
     }, [normalizedTable]);
 
     const applyZoom = useCallback(
@@ -165,7 +221,7 @@ const OperationalDataSection = ({ tabela }) => {
                         <div className="operational-title-copy">
                             <h6 className="operational-title">Tabela Consolidada</h6>
                             <p className="operational-subtitle">
-                                Consulte, pesquise e exporte os dados operacionais já sincronizados com os gráficos.
+                                Consulte, pesquise e exporte os dados operacionais ja sincronizados com os graficos.
                             </p>
                         </div>
 
@@ -259,5 +315,3 @@ const OperationalDataSection = ({ tabela }) => {
 };
 
 export default React.memo(OperationalDataSection);
-
-

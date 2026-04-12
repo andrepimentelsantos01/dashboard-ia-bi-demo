@@ -7,6 +7,7 @@ import quotationsMock from "../mocks/dashboard/dashboardQuotations.mock.json";
 import adidasSalesRows from "../mocks/datasetReal/adidasUsSales.json";
 import amazonSalesCsvRaw from "../mocks/datasetReal/Amazon Sales 2025 Dataset.csv?raw";
 import restaurantSalesCsvRaw from "../mocks/datasetReal/Restaurant Sales Dataset.csv?raw";
+import logisticsShipmentsCsvRaw from "../mocks/datasetReal/Logistics Shipments Dataset.csv?raw";
 import { normalizeStatusLabel, slugifyStatus } from "../dashboard/selectors/shared/dashboardStatus";
 import { formatCurrencyValue } from "../dashboard/utils/intlFormat";
 
@@ -289,6 +290,9 @@ const applyCommonFilters = (rows, filters = {}) => {
     if (!matchesFilter(filters.customer_name, row.customer_name || row.client_name)) return false;
     if (!matchesFilter(filters.customer_location, row.customer_location)) return false;
     if (!matchesFilter(filters.payment_method, row.payment_method || row.supplier_name)) return false;
+    if (!matchesFilter(filters.origin_warehouse, row.origin_warehouse || row.product_class_material_name)) return false;
+    if (!matchesFilter(filters.destination, row.destination || row.client_name)) return false;
+    if (!matchesFilter(filters.carrier, row.carrier || row.supplier_name)) return false;
     if (!matchesFilter(filters.time_of_sale, row.time_of_sale || row.client_name)) return false;
     if (!matchesFilter(filters.received_by, row.received_by || row.supplier_name)) return false;
     if (!matchesFilter(filters.transaction_type, row.transaction_type || row.item_status)) return false;
@@ -353,6 +357,10 @@ const buildAmazonProductId = (product) => `amazon-product-${normalizeToken(produ
 const buildRestaurantShiftId = (shift) => `shift-${normalizeToken(shift, "unknown")}`;
 const buildRestaurantAttendantId = (attendant) => `attendant-${normalizeToken(attendant, "unknown")}`;
 const buildRestaurantProductId = (product) => `restaurant-product-${normalizeToken(product, "unknown")}`;
+const buildLogisticsWarehouseId = (warehouse) => `warehouse-${normalizeToken(warehouse, "unknown")}`;
+const buildLogisticsCarrierId = (carrier) => `carrier-${normalizeToken(carrier, "unknown")}`;
+const buildLogisticsRouteId = (route) => `route-${normalizeToken(route, "unknown")}`;
+const buildLogisticsDestinationId = (destination) => `destination-${normalizeToken(destination, "unknown")}`;
 
 const adidasOverviewRows = adidasSalesRows
   .map((row, index) => {
@@ -534,6 +542,91 @@ const restaurantClientsRows = parseCsvRows(restaurantSalesCsvRaw)
       order_status: transactionType,
       logistics_status: transactionType,
       quotation_status: slugifyStatus(transactionType),
+      glosa: 0,
+      sum_glosa_amount: 0,
+      abc_classification: null,
+      xyz_classification: null,
+      classificacaoABC: null,
+      classificacaoXYZ: null
+    };
+  })
+  .filter(Boolean);
+
+const logisticsSuppliersRows = parseCsvRows(logisticsShipmentsCsvRaw)
+  .map((row, index) => {
+    const shipmentDate = safeDate(row.Shipment_Date);
+    const deliveryDate = safeDate(row.Delivery_Date);
+    const originWarehouse = row.Origin_Warehouse?.trim();
+    const destination = row.Destination?.trim();
+    const carrier = row.Carrier?.trim();
+    const rawStatus = row.Status?.trim();
+    const status = normalizeStatusLabel(rawStatus, { fallback: rawStatus || "Desconhecido" });
+    const shipmentId = row.Shipment_ID?.trim() || `SHP-${String(index + 1).padStart(5, "0")}`;
+    const weightKg = parseNumericValue(row.Weight_kg);
+    const cost = parseNumericValue(row.Cost);
+    const distanceMiles = parseNumericValue(row.Distance_miles);
+    const plannedTransitDays = parseNumericValue(row.Transit_Days);
+    const actualTransitDays = shipmentDate && deliveryDate
+      ? Math.max(
+        0,
+        Math.round((deliveryDate.getTime() - shipmentDate.getTime()) / (1000 * 60 * 60 * 24))
+      )
+      : 0;
+    const delayDays = Math.max(0, actualTransitDays - plannedTransitDays);
+    const routeName = originWarehouse && destination
+      ? `${originWarehouse} -> ${destination}`
+      : destination || originWarehouse;
+    const delivered = status === "Entregue";
+    const exception = ["Atrasado", "Extraviado", "Devolvido"].includes(status);
+    const onTime = delivered && actualTransitDays <= plannedTransitDays;
+
+    if (!shipmentDate || !originWarehouse || !destination || !carrier || !status) {
+      return null;
+    }
+
+    return {
+      row_id: index + 1,
+      currency_code: "USD",
+      client_id: buildLogisticsDestinationId(destination),
+      client_name: destination,
+      supplier_id: buildLogisticsCarrierId(carrier),
+      supplier_name: carrier,
+      product_id: buildLogisticsRouteId(routeName),
+      product_name: routeName,
+      product_class_material_name: originWarehouse,
+      origin_warehouse: originWarehouse,
+      destination,
+      carrier,
+      route_name: routeName,
+      warehouse_id: buildLogisticsWarehouseId(originWarehouse),
+      shipment_id: shipmentId,
+      order_date: shipmentDate.toISOString(),
+      shipment_date: shipmentDate.toISOString(),
+      expected_delivery_date: new Date(
+        shipmentDate.getTime() + plannedTransitDays * 24 * 60 * 60 * 1000
+      ).toISOString(),
+      actual_delivery_date: deliveryDate ? deliveryDate.toISOString() : null,
+      year_months: toYearMonth(shipmentDate),
+      quantity_requested: weightKg,
+      sum_quantity_requested: weightKg,
+      sum_quantity: weightKg,
+      weight_kg: weightKg,
+      total_amount: cost,
+      sum_total_amount: cost,
+      avg_unit_price: weightKg ? cost / weightKg : cost,
+      unit_price: weightKg ? cost / weightKg : cost,
+      item_status: status,
+      order_status: status,
+      logistics_status: status,
+      quotation_status: slugifyStatus(status),
+      distance_miles: distanceMiles,
+      transit_days: plannedTransitDays,
+      actual_transit_days: actualTransitDays,
+      delay_days: delayDays,
+      on_time_flag: onTime,
+      delivery_success_flag: delivered,
+      exception_flag: exception,
+      partial_delivery_flag: false,
       glosa: 0,
       sum_glosa_amount: 0,
       abc_classification: null,
@@ -818,6 +911,76 @@ const buildRestaurantClientsResponse = (rows) => {
   };
 };
 
+const buildLogisticsSuppliersResponse = (rows) => {
+  const totalCost = rows.reduce((sum, row) => sum + Number(row.sum_total_amount || 0), 0);
+  const totalShipments = rows.length;
+  const totalWeight = rows.reduce((sum, row) => sum + Number(row.weight_kg || row.sum_quantity || 0), 0);
+  const totalDelayDays = rows.reduce((sum, row) => sum + Number(row.delay_days || 0), 0);
+  const monthlyBuckets = rows.reduce((acc, row) => {
+    const month = row.year_months;
+    if (!month) return acc;
+
+    if (!acc[month]) {
+      acc[month] = {
+        cost: 0,
+        shipments: 0,
+        delayDays: 0
+      };
+    }
+
+    acc[month].cost += Number(row.sum_total_amount || 0);
+    acc[month].shipments += 1;
+    acc[month].delayDays += Number(row.delay_days || 0);
+    return acc;
+  }, {});
+
+  const orderedMonths = Object.keys(monthlyBuckets).sort();
+  const currentMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 1]] || {
+    cost: 0,
+    shipments: 0,
+    delayDays: 0
+  };
+  const previousMonth = monthlyBuckets[orderedMonths[orderedMonths.length - 2]] || {
+    cost: 0,
+    shipments: 0,
+    delayDays: 0
+  };
+
+  const calculateVariation = (current, previous) => {
+    if (!previous && !current) return 0;
+    if (!previous) return current > 0 ? 100 : 0;
+    return ((current - previous) / previous) * 100;
+  };
+
+  return {
+    kpis: {
+      "Custo Total": {
+        value: formatUsdCurrency(totalCost),
+        variation: calculateVariation(currentMonth.cost, previousMonth.cost)
+      },
+      Embarques: {
+        value: totalShipments.toLocaleString("en-US"),
+        variation: calculateVariation(currentMonth.shipments, previousMonth.shipments)
+      },
+      "Peso Transportado": {
+        value: `${Math.round(totalWeight).toLocaleString("en-US")} kg`,
+        variation: 0
+      },
+      "Atraso Medio": {
+        value: `${(totalShipments ? totalDelayDays / totalShipments : 0).toFixed(1)} dias`,
+        variation: calculateVariation(currentMonth.delayDays, previousMonth.delayDays)
+      }
+    },
+    alertas: {
+      "Delivery Success Rate": totalShipments
+        ? `${((rows.filter((row) => row.delivery_success_flag).length / totalShipments) * 100).toFixed(1)}%`
+        : "0%"
+    },
+    fact: rows,
+    table: rows
+  };
+};
+
 const buildQuotationsResponse = (rows) => {
   const finalizedRows = rows.filter((row) => row.quotation_status === "finalized");
 
@@ -868,9 +1031,7 @@ export const biClients = async (filters = {}) => {
 
 export const biSuppliers = async (filters = {}) => {
   await delay();
-  return {
-    fact: applyCommonFilters(suppliersRows, filters)
-  };
+  return buildLogisticsSuppliersResponse(applyCommonFilters(logisticsSuppliersRows, filters));
 };
 
 export const biQuotations = async (filters = {}) => {

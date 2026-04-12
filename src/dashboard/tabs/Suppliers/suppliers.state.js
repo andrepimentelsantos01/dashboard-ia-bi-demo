@@ -1,53 +1,67 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useDeferredValue, useTransition } from "react";
 import { biSuppliers } from "/src/services/rest";
 import { useAuth } from "/src/core/auth";
 import {
-    buildAvailableOptions,
     buildDashboardApiFilters,
     createClearFilters,
-    createCrossFilterHandler,
-    createCrossFilterMap,
     createDashboardFilters,
     createHandleFieldChange
 } from "../../hooks/dashboardTabState.helpers";
 import { useDashboardTabUi } from "../../hooks/useDashboardTabUi";
 import {
-    buildSuppliersAvailableFilters,
-    buildSuppliersDerivedData,
-    normalizeSupplierAnalytics
-} from "../../selectors/suppliersSelectors";
+    buildLogisticsPerformanceAvailableFilters,
+    buildLogisticsPerformanceDerivedData,
+    normalizeLogisticsPerformanceAnalytics,
+    normalizeLogisticsPerformanceTable
+} from "../../selectors/logisticsPerformanceSelectors";
 
 export const initialFilters = createDashboardFilters({
-    classificacaoABC: null,
-    classificacaoXYZ: null
+    carriers: [],
+    warehouses: [],
+    destinations: []
 });
+
+const toSingleOrArray = (items = [], fallbackKey = "name") => {
+    const values = items
+        .map((item) => item?.id ?? item?.[fallbackKey] ?? item?.name ?? item)
+        .filter((value) => value !== undefined && value !== null && value !== "");
+
+    if (!values.length) return undefined;
+    return values.length === 1 ? values[0] : values;
+};
 
 export const useSuppliersState = () => {
     const { key, passport } = useAuth();
+    const [, startFiltersTransition] = useTransition();
+    const [, startDataTransition] = useTransition();
 
     const [filters, setFilters] = useState(initialFilters);
-    const [rawData, setRawData] = useState([]);
+    const [rawResponse, setRawResponse] = useState({
+        kpis: {},
+        fact: [],
+        table: [],
+        alertas: {}
+    });
 
     const {
         resetToken,
         bumpResetToken,
-        openDateModal,
-        setOpenDateModal,
-        tempDateRange,
-        setTempDateRange,
         clearButtonRef,
         showFloatingClear
     } = useDashboardTabUi();
 
+    const deferredFilters = useDeferredValue(filters);
+
     const apiFilters = useMemo(
-        () => buildDashboardApiFilters(filters, {
+        () => buildDashboardApiFilters(deferredFilters, {
             includeOrders: true,
             extra: {
-                classificacao_abc: currentFilters => currentFilters.classificacaoABC,
-                classificacao_xyz: currentFilters => currentFilters.classificacaoXYZ
+                carrier: (currentFilters) => toSingleOrArray(currentFilters.carriers, "name"),
+                origin_warehouse: (currentFilters) => toSingleOrArray(currentFilters.warehouses, "name"),
+                destination: (currentFilters) => toSingleOrArray(currentFilters.destinations, "name")
             }
         }),
-        [filters]
+        [deferredFilters]
     );
 
     useEffect(() => {
@@ -56,7 +70,11 @@ export const useSuppliersState = () => {
         const load = async () => {
             const response = await biSuppliers(apiFilters, { key, passport });
 
-            if (active) setRawData(response.fact || []);
+            if (active) {
+                startDataTransition(() => {
+                    setRawResponse(response);
+                });
+            }
         };
 
         load();
@@ -64,57 +82,95 @@ export const useSuppliersState = () => {
         return () => {
             active = false;
         };
-    }, [apiFilters, key, passport]);
+    }, [apiFilters, key, passport, startDataTransition]);
 
     const analytics = useMemo(
-        () => normalizeSupplierAnalytics(rawData),
-        [rawData]
+        () => normalizeLogisticsPerformanceAnalytics(rawResponse.fact || []),
+        [rawResponse.fact]
     );
 
-    const derivedData = useMemo(
-        () => buildSuppliersDerivedData(analytics),
+    const tabela = useMemo(
+        () => normalizeLogisticsPerformanceTable(rawResponse.table || []),
+        [rawResponse.table]
+    );
+
+    const logisticsData = useMemo(
+        () => buildLogisticsPerformanceDerivedData(analytics),
         [analytics]
     );
 
     const availableFilters = useMemo(
-        () => buildSuppliersAvailableFilters(rawData),
-        [rawData]
+        () => buildLogisticsPerformanceAvailableFilters(rawResponse.fact || []),
+        [rawResponse.fact]
     );
 
-    const handleFieldChange = useCallback(createHandleFieldChange(setFilters), []);
-    const clearFilters = useCallback(
-        createClearFilters(setFilters, initialFilters, bumpResetToken),
-        [bumpResetToken]
-    );
-    const handleCrossFilter = useCallback(
-        createCrossFilterHandler(
-            setFilters,
-            clearFilters,
-            createCrossFilterMap({ includeAbc: true, includeXyz: true })
-        ),
-        [clearFilters]
-    );
+    const handleFieldChange = useCallback((name, value) => {
+        startFiltersTransition(() => {
+            createHandleFieldChange(setFilters)(name, value);
+        });
+    }, [startFiltersTransition]);
 
-    const availableOptions = useMemo(
-        () => buildAvailableOptions(availableFilters),
-        [availableFilters]
-    );
+    const clearFilters = useCallback(() => {
+        startFiltersTransition(() => {
+            createClearFilters(setFilters, initialFilters, bumpResetToken)();
+        });
+    }, [bumpResetToken, startFiltersTransition]);
+
+    const handleCrossFilter = useCallback((payload) => {
+        startFiltersTransition(() => {
+            if (!payload) return;
+
+            if (payload.type === "reset") {
+                createClearFilters(setFilters, initialFilters, bumpResetToken)();
+                return;
+            }
+
+            if (payload.type === "merge") {
+                const nextFilters = { ...(payload.filters || {}) };
+
+                if (nextFilters.categorias?.length) {
+                    nextFilters.warehouses = nextFilters.categorias.map((item) => ({
+                        id: item?.id ?? item?.name ?? item,
+                        name: item?.name ?? item
+                    }));
+                }
+
+                setFilters((previous) => ({ ...previous, ...nextFilters }));
+                return;
+            }
+
+            const option = { id: payload.id ?? payload.value, name: payload.value };
+            const handlers = {
+                fornecedor: () => ({ carriers: [option] }),
+                cliente: () => ({ destinations: [option] }),
+                categoria: () => ({ warehouses: [option] }),
+                produto: () => ({ produtos: [option] }),
+                status: () => ({ status: [payload.value] }),
+                mes: () => ({ mes: payload.value })
+            };
+
+            const nextFilters = handlers[payload.type]?.();
+            if (!nextFilters) return;
+
+            setFilters((previous) => ({ ...previous, ...nextFilters }));
+        });
+    }, [bumpResetToken, startFiltersTransition]);
 
     return {
         filters,
         setFilters,
-        data: derivedData,
+        data: {
+            kpis: logisticsData.kpis,
+            alertas: logisticsData.alertas,
+            logistics: logisticsData,
+            operacionais: { tabela }
+        },
         resetToken,
-        openDateModal,
-        setOpenDateModal,
-        tempDateRange,
-        setTempDateRange,
         showFloatingClear,
         clearButtonRef,
         handleFieldChange,
         clearFilters,
         handleCrossFilter,
-        availableOptions,
         ...availableFilters
     };
 };

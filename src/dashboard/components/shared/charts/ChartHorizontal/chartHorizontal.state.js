@@ -212,7 +212,17 @@ export const useChartHorizontalState = ({
                     fontSize: 10,
                     interval: "auto",
                     hideOverlap: true,
-                    formatter: (value) => formatCompactCurrencyValue(value, { currencyCode, locale })
+                    formatter: (value) => {
+                        if (valueFormat === "volume") {
+                            return Math.round(Number(value || 0)).toLocaleString("pt-BR");
+                        }
+
+                        if (valueFormat === "percent") {
+                            return `${Number(value || 0).toFixed(0)}%`;
+                        }
+
+                        return formatCompactCurrencyValue(value, { currencyCode, locale });
+                    }
                 }
             },
             yAxis: {

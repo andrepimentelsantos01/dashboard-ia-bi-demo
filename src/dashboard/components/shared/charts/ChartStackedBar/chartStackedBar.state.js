@@ -155,7 +155,7 @@ export const useChartStackedBarState = ({
                 return `
                     <b>${month}</b><br/><br/>
                     ${lines}<br/><br/>
-                    <b>Total do período:</b> ${formatMetric(total, metric)}
+                    <b>Total do período:</b> ${formatMetric(total, metric, currencyCode, locale)}
                 `;
             }, {
                 trigger: "axis",
