@@ -6,8 +6,7 @@ import {
     createClearFilters,
     createDashboardFilters,
     createHandleFieldChange,
-    createMappedCrossFilterHandler,
-    toSingleOrArraySelection
+    createMappedCrossFilterHandler
 } from "../../hooks/dashboardTabState.helpers";
 import { useDashboardTabUi } from "../../hooks/useDashboardTabUi";
 import {
@@ -20,8 +19,20 @@ import {
 export const initialFilters = createDashboardFilters({
     locations: [],
     customers: [],
-    paymentMethods: []
+    paymentMethods: [],
+    categorias: [],
+    produtos: [],
+    status: []
 });
+
+const toNameSelection = (items = []) => {
+    const values = items
+        .map((item) => item?.name ?? item)
+        .filter((value) => value !== undefined && value !== null && value !== "");
+
+    if (!values.length) return undefined;
+    return values.length === 1 ? values[0] : values;
+};
 
 export const useTab2State = () => {
     const { key, passport } = useAuth();
@@ -55,9 +66,9 @@ export const useTab2State = () => {
         () => buildDashboardApiFilters(deferredFilters, {
             includeOrders: true,
             extra: {
-                customer_location: (currentFilters) => toSingleOrArraySelection(currentFilters.locations, "name"),
-                customer_name: (currentFilters) => toSingleOrArraySelection(currentFilters.customers, "name"),
-                payment_method: (currentFilters) => toSingleOrArraySelection(currentFilters.paymentMethods, "name")
+                customer_location: (currentFilters) => toNameSelection(currentFilters.locations),
+                customer_name: (currentFilters) => toNameSelection(currentFilters.customers),
+                payment_method: (currentFilters) => toNameSelection(currentFilters.paymentMethods)
             }
         }),
         [deferredFilters]
@@ -148,7 +159,7 @@ export const useTab2State = () => {
 
                     const option = { id: nextPayload.id ?? nextPayload.value, name: nextPayload.value };
                     const handlers = {
-                        cliente: () => ({ locations: [option] }),
+                        cliente: () => ({ customers: [option] }),
                         fornecedor: () => ({ paymentMethods: [option] }),
                         categoria: () => ({ categorias: [{ name: nextPayload.value }] }),
                         produto: () => ({ produtos: [option] }),

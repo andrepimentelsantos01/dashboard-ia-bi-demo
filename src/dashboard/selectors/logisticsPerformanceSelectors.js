@@ -130,8 +130,8 @@ export const buildTab4DerivedData = (analytics = []) => {
         const quantity = 1;
         const delayDays = Number(row.delayDays || 0);
         const weightKg = Number(row.weightKg || 0);
-        const carrier = row.carrier || "Carrier nao informado";
-        const warehouse = row.warehouse || "Warehouse nao informado";
+        const carrier = row.carrier || "Transportadora nao informada";
+        const warehouse = row.warehouse || "Armazem nao informado";
         const destination = row.destination || "Destino nao informado";
         const status = row.status || "Desconhecido";
         const onTime = Boolean(row.on_time_flag);
@@ -284,7 +284,7 @@ export const buildTab4DerivedData = (analytics = []) => {
             }
         },
         alertas: {
-            "Delivery Success Rate": totalShipments ? `${((successShipments / totalShipments) * 100).toFixed(1)}%` : "0%",
+            "Taxa de Sucesso na Entrega": totalShipments ? `${((successShipments / totalShipments) * 100).toFixed(1)}%` : "0%",
             "Embarques Entregues": formatNumber(deliveredShipments)
         }
     };

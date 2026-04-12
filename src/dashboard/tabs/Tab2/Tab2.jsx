@@ -217,8 +217,8 @@ const Tab2 = () => {
                 status: availableStatus
             }}
             contentSectionClassName="mt-24"
-            kpiTitle="KPIs de Amazon Sales"
-            overviewTitle="Visao Geral de Amazon Sales"
+            kpiTitle="KPIs de Vendas Amazon"
+            overviewTitle="Visao Geral de Vendas Amazon"
             kpis={kpis}
             alertas={alertas}
             onCrossFilter={handleCrossFilter}

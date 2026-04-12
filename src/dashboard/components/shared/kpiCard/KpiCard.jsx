@@ -4,7 +4,7 @@ import { KPI_VARIATION_CONTEXT } from "../chartContext";
 import "./KpiCard.css";
 import { useKpiCardState } from "./kpiCard.state";
 
-const KpiCard = ({ label, value, variation }) => {
+const KpiCard = ({ label, displayLabel = label, value, variation }) => {
     const { isEmpty, formatted } = useKpiCardState(label, value);
 
     const variationClass = useMemo(() => {
@@ -34,7 +34,7 @@ const KpiCard = ({ label, value, variation }) => {
                         {variationText}
                     </span>
                 ) : null}
-                <span className="kpi-card-label">{label}</span>
+                <span className="kpi-card-label">{displayLabel}</span>
                 <span className="kpi-card-value">{isEmpty ? "-" : formatted}</span>
             </Card.Body>
         </Card>

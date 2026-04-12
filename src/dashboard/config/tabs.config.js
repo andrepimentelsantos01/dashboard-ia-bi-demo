@@ -13,28 +13,28 @@ export const DASHBOARD_TAB_IDS = Object.freeze({
 export const DASHBOARD_TABS = [
     {
         id: DASHBOARD_TAB_IDS.TAB1,
-        label: "Adidas Sales Dataset",
+        label: "Vendas Adidas",
         schema: "adidas",
         preload: loadTab1,
         loadComponent: loadTab1
     },
     {
         id: DASHBOARD_TAB_IDS.TAB2,
-        label: "Amazon Sales Dataset",
+        label: "Vendas Amazon",
         schema: "amazon",
         preload: loadTab2,
         loadComponent: loadTab2
     },
     {
         id: DASHBOARD_TAB_IDS.TAB3,
-        label: "Restaurant Sales Dataset",
+        label: "Vendas Restaurante",
         schema: "restaurant",
         preload: loadTab3,
         loadComponent: loadTab3
     },
     {
         id: DASHBOARD_TAB_IDS.TAB4,
-        label: "Logistics Performance Dataset",
+        label: "Performance Logistica",
         schema: "logistics",
         preload: loadTab4,
         loadComponent: loadTab4

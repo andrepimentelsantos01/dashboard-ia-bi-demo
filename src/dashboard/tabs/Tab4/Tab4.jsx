@@ -20,31 +20,31 @@ const LogisticsGaugePanel = React.memo(({ gauges }) => {
     const cards = [
         {
             key: "onTimeSla",
-            label: "On-Time SLA",
+            label: "SLA no Prazo",
             value: gauges.onTimeSla,
             invertColors: true,
             helpText: GAUGE_CONTEXT.sla
         },
         {
             key: "successRate",
-            label: "Delivery Success Rate",
+            label: "Taxa de Sucesso na Entrega",
             value: gauges.successRate,
             invertColors: true,
             helpText: "Percentual de embarques concluidos com status entregue no recorte filtrado. Quanto maior, maior a taxa de sucesso operacional da malha logistica."
         },
         {
             key: "exceptionRate",
-            label: "Exception Rate",
+            label: "Taxa de Excecao",
             value: gauges.exceptionRate,
             invertColors: false,
             helpText: "Percentual de embarques com excecao operacional, considerando atrasos, extravios e devolucoes. Quanto menor, mais saudavel esta a operacao."
         },
         {
             key: "carrierCompliance",
-            label: "Carrier Compliance",
+            label: "Conformidade da Transportadora",
             value: gauges.carrierCompliance,
             invertColors: true,
-            helpText: "Compliance medio do carrier selecionado, medido pela aderencia ao prazo planejado. Sem filtro de carrier, mostra o melhor desempenho consolidado entre os carriers ativos."
+            helpText: "Conformidade media da transportadora selecionada, medida pela aderencia ao prazo planejado. Sem filtro de transportadora, mostra o melhor desempenho consolidado entre as transportadoras ativas."
         }
     ];
 
@@ -113,8 +113,8 @@ const Tab4 = () => {
 
     const filterInputs = useMemo(
         () => [
-            { label: "Carriers", name: "carriers", data: availableCarriers },
-            { label: "Warehouses", name: "warehouses", data: availableWarehouses },
+            { label: "Transportadoras", name: "carriers", data: availableCarriers },
+            { label: "Armazens", name: "warehouses", data: availableWarehouses },
             { label: "Destinos", name: "destinations", data: availableDestinations },
             { label: "Status", name: "status", data: availableStatus },
             { label: "Rotas", name: "produtos", data: availableRoutes }
@@ -157,7 +157,7 @@ const Tab4 = () => {
                 )
             },
             {
-                title: "Custo por Carrier",
+                title: "Custo por Transportadora",
                 height: 260,
                 component: (
                     <ChartHorizontal
@@ -171,7 +171,7 @@ const Tab4 = () => {
                 )
             },
             {
-                title: "SLA por Carrier",
+                title: "SLA por Transportadora",
                 height: 260,
                 component: (
                     <ChartHorizontal
@@ -231,7 +231,7 @@ const Tab4 = () => {
                 )
             },
             {
-                title: "Mapa de Calor Warehouse x Mes",
+                title: "Mapa de Calor Armazem x Mes",
                 height: 280,
                 caption: HEATMAP_CONTEXT,
                 component: (
@@ -264,8 +264,8 @@ const Tab4 = () => {
                 produtos: availableRoutes
             }}
             contentSectionClassName="section-gap"
-            kpiTitle="KPIs de Logistics Performance"
-            overviewTitle="Visao Geral de Logistics Performance"
+            kpiTitle="KPIs de Performance Logistica"
+            overviewTitle="Visao Geral de Performance Logistica"
             tableTitle="Tabela Consolidada / Dados Operacionais"
             kpis={kpis}
             alertas={alertas}

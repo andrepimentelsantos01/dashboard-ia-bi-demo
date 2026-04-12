@@ -138,7 +138,7 @@ export const buildTab1DerivedData = (analytics = []) => {
         }
         acc.clientesQuantidade[cliente].valor += quantity;
 
-        const fornecedor = row.supplier_name || "Retailer nao informado";
+        const fornecedor = row.supplier_name || "Varejista nao informado";
         if (!acc.fornecedores[fornecedor]) {
             acc.fornecedores[fornecedor] = { name: fornecedor, valor: 0, type: "fornecedor" };
         }

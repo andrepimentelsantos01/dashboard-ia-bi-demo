@@ -4,8 +4,8 @@
     --logistics-primary: #d90429;
     --logistics-primary-hover: #b10322;
     --logistics-primary-soft: #fdebed;
-    --logistics-surface-dark: #0b0b0c;
-    --logistics-surface-mid: #16181d;
+    --logistics-surface-dark: #ffffff;
+    --logistics-surface-mid: #fff5f6;
     --logistics-surface-light: #ffffff;
     --logistics-border-subtle: #d9dde3;
     --logistics-text-strong: #111111;
@@ -47,8 +47,8 @@ html[data-dashboard-schema="logistics"][data-theme="light"] {
     --logistics-primary: #d90429;
     --logistics-primary-hover: #b10322;
     --logistics-primary-soft: #fdebed;
-    --logistics-surface-dark: #0b0b0c;
-    --logistics-surface-mid: #16181d;
+    --logistics-surface-dark: #ffffff;
+    --logistics-surface-mid: #fff5f6;
     --logistics-surface-light: #ffffff;
     --logistics-border-subtle: #d9dde3;
     --logistics-text-strong: #111111;
@@ -72,19 +72,19 @@ html[data-dashboard-schema="logistics"][data-theme="light"] {
 html[data-dashboard-schema="logistics"][data-theme="dark"] {
     --logistics-primary: #d90429;
     --logistics-primary-hover: #b10322;
-    --logistics-surface-dark: #0b0b0c;
-    --logistics-surface-mid: #16181d;
+    --logistics-surface-dark: #ffffff;
+    --logistics-surface-mid: #fff5f6;
     --logistics-text-on-dark: #ffffff;
-    --bi-surface: rgba(22, 24, 29, 0.92);
-    --bi-surface-strong: rgba(11, 11, 12, 0.98);
-    --bi-surface-soft: linear-gradient(180deg, rgba(22, 24, 29, 0.98) 0%, rgba(11, 11, 12, 0.99) 100%);
-    --bi-border: rgba(217, 221, 227, 0.14);
+    --bi-surface: rgba(255, 255, 255, 0.96);
+    --bi-surface-strong: rgba(255, 255, 255, 0.99);
+    --bi-surface-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(247, 248, 250, 0.98) 100%);
+    --bi-border: rgba(217, 221, 227, 0.88);
     --bi-border-strong: rgba(217, 4, 41, 0.34);
-    --bi-shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.36);
-    --bi-shadow-card: 0 18px 38px rgba(0, 0, 0, 0.4);
-    --bi-shadow-float: 0 24px 46px rgba(0, 0, 0, 0.46);
-    --bi-text: var(--logistics-text-on-dark);
-    --bi-text-soft: #d9dde3;
+    --bi-shadow-soft: 0 16px 36px rgba(11, 11, 12, 0.1);
+    --bi-shadow-card: 0 16px 34px rgba(11, 11, 12, 0.12);
+    --bi-shadow-float: 0 22px 44px rgba(11, 11, 12, 0.2);
+    --bi-text: var(--logistics-text-strong);
+    --bi-text-soft: #4b5563;
     --bi-brand: #ff3557;
     --bi-brand-strong: #ffffff;
     --bi-accent: var(--logistics-primary);
@@ -97,13 +97,13 @@ html[data-dashboard-schema="logistics"][data-theme="dark"] {
 
 .logistics-scope .section-wrapper-header,
 .logistics-scope .filter-section-wrapper .section-wrapper-header {
-    background: linear-gradient(135deg, var(--logistics-surface-dark) 0%, var(--logistics-surface-mid) 78%, var(--logistics-primary) 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #fff5f6 72%, var(--logistics-primary) 100%);
     border-bottom-color: rgba(217, 4, 41, 0.35);
 }
 
 .logistics-scope .section-wrapper-title,
 .logistics-scope .section-wrapper-collapse-button {
-    color: var(--logistics-text-on-dark);
+    color: var(--logistics-text-strong);
 }
 
 .logistics-scope .section-wrapper-title {
@@ -143,21 +143,22 @@ html[data-dashboard-schema="logistics"][data-theme="dark"] {
 }
 
 .logistics-scope .kpi-card {
-    border-color: rgba(255, 255, 255, 0.08) !important;
-    background: linear-gradient(135deg, var(--logistics-surface-dark) 0%, var(--logistics-surface-mid) 76%, #2a0b12 100%) !important;
-    box-shadow: 0 16px 34px rgba(11, 11, 12, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(217, 4, 41, 0.2) !important;
+    background: linear-gradient(135deg, #ffffff 0%, #fff5f6 72%, var(--logistics-primary) 100%) !important;
+    box-shadow: 0 16px 34px rgba(217, 4, 41, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.76) !important;
 }
 
 .logistics-scope .kpi-card:hover {
-    box-shadow: 0 20px 42px rgba(11, 11, 12, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 20px 42px rgba(217, 4, 41, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
 }
 
 .logistics-scope .kpi-card-label {
-    color: rgba(255, 255, 255, 0.72) !important;
+    color: #4b5563 !important;
 }
 
 .logistics-scope .kpi-card-value {
-    color: var(--logistics-text-on-dark) !important;
+    color: #111111 !important;
+    text-shadow: none !important;
 }
 
 .logistics-scope .overview-card-title,
@@ -167,7 +168,8 @@ html[data-dashboard-schema="logistics"][data-theme="dark"] {
 }
 
 .logistics-scope .datatable-header-row {
-    background: linear-gradient(90deg, var(--logistics-surface-dark), var(--logistics-surface-mid), var(--logistics-primary));
+    background: linear-gradient(90deg, #ffffff, #fff5f6, var(--logistics-primary));
+    color: #111111;
 }
 
 .logistics-scope .floating-clear-button,
@@ -250,8 +252,8 @@ html[data-theme="dark"] .logistics-scope .datatable-wrapper,
 html[data-theme="dark"] .logistics-scope .datatable-toolbar,
 html[data-theme="dark"] .logistics-scope .datatable-search-shell,
 html[data-theme="dark"] .logistics-scope .tab4-gauge-card {
-    border-color: rgba(217, 221, 227, 0.16) !important;
-    background: linear-gradient(180deg, rgba(22, 24, 29, 0.98) 0%, rgba(11, 11, 12, 0.99) 100%) !important;
+    border-color: rgba(217, 4, 41, 0.18) !important;
+    background: linear-gradient(180deg, #ffffff 0%, #fff8f9 100%) !important;
 }
 
 html[data-theme="dark"] .logistics-scope .overview-card-title,
@@ -259,7 +261,7 @@ html[data-theme="dark"] .logistics-scope .datatable-search-input,
 html[data-theme="dark"] .logistics-scope .datatable-cell,
 html[data-theme="dark"] .logistics-scope .selectedItems,
 html[data-theme="dark"] .logistics-scope .tab4-gauge-caption {
-    color: var(--logistics-text-on-dark) !important;
+    color: var(--logistics-text-strong) !important;
 }
 
 @media (max-width: 1200px) {

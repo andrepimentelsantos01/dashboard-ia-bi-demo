@@ -27,6 +27,16 @@ const normalizeKpiValue = (entry) => {
     };
 };
 
+const KPI_LABELS_PT_BR = {
+    "Total Sales": "Receita Total",
+    "Operating Profit": "Lucro Operacional",
+    "Average Operating Margin": "Margem Operacional Media",
+    "Units Sold": "Unidades Vendidas",
+    "Delivery Success Rate": "Taxa de Sucesso na Entrega"
+};
+
+const translateKpiLabel = (label) => KPI_LABELS_PT_BR[label] || label;
+
 const KpiSection = ({ kpis = {}, isLoading, isRefreshing, error, onRetry }) => {
     const defaultKeys = ["valorTotalMovimentado", "valorEntregue", "volumeTotal", "quantidadeClientes"];
 
@@ -79,6 +89,7 @@ const KpiSection = ({ kpis = {}, isLoading, isRefreshing, error, onRetry }) => {
 
                 return {
                     label,
+                    displayLabel: translateKpiLabel(label),
                     value: normalizedValue,
                     color: "#19b59f"
                 };
@@ -110,10 +121,11 @@ const KpiSection = ({ kpis = {}, isLoading, isRefreshing, error, onRetry }) => {
         <div className={`kpi-section-wrapper ${isRefreshing ? "dashboard-section-loading" : ""}`}>
             {isRefreshing ? <DashboardSectionLoadingOverlay label="Atualizando indicadores..." /> : null}
             <Row className="kpi-grid-row">
-                {kpiCards.map(({ label, value, color }) => (
+                {kpiCards.map(({ label, displayLabel, value, color }) => (
                     <KpiCard
                         key={label}
                         label={label}
+                        displayLabel={displayLabel || label}
                         value={value.value}
                         variation={value.variation}
                         color={color}

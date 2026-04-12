@@ -200,8 +200,8 @@ const Tab3 = () => {
                 transactionTypes: availableTransactions
             }}
             contentSectionClassName="section-gap"
-            kpiTitle="KPIs de Restaurant Sales"
-            overviewTitle="Visao Geral de Restaurant Sales"
+            kpiTitle="KPIs de Vendas Restaurante"
+            overviewTitle="Visao Geral de Vendas Restaurante"
             tableTitle="Tabela Consolidada / Dados Operacionais"
             kpis={kpis}
             alertas={alertas}

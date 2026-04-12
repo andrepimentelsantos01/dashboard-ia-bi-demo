@@ -3,14 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 const STORAGE_KEY = "dashboard-theme-mode";
 
 const getPreferredTheme = () => {
-    if (typeof window === "undefined") return "light";
-
-    const persistedTheme = window.localStorage.getItem(STORAGE_KEY);
-    if (persistedTheme === "light" || persistedTheme === "dark") {
-        return persistedTheme;
-    }
-
-    return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
+    return "light";
 };
 
 export const useThemeMode = () => {
@@ -22,21 +15,7 @@ export const useThemeMode = () => {
     }, [theme]);
 
     useEffect(() => {
-        const mediaQuery = window.matchMedia?.("(prefers-color-scheme: dark)");
-        if (!mediaQuery) return undefined;
-
-        const handleSystemThemeChange = (event) => {
-            const persistedTheme = window.localStorage.getItem(STORAGE_KEY);
-            if (persistedTheme === "light" || persistedTheme === "dark") return;
-
-            setTheme(event.matches ? "dark" : "light");
-        };
-
-        mediaQuery.addEventListener?.("change", handleSystemThemeChange);
-
-        return () => {
-            mediaQuery.removeEventListener?.("change", handleSystemThemeChange);
-        };
+        return undefined;
     }, []);
 
     const toggleTheme = useCallback(() => {
@@ -49,4 +28,3 @@ export const useThemeMode = () => {
         toggleTheme
     }), [theme, toggleTheme]);
 };
-

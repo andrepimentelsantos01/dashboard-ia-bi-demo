@@ -141,7 +141,7 @@ const FilterSection = ({
                     type="button"
                     className="filter-scroll-button filter-scroll-button--left"
                     onClick={() => handleHorizontalScroll(-1)}
-                    aria-label="Scroll filters left"
+                    aria-label="Rolar filtros para a esquerda"
                 >
                     <FiChevronLeft />
                 </button>
@@ -157,7 +157,7 @@ const FilterSection = ({
                     type="button"
                     className="filter-scroll-button filter-scroll-button--right"
                     onClick={() => handleHorizontalScroll(1)}
-                    aria-label="Scroll filters right"
+                    aria-label="Rolar filtros para a direita"
                 >
                     <FiChevronRight />
                 </button>

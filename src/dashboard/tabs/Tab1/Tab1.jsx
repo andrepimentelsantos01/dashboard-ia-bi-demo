@@ -57,14 +57,14 @@ const Tab1 = () => {
     const filterInputs = useMemo(
         () => [
             {
-                label: "Region",
+                label: "Regiao",
                 name: "categorias",
                 data: availableCategorias.map((name) => ({ id: name, name }))
             },
-            { label: "State", name: "clients", data: availableClients },
-            { label: "Retailer", name: "suppliers", data: availableSuppliers },
-            { label: "Product", name: "produtos", data: availableProdutos },
-            { label: "Sales Method", name: "status", data: availableStatus }
+            { label: "Estado", name: "clients", data: availableClients },
+            { label: "Varejista", name: "suppliers", data: availableSuppliers },
+            { label: "Produto", name: "produtos", data: availableProdutos },
+            { label: "Canal de Venda", name: "status", data: availableStatus }
         ],
         [
             availableCategorias,
@@ -78,7 +78,7 @@ const Tab1 = () => {
     const charts = useMemo(
         () => [
             {
-                title: "Monthly Revenue",
+                title: "Receita Mensal",
                 height: 260,
                 component: (
                     <ChartBarVertical
@@ -92,7 +92,7 @@ const Tab1 = () => {
                 )
             },
             {
-                title: "Monthly Operating Profit",
+                title: "Lucro Operacional Mensal",
                 height: 260,
                 component: (
                     <ChartBarVertical
@@ -106,7 +106,7 @@ const Tab1 = () => {
                 )
             },
             {
-                title: "State Sales Map",
+                title: "Mapa de Vendas por Estado",
                 height: 320,
                 component: (
                     <ChartMapMorph
@@ -120,7 +120,7 @@ const Tab1 = () => {
                 )
             },
             {
-                title: "Region comparison",
+                title: "Comparativo por Regiao",
                 height: 260,
                 component: (
                     <ChartBarVertical
@@ -136,7 +136,7 @@ const Tab1 = () => {
                 )
             },
             {
-                title: "Revenue by Sales Method over Time",
+                title: "Receita por Canal de Venda ao Longo do Tempo",
                 height: 280,
                 caption: STACKED_BAR_CONTEXT,
                 component: (
@@ -150,7 +150,7 @@ const Tab1 = () => {
                 )
             },
             {
-                title: "Sales Method Mix",
+                title: "Mix por Canal de Venda",
                 height: 260,
                 component: (
                     <ChartPie
@@ -163,7 +163,7 @@ const Tab1 = () => {
                 )
             },
             {
-                title: "Product Revenue Ranking",
+                title: "Ranking de Produtos por Receita",
                 height: 260,
                 component: (
                     <ChartHorizontal
@@ -178,7 +178,7 @@ const Tab1 = () => {
                 )
             },
             {
-                title: "Retailer Revenue Ranking",
+                title: "Ranking de Varejistas por Receita",
                 height: 260,
                 component: (
                     <ChartHorizontal
@@ -193,7 +193,7 @@ const Tab1 = () => {
                 )
             },
             {
-                title: "Price vs Volume Scatter",
+                title: "Dispersao Preco x Volume",
                 height: 300,
                 caption: SCATTER_CONTEXT,
                 component: (
@@ -206,7 +206,7 @@ const Tab1 = () => {
                 )
             },
             {
-                title: "Region x Month Heatmap",
+                title: "Mapa de Calor Regiao x Mes",
                 height: 280,
                 caption: HEATMAP_CONTEXT,
                 component: (
@@ -220,7 +220,7 @@ const Tab1 = () => {
                 )
             },
             {
-                title: "Average Price per Unit over Time",
+                title: "Preco Medio por Unidade ao Longo do Tempo",
                 height: 260,
                 fullWidth: true,
                 component: (
