@@ -1,14 +1,9 @@
-import { useState, useMemo, useCallback, useDeferredValue } from "react";
+import { useState, useMemo, useCallback, useDeferredValue, useEffect } from "react";
 import * as echarts from "echarts";
-import brasilMap from "/src/mocks/dashboard/brasil.geo.json";
 import usStatesMap from "./geoJson/us-states.json";
 import { buildResponsiveTooltip } from "../chartTooltip.helpers";
 import { useChartThemeTokens } from "../chartTheme";
 import { formatCompactCurrencyValue, formatCurrencyValue } from "../../../../utils/intlFormat";
-
-if (!echarts.getMap("brazil-morph")) {
-    echarts.registerMap("brazil-morph", brasilMap);
-}
 
 if (!echarts.getMap("us-states-morph")) {
     echarts.registerMap("us-states-morph", usStatesMap);
@@ -151,7 +146,38 @@ export const useChartMapMorphState = ({
     const [viewMode, setViewMode] = useState("map");
     const themeTokens = useChartThemeTokens();
     const geographyConfig = GEO_CONFIG[geography] || GEO_CONFIG.brazil;
+    const needsBrazilMap = geographyConfig.mapName === "brazil-morph";
+    const [mapReady, setMapReady] = useState(() => !needsBrazilMap || Boolean(echarts.getMap("brazil-morph")));
     const deferredBackendData = useDeferredValue(backendData);
+
+    useEffect(() => {
+        let active = true;
+
+        if (!needsBrazilMap || echarts.getMap("brazil-morph")) {
+            setMapReady(true);
+            return () => {
+                active = false;
+            };
+        }
+
+        setMapReady(false);
+
+        import("/src/mocks/dashboard/brasil.geo.json")
+            .then(({ default: brasilMap }) => {
+                if (!echarts.getMap("brazil-morph")) {
+                    echarts.registerMap("brazil-morph", brasilMap);
+                }
+
+                if (active) setMapReady(true);
+            })
+            .catch(() => {
+                if (active) setMapReady(false);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [needsBrazilMap]);
 
     const handleRefresh = useCallback(() => {
         setSelectedRegion(null);
@@ -280,6 +306,21 @@ export const useChartMapMorphState = ({
     }, [aggregated, onCrossFilter, selectedRegion]);
 
     const option = useMemo(() => {
+        if (!mapReady) {
+            return {
+                title: {
+                    text: "Carregando mapa...",
+                    left: "center",
+                    top: "middle",
+                    textStyle: {
+                        color: themeTokens.textSecondary,
+                        fontSize: 13,
+                        fontWeight: 500
+                    }
+                }
+            };
+        }
+
         const commonTooltip = buildResponsiveTooltip((params) => {
             const item = viewMode === "map" ? params : sortedData[params.dataIndex];
             return item ? tooltipContentByName[item.name] || "" : "";
@@ -419,6 +460,7 @@ export const useChartMapMorphState = ({
         geographyConfig,
         locale,
         mapData,
+        mapReady,
         maxValue,
         sortedData,
         themeTokens,

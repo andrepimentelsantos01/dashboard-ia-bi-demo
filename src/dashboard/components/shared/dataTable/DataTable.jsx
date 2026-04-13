@@ -423,7 +423,7 @@ const DataTable = ({
                                         <span>{column.label}</span>
                                         {sortColumn === column.key && (
                                             <span className="datatable-sort-indicator">
-                                                {sortDirection === "asc" ? "?" : "?"}
+                                                {sortDirection === "asc" ? "ASC" : "DESC"}
                                             </span>
                                         )}
                                     </th>

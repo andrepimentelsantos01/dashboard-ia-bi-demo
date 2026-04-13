@@ -82,6 +82,7 @@ export const normalizeTab2Table = (rows = []) =>
             year_months: row.year_months,
             customer_name: row.customer_name || row.client_name,
             customer_location: row.customer_location,
+            product_id: row.product_id,
             product_name: row.product_name,
             product_class_material_name: row.product_class_material_name,
             payment_method: row.payment_method || row.supplier_name,
@@ -215,8 +216,8 @@ export const buildTab2DerivedData = (analytics = []) => {
         categoriasRankingVolume: toMetricArray(acc.categoriesVolume, "categoria"),
         produtosRanking: toMetricArray(acc.products, "produto"),
         produtosRankingVolume: toMetricArray(acc.productsVolume, "produto"),
-        locationsRanking: toMetricArray(acc.locations, "cliente"),
-        locationsRankingVolume: toMetricArray(acc.locationsVolume, "cliente"),
+        locationsRanking: toMetricArray(acc.locations, "location"),
+        locationsRankingVolume: toMetricArray(acc.locationsVolume, "location"),
         paymentRanking: toMetricArray(acc.payments, "fornecedor"),
         paymentRankingVolume: toMetricArray(acc.paymentsVolume, "fornecedor"),
         statusTreemap: Object.values(acc.statusTreemap).map((item) => ({

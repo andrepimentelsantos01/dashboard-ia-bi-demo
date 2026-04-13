@@ -62,6 +62,7 @@ export const normalizeTab3Table = (rows = []) =>
             customer_name: row.received_by,
             customer_location: row.time_of_sale,
             payment_method: row.transaction_type,
+            product_id: row.product_id,
             product_name: row.product_name,
             product_class_material_name: row.product_class_material_name,
             quantity_requested: quantidade,
@@ -74,6 +75,7 @@ export const normalizeTab3Table = (rows = []) =>
             fornecedor: row.received_by,
             categoria: row.product_class_material_name,
             produto: row.product_name,
+            status,
             quantidade,
             valorTotal,
             valorUnitario

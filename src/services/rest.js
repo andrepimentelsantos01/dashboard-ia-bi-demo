@@ -1,7 +1,3 @@
-import adidasSalesRows from "../mocks/datasetReal/adidasUsSales.json";
-import amazonSalesCsvRaw from "../mocks/datasetReal/Amazon Sales 2025 Dataset.csv?raw";
-import logisticsShipmentsCsvRaw from "../mocks/datasetReal/Logistics Shipments Dataset.csv?raw";
-import restaurantSalesCsvRaw from "../mocks/datasetReal/Restaurant Sales Dataset.csv?raw";
 import { normalizeStatusLabel, slugifyStatus } from "../dashboard/selectors/shared/dashboardStatus";
 import { formatCurrencyValue } from "../dashboard/utils/intlFormat";
 
@@ -302,7 +298,7 @@ const buildLogisticsCarrierId = (carrier) => `carrier-${normalizeToken(carrier, 
 const buildLogisticsRouteId = (route) => `route-${normalizeToken(route, "unknown")}`;
 const buildLogisticsDestinationId = (destination) => `destination-${normalizeToken(destination, "unknown")}`;
 
-const tab1Rows = adidasSalesRows
+const normalizeTab1Rows = (adidasSalesRows) => adidasSalesRows
   .map((row, index) => {
     const retailer = row.Retailer?.trim();
     const retailerId = row["Retailer ID"];
@@ -379,7 +375,7 @@ const tab1Rows = adidasSalesRows
   })
   .filter(Boolean);
 
-const tab2Rows = parseCsvRows(amazonSalesCsvRaw)
+const normalizeTab2Rows = (amazonSalesCsvRaw) => parseCsvRows(amazonSalesCsvRaw)
   .map((row, index) => {
     const orderDate = parseDayFirstDate(row.Date);
     const customerName = row["Customer Name"]?.trim();
@@ -435,7 +431,7 @@ const tab2Rows = parseCsvRows(amazonSalesCsvRaw)
   })
   .filter(Boolean);
 
-const tab3Rows = parseCsvRows(restaurantSalesCsvRaw)
+const normalizeTab3Rows = (restaurantSalesCsvRaw) => parseCsvRows(restaurantSalesCsvRaw)
   .map((row, index) => {
     const orderDate = parseRestaurantDate(row.date);
     const productName = row.item_name?.trim();
@@ -492,7 +488,7 @@ const tab3Rows = parseCsvRows(restaurantSalesCsvRaw)
   })
   .filter(Boolean);
 
-const tab4Rows = parseCsvRows(logisticsShipmentsCsvRaw)
+const normalizeTab4Rows = (logisticsShipmentsCsvRaw) => parseCsvRows(logisticsShipmentsCsvRaw)
   .map((row, index) => {
     const shipmentDate = safeDate(row.Shipment_Date);
     const deliveryDate = safeDate(row.Delivery_Date);
@@ -576,6 +572,47 @@ const tab4Rows = parseCsvRows(logisticsShipmentsCsvRaw)
     };
   })
   .filter(Boolean);
+
+let tab1RowsCache;
+let tab2RowsCache;
+let tab3RowsCache;
+let tab4RowsCache;
+
+const getTab1Rows = async () => {
+  if (!tab1RowsCache) {
+    const { default: adidasSalesRows } = await import("../mocks/datasetReal/adidasUsSales.json");
+    tab1RowsCache = normalizeTab1Rows(adidasSalesRows);
+  }
+
+  return tab1RowsCache;
+};
+
+const getTab2Rows = async () => {
+  if (!tab2RowsCache) {
+    const { default: amazonSalesCsvRaw } = await import("../mocks/datasetReal/Amazon Sales 2025 Dataset.csv?raw");
+    tab2RowsCache = normalizeTab2Rows(amazonSalesCsvRaw);
+  }
+
+  return tab2RowsCache;
+};
+
+const getTab3Rows = async () => {
+  if (!tab3RowsCache) {
+    const { default: restaurantSalesCsvRaw } = await import("../mocks/datasetReal/Restaurant Sales Dataset.csv?raw");
+    tab3RowsCache = normalizeTab3Rows(restaurantSalesCsvRaw);
+  }
+
+  return tab3RowsCache;
+};
+
+const getTab4Rows = async () => {
+  if (!tab4RowsCache) {
+    const { default: logisticsShipmentsCsvRaw } = await import("../mocks/datasetReal/Logistics Shipments Dataset.csv?raw");
+    tab4RowsCache = normalizeTab4Rows(logisticsShipmentsCsvRaw);
+  }
+
+  return tab4RowsCache;
+};
 
 const buildTab1Response = (rows) => {
   const totalSales = rows.reduce((sum, row) => sum + Number(row.sum_total_amount || 0), 0);
@@ -758,20 +795,24 @@ const delay = async () => {
 
 export const biTab1 = async (filters = {}) => {
   await delay();
-  return buildTab1Response(applyCommonFilters(tab1Rows, filters));
+  const rows = await getTab1Rows();
+  return buildTab1Response(applyCommonFilters(rows, filters));
 };
 
 export const biTab2 = async (filters = {}) => {
   await delay();
-  return buildTab2Response(applyCommonFilters(tab2Rows, filters));
+  const rows = await getTab2Rows();
+  return buildTab2Response(applyCommonFilters(rows, filters));
 };
 
 export const biTab3 = async (filters = {}) => {
   await delay();
-  return buildTab3Response(applyCommonFilters(tab3Rows, filters));
+  const rows = await getTab3Rows();
+  return buildTab3Response(applyCommonFilters(rows, filters));
 };
 
 export const biTab4 = async (filters = {}) => {
   await delay();
-  return buildTab4Response(applyCommonFilters(tab4Rows, filters));
+  const rows = await getTab4Rows();
+  return buildTab4Response(applyCommonFilters(rows, filters));
 };

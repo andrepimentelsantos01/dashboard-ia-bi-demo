@@ -219,6 +219,7 @@ const STATUS_SLUG_ALIASES = {
     concluido: "completed",
     atrasado: "pending",
     cancelado: "cancelled",
+    em_transito: "in_transit",
     em_transporte: "in_transit"
 };
 
