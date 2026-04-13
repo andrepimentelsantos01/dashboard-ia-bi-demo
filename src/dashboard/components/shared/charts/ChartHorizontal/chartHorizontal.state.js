@@ -128,16 +128,17 @@ export const useChartHorizontalState = ({
             return;
         }
 
+        const clickedItem = sorted.find((item) => item.name === clicked);
         const info = aggregated[clicked];
-        if (!info) return;
+        if (!info && !clickedItem) return;
 
         setSelectedName(clicked);
         onCrossFilter({
-            type: info.type,
-            id: info.id,
+            type: clickedItem?.type ?? info.type,
+            id: clickedItem?.id ?? info?.id ?? clicked,
             value: clicked
         });
-    }, [aggregated, onCrossFilter, selectedName]);
+    }, [aggregated, onCrossFilter, selectedName, sorted]);
 
     const formatValue = useCallback((value) => {
         if (valueFormat === "volume") return Math.round(value);

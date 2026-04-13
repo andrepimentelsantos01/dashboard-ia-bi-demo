@@ -248,13 +248,6 @@ const OperationalDataSection = ({ tabela = [], isLoading, isRefreshing, error, o
             <Row className="mb-0">
                 <Col xs={12}>
                     <div className="operational-title-container">
-                        <div className="operational-title-copy">
-                            <h6 className="operational-title">Tabela Consolidada</h6>
-                            <p className="operational-subtitle">
-                                Consulte, pesquise e exporte os dados operacionais ja sincronizados com os graficos.
-                            </p>
-                        </div>
-
                         <div className="operational-actions">
                             <div className="operational-zoom-controls">
                                 <button
