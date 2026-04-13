@@ -1,4 +1,4 @@
-# Blueprint BI Standalone v2
+# Blueprint BI Standalone v2 - Versao Final
 
 ## Objetivo
 
@@ -21,6 +21,7 @@ Abas descontinuadas nao fazem mais parte do escopo, da navegacao nem da camada d
 4. Contrato de dados interno deve permanecer estavel entre datasets.
 5. Cross-filter e traducao de filtros devem ser padronizados em helpers compartilhados.
 6. Otimizacoes de bundle e lazy loading sao parte da arquitetura, nao pos-processo.
+7. Datasets, assets geograficos e exportadores pesados devem ficar sob demanda quando nao forem necessarios no caminho inicial.
 
 ## Arquitetura oficial
 
@@ -31,8 +32,9 @@ Fluxo adotado no repositorio:
 ### Responsabilidades
 
 - `src/services/rest.js`
-  - le datasets reais locais;
+  - carrega datasets reais locais sob demanda;
   - normaliza cada dominio para o contrato interno comum;
+  - mantem cache em memoria por dominio depois do primeiro carregamento;
   - aplica filtros de consulta consumidos pelas abas.
 
 - `src/dashboard/tabs/*/*.state.js`
@@ -51,12 +53,25 @@ Fluxo adotado no repositorio:
 - `src/dashboard/config/tabs.config.js`
   - fonte unica de verdade para navegacao, preload e schema visual das abas finais.
 
-## Estrutura final recomendada
+- `src/hooks/useThemeMode.js`
+  - fonte compartilhada do tema claro/escuro;
+  - sincroniza DOM, `localStorage` e multiplas instancias do hook.
+
+## Estrutura final real
 
 ```text
 src/
+|-- App.jsx
+|-- main.jsx
+|-- core/
+|   |-- auth.js
+|-- hooks/
+|   |-- useThemeMode.js
 |-- services/
 |   |-- rest.js
+|-- mocks/
+|   |-- datasetReal/
+|   |-- dashboard/
 |-- dashboard/
 |   |-- config/
 |   |   |-- tabs.config.js
@@ -64,18 +79,24 @@ src/
 |   |-- hooks/
 |   |   |-- dashboardTabState.helpers.js
 |   |   |-- useDashboardTabUi.js
+|   |   |-- useFilterSectionOptions.js
+|   |   |-- useFormatter.js
 |   |-- selectors/
-|   |   |-- overviewSelectors.js
+|   |   |-- tab1Selectors.js
 |   |   |-- amazonSalesSelectors.js
 |   |   |-- restaurantSalesSelectors.js
 |   |   |-- logisticsPerformanceSelectors.js
 |   |   |-- shared/
 |   |-- tabs/
-|   |   |-- Overview/
-|   |   |-- Products/
-|   |   |-- Clients/
-|   |   |-- Suppliers/
+|   |   |-- shared/
+|   |   |-- Tab1/
+|   |   |-- Tab2/
+|   |   |-- Tab3/
+|   |   |-- Tab4/
 |   |-- index.jsx
+|   |-- index.css
+tests/
+|-- run.js
 ```
 
 ## Contrato interno de dados
@@ -119,25 +140,33 @@ Componentes visuais nao devem depender de campos crus do dataset se o contrato n
 
 - origem: `adidasUsSales.json`
 - especialidades: `operating_profit`, `operating_margin`, `region`, `sales_method`
+- selector: `tab1Selectors.js`
+- aba: `Tab1`
 - schema visual: `adidas`
 
 ### Amazon
 
 - origem: `Amazon Sales 2025 Dataset.csv`
 - especialidades: `customer_name`, `customer_location`, `payment_method`
+- selector: `amazonSalesSelectors.js`
+- aba: `Tab2`
 - schema visual: `amazon`
 
 ### Restaurant
 
 - origem: `Restaurant Sales Dataset.csv`
 - especialidades: `time_of_sale`, `received_by`, `transaction_type`
+- selector: `restaurantSalesSelectors.js`
+- aba: `Tab3`
 - schema visual: `restaurant`
 
 ### Logistics
 
 - origem: `Logistics Shipments Dataset.csv`
 - especialidades: `origin_warehouse`, `destination`, `carrier`, `delay_days`, `on_time_flag`
-- schema visual: `default`
+- selector: `logisticsPerformanceSelectors.js`
+- aba: `Tab4`
+- schema visual: `logistics`
 
 ## Padrao de filtros
 
@@ -206,9 +235,14 @@ Otimizacoes obrigatorias no estado final:
 - tabs lazy-loaded;
 - preload oportunistico das tabs nao ativas;
 - camada `rest.js` sem codigo morto de dominios removidos;
+- datasets reais carregados sob demanda e cacheados por dominio;
+- mapa grande do Brasil carregado sob demanda no `ChartMapMorph`, sem entrar no caminho inicial da aba Adidas;
+- exportadores pesados (`xlsx`, `jspdf`, `jspdf-autotable`) importados apenas no clique de exportacao;
 - helpers compartilhados para reduzir duplicacao de cross-filter;
 - `manualChunks` no Vite para separar dependencias pesadas;
 - selectors memoizados antes da renderizacao dos charts.
+
+Observacao: ECharts, datasets reais e GeoJSONs ainda podem gerar chunks grandes quando carregados, mas ficam isolados em chunks sob demanda.
 
 ### Diretriz
 
@@ -220,6 +254,7 @@ Cobertura minima esperada:
 
 - helpers compartilhados de filtros;
 - selectors com agregacoes criticas;
+- normalizacao e slug de status;
 - build de producao sem erro.
 
 ### Prioridade futura, se houver manutencao adicional
@@ -238,6 +273,17 @@ Qualquer manutencao futura deve preservar:
 - servico unico coerente com datasets locais ativos;
 - documentacao sincronizada com a implementacao real.
 
+## Robustez final
+
+O estado final reforca:
+
+- normalizacao de status centralizada em `dashboardStatus.js`;
+- filtros com guards para valores nulos, arrays vazios e datas invalidas;
+- tabela operacional com formatacao defensiva para datas, flags, status e moeda;
+- `FilterSection` sem dependencia insegura de `ResizeObserver` ou `document.body`;
+- tema claro/escuro compartilhado entre os botoes globais e flutuantes;
+- erro de carregamento preservando a ultima visao disponivel quando houver dados cacheados.
+
 ## Conclusao
 
 O projeto finalizado fica padronizado sobre uma base simples e suficiente para portfolio de BI:
@@ -246,5 +292,7 @@ O projeto finalizado fica padronizado sobre uma base simples e suficiente para p
 - shell compartilhado;
 - dominio isolado por selectors;
 - contrato de dados uniforme;
-- codigo legado removido do caminho critico;
-- bundle organizado para entrega final.
+- datasets e assets pesados sob demanda;
+- tema compartilhado e persistido;
+- codigo legado fora do caminho critico;
+- build e testes validaveis para entrega final.

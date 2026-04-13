@@ -79,15 +79,18 @@ const FilterSection = ({
 
         element.addEventListener("scroll", updateScrollState, { passive: true });
 
-        const resizeObserver = new ResizeObserver(() => {
-            updateScrollState();
-        });
+        const resizeObserver =
+            typeof ResizeObserver !== "undefined"
+                ? new ResizeObserver(() => {
+                    updateScrollState();
+                })
+                : null;
 
-        resizeObserver.observe(element);
+        resizeObserver?.observe(element);
 
         return () => {
             element.removeEventListener("scroll", updateScrollState);
-            resizeObserver.disconnect();
+            resizeObserver?.disconnect();
         };
     }, [updateScrollState, visibleFilterInputs.length]);
 
@@ -118,7 +121,7 @@ const FilterSection = ({
                             value={filters[name]}
                             data={data}
                             onChange={handleSelectChange(name)}
-                            menuPortalTarget={document.body}
+                            menuPortalTarget={typeof document !== "undefined" ? document.body : undefined}
                             menuPosition="fixed"
                         />
                     </div>

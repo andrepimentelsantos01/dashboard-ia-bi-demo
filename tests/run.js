@@ -10,6 +10,10 @@ import {
     buildDashboardApiFilters,
     createCrossFilterMap
 } from "../src/dashboard/hooks/dashboardTabState.helpers.js";
+import {
+    normalizeStatusLabel,
+    slugifyStatus
+} from "../src/dashboard/selectors/shared/dashboardStatus.js";
 
 const tests = [
     () => {
@@ -154,6 +158,13 @@ const tests = [
         assert.deepEqual(handlers.orders({ value: "INV-99" }), {
             orders: [{ id: "INV-99", name: "INV-99" }]
         });
+    },
+    () => {
+        assert.equal(normalizeStatusLabel("completed"), "Concluído");
+        assert.equal(normalizeStatusLabel("em_transporte"), "Em Trânsito");
+        assert.equal(normalizeStatusLabel("unknown-status", { fallback: "Sem status" }), "Sem status");
+        assert.equal(slugifyStatus("Concluído"), "completed");
+        assert.equal(slugifyStatus("Em Trânsito"), "in_transit");
     }
 ];
 
