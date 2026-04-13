@@ -129,7 +129,7 @@ const OverviewSection = ({ charts, isLoading, isRefreshing, error, onRetry }) =>
 
                                     <div
                                         className="overview-chart-container"
-                                        style={{ height: height || 260 }}
+                                        style={{ "--overview-chart-height": `${height || 260}px` }}
                                     >
                                         {component}
                                         <ChartHelpTooltip title={title} caption={caption} />

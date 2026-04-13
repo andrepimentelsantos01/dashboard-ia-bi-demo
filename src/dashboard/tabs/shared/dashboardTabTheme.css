@@ -547,15 +547,20 @@ html[data-dashboard-schema="amazon"][data-theme="dark"] .bi-scope .floating-clea
     }
 
     .bi-scope .section-wrapper-header {
-        padding: 8px 12px;
+        padding: 8px 10px;
     }
 
     .bi-scope .section-wrapper-body {
-        padding: 14px 12px;
+        padding: 10px;
+    }
+
+    .bi-scope .filter-section-wrapper .section-wrapper-body {
+        padding-right: 10px;
+        padding-left: 10px;
     }
 
     .bi-scope .overview-chart-container {
-        min-height: 250px;
+        min-height: 220px;
     }
 
     .bi-scope .floating-clear-button {
@@ -564,7 +569,7 @@ html[data-dashboard-schema="amazon"][data-theme="dark"] .bi-scope .floating-clea
 
     .bi-scope .floating-action-stack {
         right: 12px !important;
-        bottom: 12px !important;
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
         gap: 8px !important;
     }
 
@@ -574,5 +579,30 @@ html[data-dashboard-schema="amazon"][data-theme="dark"] .bi-scope .floating-clea
 
     .bi-scope .date-filter-buttons .btn {
         width: 100%;
+    }
+
+    .bi-scope .section-mt,
+    .bi-scope .section-gap,
+    .bi-scope .mt-24 {
+        margin-top: 14px !important;
+    }
+}
+
+@media (max-width: 430px) {
+    .bi-scope .floating-clear-button {
+        min-width: 0 !important;
+        padding: 8px 10px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .bi-scope .floating-theme-button {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+    }
+
+    .bi-scope .overview-chart-help {
+        right: 6px;
+        bottom: 6px;
     }
 }

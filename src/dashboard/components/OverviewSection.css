@@ -118,6 +118,7 @@
 
 .overview-chart-container {
     width: 100%;
+    height: var(--overview-chart-height, 260px);
     min-height: 320px;
     display: flex;
     align-items: center;
@@ -235,7 +236,8 @@ html[data-theme="dark"] .overview-title-black50 {
     }
 
     .overview-chart-container {
-        min-height: 260px;
+        height: clamp(220px, var(--overview-chart-height, 260px), 300px);
+        min-height: 220px;
     }
 
     .overview-curva-wrapper--compact .overview-chart-container.curva-container {
@@ -251,5 +253,42 @@ html[data-theme="dark"] .overview-title-black50 {
         right: 0;
         left: auto;
         width: min(280px, calc(100vw - 36px));
+    }
+}
+
+@media (max-width: 430px) {
+    .overview-grid-row {
+        --bs-gutter-x: 0;
+        --bs-gutter-y: 12px;
+    }
+
+    .overview-grid-col {
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .overview-card {
+        border-radius: 14px;
+    }
+
+    .overview-card-body {
+        padding: 12px 10px 10px;
+    }
+
+    .overview-card-title {
+        font-size: 0.88rem;
+        line-height: 1.3;
+        margin-bottom: 6px;
+    }
+
+    .overview-chart-container {
+        height: 220px;
+        min-height: 220px;
+    }
+
+    .overview-chart-help-tooltip {
+        right: -4px;
+        width: min(260px, calc(100vw - 28px));
+        font-size: 0.72rem;
     }
 }

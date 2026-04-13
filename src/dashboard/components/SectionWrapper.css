@@ -172,15 +172,35 @@ html[data-dashboard-schema="restaurant"][data-theme="dark"] .section-wrapper-tit
 
 @media (max-width: 767px) {
     .section-wrapper-card {
-        border-radius: 18px;
-        margin-bottom: 18px;
+        border-radius: 14px;
+        margin-bottom: 14px;
     }
 
     .section-wrapper-header {
-        padding: 4px 12px;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 10px;
+    }
+
+    .section-wrapper-title {
+        min-width: 0;
+        font-size: 0.92rem;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+    }
+
+    .section-wrapper-actions {
+        gap: 8px;
+    }
+
+    .section-wrapper-actions .btn {
+        min-width: 72px;
+        height: 28px;
+        padding: 2px 7px;
+        font-size: 0.72rem;
     }
 
     .section-wrapper-body {
-        padding: 12px;
+        padding: 10px;
     }
 }

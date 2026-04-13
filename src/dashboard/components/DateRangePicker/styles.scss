@@ -139,3 +139,25 @@
 .react-datepicker-popper {
   z-index: 10000 !important;
 }
+
+@media (max-width: 767px) {
+  .dropdown-button {
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 0.82rem;
+  }
+
+  .dropdown-content {
+    width: min(330px, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px);
+    padding: 10px;
+  }
+}
+
+@media (max-width: 430px) {
+  .dropdown-content {
+    left: 10px !important;
+    right: 10px !important;
+    width: calc(100vw - 20px) !important;
+  }
+}

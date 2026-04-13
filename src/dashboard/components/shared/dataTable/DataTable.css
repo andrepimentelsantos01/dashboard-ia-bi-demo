@@ -774,6 +774,8 @@ html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-download-
 @media (max-width: 767px) {
     .datatable-toolbar {
         align-items: stretch;
+        gap: 10px;
+        padding: 10px;
     }
 
     .datatable-search-shell {
@@ -787,12 +789,30 @@ html[data-dashboard-schema="restaurant"][data-theme="dark"] .datatable-download-
     .datatable-export-button {
         flex: 1 1 calc(50% - 5px);
         justify-content: center;
+        min-height: 38px;
+        padding: 8px 10px;
+    }
+
+    .datatable-table-shell {
+        max-height: 62vh;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .datatable-table {
+        min-width: 760px;
     }
 
     .datatable-cell,
     .datatable-header-cell {
-        padding-left: 10px;
-        padding-right: 10px;
+        padding-left: 9px;
+        padding-right: 9px;
+        font-size: 0.76rem;
+    }
+
+    .datatable-status {
+        min-width: 78px;
+        padding: 5px 8px;
     }
 }
 

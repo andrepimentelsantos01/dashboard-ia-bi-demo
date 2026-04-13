@@ -147,11 +147,35 @@ html[data-dashboard-schema="restaurant"] .kpi-card-value {
     .kpi-card,
     .kpi-card.card,
     .kpi-card-body {
-        min-height: 88px !important;
+        min-height: 82px !important;
+    }
+
+    .kpi-card-body {
+        padding: 12px 12px;
+    }
+
+    .kpi-card-label {
+        padding: 0 54px 16px 0;
+        font-size: 0.72rem;
+        line-height: 1.28;
     }
 
     .kpi-card-value {
-        font-size: 1.3rem;
+        margin-top: -16px;
+        font-size: 1.18rem;
+        overflow-wrap: anywhere;
+    }
+
+    .kpi-card-variation {
+        top: 5px;
+        right: 8px;
+        font-size: 0.6rem;
+    }
+}
+
+@media (max-width: 430px) {
+    .kpi-card-value {
+        font-size: 1.28rem;
     }
 }
 
