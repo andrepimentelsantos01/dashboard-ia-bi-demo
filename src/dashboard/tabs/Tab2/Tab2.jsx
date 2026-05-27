@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import ChartBoxplot from "../../components/shared/charts/ChartBoxplot";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal/ChartHorizontal";
 import ChartLine from "../../components/shared/charts/ChartLine/ChartLine";
@@ -6,6 +7,7 @@ import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
 import ChartTreemap from "../../components/shared/charts/ChartTreemap/ChartTreemap";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
 import {
+    BOXPLOT_CONTEXT,
     HEATMAP_CONTEXT,
     STACKED_BAR_CONTEXT
 } from "../../components/shared/chartContext";
@@ -100,6 +102,23 @@ const Tab2 = () => {
                         onCrossFilter={handleCrossFilter}
                         currencyCode={AMAZON_CURRENCY}
                         locale={AMAZON_LOCALE}
+                    />
+                )
+            },
+            {
+                title: "Distribuicao do Ticket por Categoria",
+                height: 320,
+                caption: BOXPLOT_CONTEXT,
+                component: (
+                    <ChartBoxplot
+                        backendData={tabela}
+                        categoryField="categoria"
+                        valueField="valorTotal"
+                        filterType="categoria"
+                        maxCategories={8}
+                        currencyCode={AMAZON_CURRENCY}
+                        locale={AMAZON_LOCALE}
+                        onCrossFilter={handleCrossFilter}
                     />
                 )
             },

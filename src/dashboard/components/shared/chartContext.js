@@ -15,6 +15,9 @@ export const HEATMAP_CONTEXT =
 export const SCATTER_CONTEXT =
     "Cada ponto representa um agrupamento de itens. A posicao horizontal mostra o comportamento no eixo X, a posicao vertical mostra o comportamento no eixo Y e o tamanho da bolha indica a relevancia agregada do grupo. Esse grafico e ideal para identificar concentracoes, dispersoes, outliers e relacoes entre variaveis. Use a leitura por quadrantes para entender quais grupos combinam alto valor com alto volume, baixo valor com alta recorrencia ou comportamentos fora do padrao esperado.";
 
+export const BOXPLOT_CONTEXT =
+    "O boxplot mostra a distribuicao de uma metrica dentro de cada grupo. A linha central representa a mediana, a caixa cobre os quartis de 25% a 75%, as hastes indicam a faixa esperada e os pontos isolados destacam outliers. Use essa visualizacao para comparar estabilidade, dispersao e dependencia de eventos atipicos entre produtos, categorias, operadores ou transportadoras.";
+
 export const HORIZONTAL_BAR_CONTEXT =
     "O grafico de barras horizontais e indicado para ranking e comparacao direta entre grupos. Os itens normalmente sao exibidos do maior para o menor, facilitando a leitura das liderancas, das quedas e da distancia entre posicoes. Use esse grafico para identificar rapidamente quem mais contribui para o resultado, quais grupos perderam relevancia e onde existe maior concentracao. A leitura mais eficiente e observar a ordem, o tamanho relativo das barras e o espacamento entre os primeiros colocados.";
 

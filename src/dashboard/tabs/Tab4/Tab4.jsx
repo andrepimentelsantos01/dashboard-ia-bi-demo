@@ -1,11 +1,13 @@
 import React, { useMemo } from "react";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
+import ChartBoxplot from "../../components/shared/charts/ChartBoxplot";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal";
 import ChartLine from "../../components/shared/charts/ChartLine";
 import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
 import GaugeCount from "../../components/shared/charts/GaugeCount/GaugeCount";
 import {
+    BOXPLOT_CONTEXT,
     GAUGE_CONTEXT,
     HEATMAP_CONTEXT,
     STACKED_BAR_CONTEXT
@@ -182,6 +184,24 @@ const Tab4 = () => {
                         valueFormat="percent"
                         currencyCode={LOGISTICS_CURRENCY}
                         locale={LOGISTICS_LOCALE}
+                    />
+                )
+            },
+            {
+                title: "Distribuicao do Tempo de Transito por Transportadora",
+                height: 320,
+                caption: BOXPLOT_CONTEXT,
+                component: (
+                    <ChartBoxplot
+                        backendData={tabela}
+                        categoryField="fornecedor"
+                        valueField="actual_transit_days"
+                        filterType="fornecedor"
+                        maxCategories={8}
+                        valueFormat="days"
+                        currencyCode={LOGISTICS_CURRENCY}
+                        locale={LOGISTICS_LOCALE}
+                        onCrossFilter={handleCrossFilter}
                     />
                 )
             },

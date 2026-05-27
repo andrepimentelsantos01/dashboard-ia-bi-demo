@@ -1,5 +1,6 @@
 ﻿import React, { useMemo } from "react";
 import ChartBarVertical from "../../components/shared/charts/ChartBarVertical";
+import ChartBoxplot from "../../components/shared/charts/ChartBoxplot";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal";
 import ChartLine from "../../components/shared/charts/ChartLine";
@@ -10,6 +11,7 @@ import ChartStackedBar from "../../components/shared/charts/ChartStackedBar";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
 import {
     HEATMAP_CONTEXT,
+    BOXPLOT_CONTEXT,
     SCATTER_CONTEXT,
     STACKED_BAR_CONTEXT
 } from "../../components/shared/chartContext";
@@ -174,6 +176,24 @@ const Tab1 = () => {
                         onCrossFilter={handleCrossFilter}
                         currencyCode={TAB1_CURRENCY}
                         locale={TAB1_LOCALE}
+                    />
+                )
+            },
+            {
+                title: "Distribuicao do Valor do Pedido por Produto",
+                height: 320,
+                caption: BOXPLOT_CONTEXT,
+                component: (
+                    <ChartBoxplot
+                        backendData={tabela}
+                        categoryField="produto"
+                        valueField="valorTotal"
+                        idField="product_id"
+                        filterType="produto"
+                        maxCategories={8}
+                        currencyCode={TAB1_CURRENCY}
+                        locale={TAB1_LOCALE}
+                        onCrossFilter={handleCrossFilter}
                     />
                 )
             },
