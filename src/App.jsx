@@ -12,8 +12,8 @@ const App = () => {
       <section className="app-shell__hero">
         <div className="app-shell__hero-content">
           <div>
-            <p className="app-shell__eyebrow">Andre Pimentel Santos /@andrepimentelsantos01</p>
-            <h1>Demonstracao Dashboard Corporativo</h1>
+            <p className="app-shell__eyebrow">Datasets disponíveis no Kaggle /@andrepimentelsantos01</p>
+            <h1>Dashboard Corporativo IA/BI</h1>
           </div>
 
           <button
