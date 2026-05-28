@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
 import ChartBoxplot from "../../components/shared/charts/ChartBoxplot";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
@@ -11,6 +11,7 @@ import {
     HEATMAP_CONTEXT,
     STACKED_BAR_CONTEXT
 } from "../../components/shared/chartContext";
+import { compactFilters, compactSeries, publishDashboardAiContext, topItems } from "../../utils/aiContext";
 import { useTab3State } from "./tab3.state";
 import "./Tab3.css";
 
@@ -34,6 +35,25 @@ const Tab3 = () => {
 
     const { tab3, operacionais, kpis, alertas } = data;
     const tabela = operacionais.tabela || [];
+
+    useEffect(() => publishDashboardAiContext({
+        aba: "Vendas Restaurante",
+        filtrosAtivos: compactFilters(filters),
+        kpis,
+        alertas,
+        graficos: {
+            receitaMensal: compactSeries(tab3.historicoMeses, tab3.historicoValores),
+            rankingItensPorReceita: topItems(tab3.itemsRanking, "valor", 12),
+            rankingItensPorVolume: topItems(tab3.itemsRankingVolume, "valor", 10),
+            receitaPorTurno: topItems(tab3.shiftsRanking, "valor", 10),
+            volumePorTurno: topItems(tab3.shiftsRankingVolume, "valor", 10),
+            receitaPorAtendente: topItems(tab3.attendantsRanking, "valor", 10),
+            receitaPorTipoTransacao: topItems(tab3.transactionRanking, "valor", 10),
+            mixTipoTransacao: topItems(tab3.statusTreemap, "value", 10)
+        },
+        amostraTabela: tabela.slice(0, 5),
+        totalLinhasTabela: tabela.length
+    }), [alertas, filters, kpis, tab3, tabela]);
 
     const filterInputs = useMemo(
         () => [

@@ -1,5 +1,6 @@
 import React from "react";
 import { FiMoon, FiSun } from "react-icons/fi";
+import AiAssistantWidget from "./components/AiAssistantWidget";
 import Dashboard from "./dashboard";
 import { useThemeMode } from "./hooks/useThemeMode";
 
@@ -34,6 +35,8 @@ const App = () => {
       <section className="app-shell__content">
         <Dashboard />
       </section>
+
+      <AiAssistantWidget />
     </main>
   );
 };

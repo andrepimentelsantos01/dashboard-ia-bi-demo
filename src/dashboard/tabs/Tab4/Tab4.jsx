@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
 import ChartBoxplot from "../../components/shared/charts/ChartBoxplot";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
@@ -12,6 +12,7 @@ import {
     HEATMAP_CONTEXT,
     STACKED_BAR_CONTEXT
 } from "../../components/shared/chartContext";
+import { compactFilters, compactSeries, publishDashboardAiContext, topItems } from "../../utils/aiContext";
 import { useTab4State } from "./tab4.state";
 import "./Tab4.css";
 
@@ -87,6 +88,26 @@ const Tab4 = () => {
 
     const { tab4, operacionais, kpis, alertas } = data;
     const tabela = operacionais.tabela || [];
+
+    useEffect(() => publishDashboardAiContext({
+        aba: "Performance Logistica",
+        filtrosAtivos: compactFilters(filters),
+        kpis,
+        alertas,
+        graficos: {
+            gauges: tab4.gauges,
+            embarquesMensais: compactSeries(tab4.historicoMeses, tab4.historicoEmbarques),
+            custosMensais: compactSeries(tab4.historicoMeses, tab4.historicoCustos),
+            atrasosMensais: compactSeries(tab4.historicoMeses, tab4.historicoAtrasos),
+            custoPorTransportadora: topItems(tab4.carriersRanking, "valor", 10),
+            slaPorTransportadora: topItems(tab4.carriersSlaRanking, "valor", 10),
+            embarquesPorOrigem: topItems(tab4.warehousesRanking, "valor", 10),
+            embarquesPorDestino: topItems(tab4.destinationsRanking, "valor", 10),
+            mixStatus: topItems(tab4.statusTreemap, "value", 10)
+        },
+        amostraTabela: tabela.slice(0, 5),
+        totalLinhasTabela: tabela.length
+    }), [alertas, filters, kpis, tab4, tabela]);
 
     const shipmentTrendData = useMemo(
         () => tabela.map((row) => ({

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import ChartBoxplot from "../../components/shared/charts/ChartBoxplot";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal/ChartHorizontal";
@@ -11,6 +11,7 @@ import {
     HEATMAP_CONTEXT,
     STACKED_BAR_CONTEXT
 } from "../../components/shared/chartContext";
+import { compactFilters, compactSeries, publishDashboardAiContext, topItems } from "../../utils/aiContext";
 import { useTab2State } from "./tab2.state";
 import "./Tab2.css";
 
@@ -38,6 +39,24 @@ const Tab2 = () => {
 
     const { tab2, operacionais, kpis, alertas } = data;
     const tabela = operacionais.tabela || [];
+
+    useEffect(() => publishDashboardAiContext({
+        aba: "Vendas Amazon",
+        filtrosAtivos: compactFilters(filters),
+        kpis,
+        alertas,
+        graficos: {
+            receitaMensal: compactSeries(tab2.historicoMeses, tab2.historicoValores),
+            rankingProdutosPorReceita: topItems(tab2.produtosRanking, "valor", 12),
+            rankingCategoriasPorReceita: topItems(tab2.categoriasRanking, "valor", 10),
+            rankingLocalidadesPorReceita: topItems(tab2.locationsRanking, "valor", 10),
+            rankingPagamentosPorReceita: topItems(tab2.paymentRanking, "valor", 10),
+            volumePorCategoria: topItems(tab2.categoriasRankingVolume, "valor", 10),
+            mixStatusPedido: topItems(tab2.statusTreemap, "value", 10)
+        },
+        amostraTabela: tabela.slice(0, 5),
+        totalLinhasTabela: tabela.length
+    }), [alertas, filters, kpis, tab2, tabela]);
 
     const filterInputs = useMemo(
         () => [

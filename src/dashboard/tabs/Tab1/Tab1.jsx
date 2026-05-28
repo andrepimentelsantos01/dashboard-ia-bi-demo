@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from "react";
+﻿import React, { useEffect, useMemo } from "react";
 import ChartBarVertical from "../../components/shared/charts/ChartBarVertical";
 import ChartBoxplot from "../../components/shared/charts/ChartBoxplot";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
@@ -15,6 +15,7 @@ import {
     SCATTER_CONTEXT,
     STACKED_BAR_CONTEXT
 } from "../../components/shared/chartContext";
+import { compactFilters, compactSeries, publishDashboardAiContext, topItems } from "../../utils/aiContext";
 import { useTab1State } from "./tab1.state";
 import "./Tab1.css";
 
@@ -55,6 +56,35 @@ const Tab1 = () => {
     const regionComparison = rankingRegioesOperatingProfit.length
         ? rankingRegioesOperatingProfit
         : rankingRegioes;
+
+    useEffect(() => publishDashboardAiContext({
+        aba: "Vendas Adidas",
+        filtrosAtivos: compactFilters(filters),
+        kpis: data.kpis,
+        alertas: data.alertas,
+        graficos: {
+            receitaMensal: compactSeries(historicoMeses, historicoValores),
+            lucroOperacionalMensal: compactSeries(historicoMeses, historicoOperatingProfit),
+            rankingProdutosPorReceita: topItems(produtosRanking, "valor", 12),
+            rankingVarejistasPorReceita: topItems(fornecedoresEntrega, "valor", 10),
+            comparativoPorRegiao: topItems(regionComparison, "value", 10),
+            mixPorCanalDeVenda: topItems(salesMethodMix, "value", 10)
+        },
+        amostraTabela: tabela.slice(0, 5),
+        totalLinhasTabela: tabela.length
+    }), [
+        data.alertas,
+        data.kpis,
+        filters,
+        fornecedoresEntrega,
+        historicoMeses,
+        historicoOperatingProfit,
+        historicoValores,
+        produtosRanking,
+        regionComparison,
+        salesMethodMix,
+        tabela
+    ]);
 
     const filterInputs = useMemo(
         () => [
