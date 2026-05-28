@@ -14,10 +14,6 @@ const App = () => {
           <div>
             <p className="app-shell__eyebrow">Andre Pimentel Santos /@andrepimentelsantos01</p>
             <h1>Demonstracao Dashboard Corporativo</h1>
-            <p>
-              Esta versao roda com servicos mockados e
-              dados locais no mesmo formato esperado por uma API REST.
-            </p>
           </div>
 
           <button
