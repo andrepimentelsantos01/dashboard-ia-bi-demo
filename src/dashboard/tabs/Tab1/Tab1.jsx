@@ -44,6 +44,7 @@ const Tab1 = () => {
         fornecedoresEntrega,
         historicoMeses,
         historicoOperatingProfit,
+        historicoQuantidades,
         historicoValores,
         rankingRegioes,
         rankingRegioesOperatingProfit,
@@ -64,6 +65,7 @@ const Tab1 = () => {
         alertas: data.alertas,
         graficos: {
             receitaMensal: compactSeries(historicoMeses, historicoValores),
+            quantidadeMensal: compactSeries(historicoMeses, historicoQuantidades),
             lucroOperacionalMensal: compactSeries(historicoMeses, historicoOperatingProfit),
             rankingProdutosPorReceita: topItems(produtosRanking, "valor", 12),
             rankingVarejistasPorReceita: topItems(fornecedoresEntrega, "valor", 10),
@@ -79,6 +81,7 @@ const Tab1 = () => {
         fornecedoresEntrega,
         historicoMeses,
         historicoOperatingProfit,
+        historicoQuantidades,
         historicoValores,
         produtosRanking,
         regionComparison,
@@ -118,6 +121,22 @@ const Tab1 = () => {
                         values={historicoValores}
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
+                        currencyCode={TAB1_CURRENCY}
+                        locale={TAB1_LOCALE}
+                    />
+                )
+            },
+            {
+                title: "Unidades Vendidas por Mes",
+                height: 260,
+                component: (
+                    <ChartBarVertical
+                        labels={historicoMeses}
+                        values={historicoQuantidades}
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                        valueFormat="number"
+                        valueLabel="Quantidade"
                         currencyCode={TAB1_CURRENCY}
                         locale={TAB1_LOCALE}
                     />
@@ -288,6 +307,7 @@ const Tab1 = () => {
             handleCrossFilter,
             historicoMeses,
             historicoOperatingProfit,
+            historicoQuantidades,
             historicoValores,
             produtosRanking,
             regionComparison,

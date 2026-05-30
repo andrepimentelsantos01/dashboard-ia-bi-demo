@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from "react";
+import ChartBarVertical from "../../components/shared/charts/ChartBarVertical";
 import ChartBoxplot from "../../components/shared/charts/ChartBoxplot";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal/ChartHorizontal";
@@ -47,6 +48,7 @@ const Tab2 = () => {
         alertas,
         graficos: {
             receitaMensal: compactSeries(tab2.historicoMeses, tab2.historicoValores),
+            quantidadeMensal: compactSeries(tab2.historicoMeses, tab2.historicoQuantidades),
             rankingProdutosPorReceita: topItems(tab2.produtosRanking, "valor", 12),
             rankingCategoriasPorReceita: topItems(tab2.categoriasRanking, "valor", 10),
             rankingLocalidadesPorReceita: topItems(tab2.locationsRanking, "valor", 10),
@@ -91,6 +93,22 @@ const Tab2 = () => {
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
                         metric="amount"
+                        currencyCode={AMAZON_CURRENCY}
+                        locale={AMAZON_LOCALE}
+                    />
+                )
+            },
+            {
+                title: "Unidades Vendidas por Mes",
+                height: 260,
+                component: (
+                    <ChartBarVertical
+                        labels={tab2.historicoMeses}
+                        values={tab2.historicoQuantidades}
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                        valueFormat="number"
+                        valueLabel="Quantidade"
                         currencyCode={AMAZON_CURRENCY}
                         locale={AMAZON_LOCALE}
                     />

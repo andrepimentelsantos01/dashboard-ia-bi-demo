@@ -116,6 +116,45 @@ const tests = [
         );
     },
     () => {
+        const derived = buildTab1DerivedData([
+            {
+                year_months: "2024-03",
+                valorTotal: 40,
+                quantidade: 2,
+                region: "West",
+                product_name: "Runner",
+                client_name: "California",
+                supplier_name: "Retail A",
+                salesMethod: "Online"
+            },
+            {
+                year_months: "2024-01",
+                valorTotal: 100,
+                quantidade: 5,
+                region: "South",
+                product_name: "Street",
+                client_name: "Texas",
+                supplier_name: "Retail B",
+                salesMethod: "Outlet"
+            },
+            {
+                year_months: "2024-03",
+                valorTotal: 60,
+                quantidade: 3,
+                region: "West",
+                product_name: "Runner",
+                client_name: "California",
+                supplier_name: "Retail A",
+                salesMethod: "Online"
+            }
+        ]);
+
+        assert.deepEqual(derived.historicoMeses, ["2024-01", "2024-03"]);
+        assert.deepEqual(derived.historicoValores, [100, 100]);
+        assert.deepEqual(derived.historicoQuantidades, [5, 5]);
+        assert.equal(derived.historicoMeses.length, derived.historicoQuantidades.length);
+    },
+    () => {
         const filters = createDashboardFilters({ uf: "CA", mes: "2021-01" });
         assert.equal(filters.uf, "CA");
         assert.equal(filters.mes, "2021-01");

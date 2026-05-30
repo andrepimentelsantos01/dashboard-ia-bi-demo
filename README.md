@@ -1,6 +1,6 @@
-# Dashboard BI Corporativo Multi-Dominio
+# Dashboard AI/BI Corporativo Multi-Dominio
 
-Aplicacao analitica em React 18 para demonstracao de arquitetura front-end orientada a Business Intelligence, com ingestao local de datasets reais, normalizacao de contratos heterogeneos, filtros multidimensionais, cross-filtering entre visualizacoes, KPIs executivos, tabelas operacionais e exportacao de dados.
+Aplicacao analitica em React 18 para demonstracao de arquitetura front-end orientada a AI/BI, com ingestao local de datasets reais, normalizacao de contratos heterogeneos, filtros multidimensionais, cross-filtering entre visualizacoes, KPIs executivos, tabelas operacionais, exportacao de dados e assistente de IA generativa contextualizado pelo dashboard ativo.
 
 O produto consolida quatro contextos de negocio em um unico shell corporativo:
 
@@ -52,6 +52,12 @@ Principios aplicados:
 - theming baseado em `data-dashboard-schema`, com variaveis por dominio para dashboard, barra superior, botoes, cards, filtros e dropdowns em portal;
 - cross-filtering padronizado por handlers compartilhados, preservando sincronizacao entre KPIs, graficos e tabela;
 - componentes de chart reutilizaveis com parametros de metrica, moeda, locale, ordenacao e semantica de filtro.
+
+## Assistente de IA
+
+O sistema inclui um chatbot de IA generativa que consome o contexto estruturado do dashboard ativo, publicado pelo front-end para apoiar perguntas sobre os dados visiveis e filtrados.
+
+Esse pacote analitico inclui filtros ativos, KPIs, alertas, series temporais, rankings, amostra da tabela operacional e total de linhas. Quando o dataset informa quantidade, o contexto tambem publica a serie temporal de quantidade junto das series de valor, permitindo perguntas sobre evolucao de volume, unidades, itens vendidos ou embarques no mesmo recorte aplicado no dashboard.
 
 ## Contrato Analitico
 

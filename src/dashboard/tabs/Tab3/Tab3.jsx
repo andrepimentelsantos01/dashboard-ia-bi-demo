@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
+import ChartBarVertical from "../../components/shared/charts/ChartBarVertical";
 import ChartBoxplot from "../../components/shared/charts/ChartBoxplot";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal";
@@ -43,6 +44,7 @@ const Tab3 = () => {
         alertas,
         graficos: {
             receitaMensal: compactSeries(tab3.historicoMeses, tab3.historicoValores),
+            quantidadeMensal: compactSeries(tab3.historicoMeses, tab3.historicoQuantidades),
             rankingItensPorReceita: topItems(tab3.itemsRanking, "valor", 12),
             rankingItensPorVolume: topItems(tab3.itemsRankingVolume, "valor", 10),
             receitaPorTurno: topItems(tab3.shiftsRanking, "valor", 10),
@@ -80,6 +82,20 @@ const Tab3 = () => {
                         backendData={tabela}
                         onCrossFilter={handleCrossFilter}
                         metric="amount"
+                    />
+                )
+            },
+            {
+                title: "Itens Vendidos por Mes",
+                height: 260,
+                component: (
+                    <ChartBarVertical
+                        labels={tab3.historicoMeses}
+                        values={tab3.historicoQuantidades}
+                        backendData={tabela}
+                        onCrossFilter={handleCrossFilter}
+                        valueFormat="number"
+                        valueLabel="Quantidade"
                     />
                 )
             },

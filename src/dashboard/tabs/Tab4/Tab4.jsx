@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import DashboardTabLayout from "../../components/DashboardTabLayout";
+import ChartBarVertical from "../../components/shared/charts/ChartBarVertical";
 import ChartBoxplot from "../../components/shared/charts/ChartBoxplot";
 import ChartHeatmap from "../../components/shared/charts/ChartHeatmap";
 import ChartHorizontal from "../../components/shared/charts/ChartHorizontal";
@@ -97,6 +98,7 @@ const Tab4 = () => {
         graficos: {
             gauges: tab4.gauges,
             embarquesMensais: compactSeries(tab4.historicoMeses, tab4.historicoEmbarques),
+            quantidadeMensal: compactSeries(tab4.historicoMeses, tab4.historicoEmbarques),
             custosMensais: compactSeries(tab4.historicoMeses, tab4.historicoCustos),
             atrasosMensais: compactSeries(tab4.historicoMeses, tab4.historicoAtrasos),
             custoPorTransportadora: topItems(tab4.carriersRanking, "valor", 10),
@@ -108,15 +110,6 @@ const Tab4 = () => {
         amostraTabela: tabela.slice(0, 5),
         totalLinhasTabela: tabela.length
     }), [alertas, filters, kpis, tab4, tabela]);
-
-    const shipmentTrendData = useMemo(
-        () => tabela.map((row) => ({
-            ...row,
-            valorTotal: 1,
-            quantidade: 1
-        })),
-        [tabela]
-    );
 
     const exceptionTrendData = useMemo(
         () => tabela.map((row) => {
@@ -157,10 +150,13 @@ const Tab4 = () => {
                 title: "Embarques Mensais",
                 height: 260,
                 component: (
-                    <ChartLine
-                        backendData={shipmentTrendData}
+                    <ChartBarVertical
+                        labels={tab4.historicoMeses}
+                        values={tab4.historicoEmbarques}
+                        backendData={tabela}
                         onCrossFilter={handleCrossFilter}
-                        metric="quantity"
+                        valueFormat="number"
+                        valueLabel="Quantidade"
                         currencyCode={LOGISTICS_CURRENCY}
                         locale={LOGISTICS_LOCALE}
                     />
@@ -285,7 +281,7 @@ const Tab4 = () => {
                 )
             }
         ],
-        [exceptionTrendData, handleCrossFilter, shipmentTrendData, tab4, tabela]
+        [exceptionTrendData, handleCrossFilter, tab4, tabela]
     );
 
     return (

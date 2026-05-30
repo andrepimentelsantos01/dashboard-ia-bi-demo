@@ -129,7 +129,7 @@ const buildLeaderSet = (info) => ({
     produtoQuantidade: formatLeader(info.produtoQtd)
 });
 
-export const buildTooltip = ({ aggregated, valueFormat, currencyCode, locale }) =>
+export const buildTooltip = ({ aggregated, valueFormat, valueLabel = "Valor", currencyCode, locale }) =>
     buildResponsiveTooltip((params) => {
         if (!params?.length) return "";
 
@@ -143,7 +143,7 @@ export const buildTooltip = ({ aggregated, valueFormat, currencyCode, locale }) 
         if (!info) {
             return `
                 <b>${key}</b><br/>
-                Valor: <b>${formatValue(data, valueFormat, currencyCode, locale)}</b><br/><br/>
+                ${valueLabel}: <b>${formatValue(data, valueFormat, currencyCode, locale)}</b><br/><br/>
             `;
         }
 
@@ -151,7 +151,7 @@ export const buildTooltip = ({ aggregated, valueFormat, currencyCode, locale }) 
 
         return `
             <b>${key}</b><br/>
-            Valor: <b>${formatCurrencyValue(data, { currencyCode, locale })}</b><br/><br/>
+            ${valueLabel}: <b>${formatValue(data, valueFormat, currencyCode, locale)}</b><br/><br/>
             <b>Volume Movimentado:</b> ${info.volume.toLocaleString("pt-BR")}<br/><br/>
             <b>Categoria Líder (Valor):</b> ${leaders.categoriaValor}<br/>
             <b>Categoria Líder (Quantidade):</b> ${leaders.categoriaQuantidade}<br/><br/>
@@ -184,6 +184,7 @@ export const buildBarVerticalOptions = ({
                                             aggregated,
                                             color,
                                             valueFormat,
+                                            valueLabel,
                                             showTrendLine,
                                             themeTokens,
                                             isTemporalOrder = false,
@@ -239,7 +240,7 @@ export const buildBarVerticalOptions = ({
     };
 
     return {
-        tooltip: buildTooltip({ aggregated, valueFormat, currencyCode, locale }),
+        tooltip: buildTooltip({ aggregated, valueFormat, valueLabel, currencyCode, locale }),
         grid: {
             left: "6%",
             right: -80,
@@ -310,6 +311,7 @@ export const useChartBarVerticalState = ({
                                              backendData,
                                              color,
                                              valueFormat = "currency",
+                                             valueLabel = "Valor",
                                              filterType = "mes",
                                              onCrossFilter,
                                          showTrendLine,
@@ -383,13 +385,14 @@ export const useChartBarVerticalState = ({
             aggregated,
             color: resolvedColor,
             valueFormat,
+            valueLabel,
             showTrendLine,
             themeTokens,
             isTemporalOrder: shouldDefaultDesc,
             currencyCode,
             locale
         }),
-        [aggregated, currencyCode, locale, orderedLabels, orderedValues, resolvedColor, shouldDefaultDesc, showTrendLine, themeTokens, valueFormat]
+        [aggregated, currencyCode, locale, orderedLabels, orderedValues, resolvedColor, shouldDefaultDesc, showTrendLine, themeTokens, valueFormat, valueLabel]
     );
 
     return {
